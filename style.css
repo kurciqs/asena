@@ -1,0 +1,181 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+body {
+    margin: 0px;
+}
+
+* {
+    font-family: 'Orbitron', sans-serif;
+}
+
+#main-container {
+    display: grid;
+    width: 100%;
+    grid-template-columns: auto auto auto;
+}
+
+#chat-panel {
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: stretch;
+    pointer-events: auto;
+    border: 3px solid rgb(109, 21, 21);
+    margin: 50px;
+    /* glassmorphic SEX OH IT LOOKS GOOD */
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(9px);
+    -webkit-backdrop-filter: blur(9px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.1),
+        inset 0 0 0px 0px rgba(255, 255, 255, 0);
+    resize: both;
+    /* <— enables manual resizing */
+    overflow: auto;
+    min-width: 30vw;
+    min-height: 15vh;
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding-top: 30px;
+    /* reserve space for handle */
+}
+
+#chat-drag-handle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    background-color: rgb(109, 21, 21);
+    color: white;
+    padding: 6px 10px;
+    cursor: move;
+    user-select: none;
+    pointer-events: auto;
+    z-index: 11;
+}
+
+#chat-display {
+    width: 100%;
+    height: 100%;
+    overflow: scroll;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: stretch;
+}
+
+#selections {
+    height: 40px;
+    width: 400px;
+    max-width: 100vw;
+    background-color: rgb(109, 21, 21);
+    margin: 20px;
+    padding: 15px 20px;
+    border-radius: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    pointer-events: auto;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    z-index: 9;
+}
+
+#selections>div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 3px;
+    color: #fff;
+}
+
+#selections select {
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: none;
+    background-color: #fff;
+    color: #000;
+    font-size: 14px;
+    cursor: pointer;
+    appearance: none;
+}
+
+#user-input-container {
+    flex: 1;
+    border-radius: 20px;
+    background-color: rgb(109, 21, 21);
+    margin: 20px;
+    padding: 15px;
+    display: flex;
+    pointer-events: auto;
+    bottom: 0px;
+    align-items: flex-start;
+}
+
+#user-input-message {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    margin-right: 10px;
+    font-size: 16px;
+}
+
+#user-message-send {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    background-color: #fff;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#bg-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: auto;
+    /* allow interaction */
+}
+
+.msg-user {
+  align-self: flex-end;
+  background-color: #4a0e0e;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 15px 15px 0 15px;
+  max-width: 70%;
+  margin: 20px;
+  overflow: auto;
+}
+
+.msg-asena {
+  align-self: flex-start;
+  background-color: #222;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 15px 15px 15px 0;
+  max-width: 70%;
+  margin: 20px;
+}
+
+.msg-system {
+  align-self: flex-start;
+  background-color: #e11a1a;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 15px ;
+  max-width: 70%;
+  margin: 20px;
+}

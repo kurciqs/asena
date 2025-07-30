@@ -1,0 +1,7 @@
+data/*
+animations/*
+vrm_models/*
+__pychache__/*
+node_modules/*
+package.json
+package-lock.json
