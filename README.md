@@ -10,7 +10,7 @@ i also apologise to frontend devs for that amazing gui haha.
 
 it's seriously a pain, i recommend waiting until i bring out a stable release (if ever). you'll need docker with [Kokoro-FastAPI](https://github.com/remsky/Kokoro-FastAPI/tree/master) installed, as well as lmstudio. you can configure and choose the chatbot by editing the lms request in main.js. you'll need to have rhubarb installed and exactly in the directory as the project folder (working on making that a little less scuffed haha). 
 
-you'll need node.js i think and flask for backend python. maybe i'll specify the exact dependencies later. you start the server with serve . and python3 proxy.py
+you'll need node.js, three.js, three-vrm i think and flask for backend python. maybe i'll specify the exact dependencies later. you start the server with serve . and python3 proxy.py
 
 last but not least, you'll need animations and vrm models. load whatever mixamo animations you want into animations/ and models created with [vroid studio](https://hub.vroid.com/en/search/%23VRoidStudio) into vrm_models/.  
 
