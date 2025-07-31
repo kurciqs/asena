@@ -6,6 +6,8 @@ the plan forward is to rewrite it using streaming from kokoro and faking visemes
 
 i also apologise to frontend devs for that amazing gui haha.
 
+that aside, if this works and is sufficiently fast, you can only imagine the power. the fact that it's running locally means that noone is datamining you, the fact that you get to pick your llm means you can go as wild as you want with requests. plus it's entirely free and based open source so you can add features or play around with it. 
+
 # installation
 
 it's seriously a pain, i recommend waiting until i bring out a stable release (if ever). you'll need docker with [Kokoro-FastAPI](https://github.com/remsky/Kokoro-FastAPI/tree/master) installed, as well as lmstudio. you can configure and choose the chatbot by editing the lms request in main.js. you'll need to have rhubarb installed and exactly in the directory as the project folder (working on making that a little less scuffed haha). 
