@@ -6,3 +6,5 @@ node_modules/*
 package.json
 package-lock.json
 stream.py
+.gitattributes
+.DS_Store
