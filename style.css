@@ -68,11 +68,21 @@ body {
     display: flex;
     flex-direction: column-reverse;
     align-items: stretch;
+
+}
+
+#chat-display {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+}
+
+#chat-display::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 #selections {
     height: 40px;
-    width: 400px;
+    width: 500px;
     max-width: 100vw;
     background-color: rgb(109, 21, 21);
     margin: 20px;
@@ -157,7 +167,6 @@ body {
   border-radius: 15px 15px 0 15px;
   max-width: 70%;
   margin: 20px;
-  overflow: auto;
 }
 
 .msg-asena {

@@ -39,7 +39,7 @@ let handlingResponse = false;
 let message_history = [
     {
         role: "system",
-        content: "respond only in lower case.",
+        content: "you are an ai companion. provide extremely brief responses.",
     }
 ]
 
@@ -89,13 +89,16 @@ async function handleTextResponse() {
 
     message_history.push({ role: "user", content: message });
     renderMessages();
-
+    
+    
     try {
+        const start = performance.now();
+        let now = start; 
         const chatResponse = await fetch(`${FLASK_SERVER}/chat`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                model: 'dolphin-2.6-mistral-7b.Q4_K_M.gguf',
+                model: 'open-hermes-2.5-mistral-7b-quantized',
                 messages: message_history,
                 temperature: 0.8,
                 top_p: 0.95
@@ -107,13 +110,18 @@ async function handleTextResponse() {
         }
 
         const chatData = await chatResponse.json();
+        console.log("LOG: Chat response received:", chatData);
         const asenaReply = chatData.choices[0].message.content;
         message_history.push({ role: "assistant", content: asenaReply });
+        renderMessages();
 
         console.log("LOG: Asena responded:", asenaReply);
+        now = performance.now();
+        console.log("TIMING:", now - start);
         console.log("LOG: Chat history:", message_history);
 
 
+        console.log("LOG: Sending TTS request to Kokoro...");
         const ttsResponse = await fetch(KOKORO_TTS, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -147,7 +155,7 @@ async function handleTextResponse() {
         const audio = new Audio(audioURL);
 
         // write the audio to a file
-        await fetch('http://localhost:58762/save_audio', {
+        await fetch(FLASK_SERVER + '/save_audio', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -156,9 +164,12 @@ async function handleTextResponse() {
             })
         });
 
-
+        console.log("LOG: TTS audio saved successfully.");
+        now = performance.now();
+        console.log("TIMING:", now - start);
+        console.log("LOG: Starting rhubarh viseme extraction...");
         // get visemes and write to animation data
-        const response = await fetch('http://localhost:58762/get_visemes', {
+        const response = await fetch(FLASK_SERVER + '/get_visemes', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ filepath: AUDIO_PATH, animation_data: ANIMATION_DATA_PATH })
@@ -171,7 +182,10 @@ async function handleTextResponse() {
 
         const data = await response.json();
         console.log("Viseme data:", data.mouthCues);
-
+        console.log("LOG: Rhubarh viseme extraction completed successfully.");
+        now = performance.now();
+        console.log("TIMING:", now - start);
+        console.log("LOG: Starting animation experience...");
         ANI.startExperience();
     } catch (error) {
         console.error("ERROR:", error);

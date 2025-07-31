@@ -5,3 +5,4 @@ __pychache__/*
 node_modules/*
 package.json
 package-lock.json
+stream.py

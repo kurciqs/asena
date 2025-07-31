@@ -296,6 +296,7 @@ export function startExperience() {
                 });
             }
 
+          // TODO: this breaks on empty animationData
             let tracks = [];
             // loop over rhubarbToVRM and create tracks
             Object.keys(rhubarbToVRM).forEach((key) => {
