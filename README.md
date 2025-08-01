@@ -20,12 +20,9 @@ it probably won't run anywhere outside of my computer for now, but i'll maybe wo
 
 # todo
 
-- [ ] clean up
-- [ ] rewrite for streaming
 - [ ] action system, let ai control the animations
 - [ ] memory system
-- [ ] better llm
-- [ ] system prompt
+– [ ] clean building and installation haha
 
 # img
 

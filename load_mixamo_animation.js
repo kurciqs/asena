@@ -13,9 +13,7 @@ export function loadMixamoAnimation( url, vrm ) {
 
 	const loader = new FBXLoader(); // A loader which loads FBX
 	return loader.loadAsync( url ).then( ( asset ) => {
-		console.log("LOG: Loaded asset:", asset.animations);
 		const clip = asset.animations[0]; // extract the AnimationClip
-		console.log("LOG: Extracted clip:", clip);
 
 		const tracks = []; // KeyframeTracks compatible with VRM will be added here
 

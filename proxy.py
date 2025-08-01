@@ -1,11 +1,14 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, Response
+import asyncio
 from flask_cors import CORS
 import requests
 import os
 import json
 import base64 
 import subprocess
+
 SAVE_DIR = "."
+RHUBARB = "../rhubarb/rhubarb"
 
 app = Flask(__name__, static_folder="./")
 CORS(app)
@@ -17,7 +20,7 @@ def chat():
 
 @app.route("/")
 def index():
-    return send_from_directory(app.static_folder, "index.html")
+    return "everybody lies"
 
 @app.route("/<path:path>")
 def static_files(path):
@@ -83,9 +86,11 @@ def get_visemes():
         "-ac", "1", "-ar", "44100", "-sample_fmt", "s16",
         conv_path
     ], capture_output=True, text=True)
+    
+    print(f"Converted {filepath} to {conv_path}")
 
     result = subprocess.run(
-        ["../rhubarb/rhubarb", conv_path, "-f", "json"],
+        [RHUBARB, conv_path, "-f", "json"],
         capture_output=True,
         text=True
     )
@@ -98,18 +103,18 @@ def get_visemes():
         "soundFile" : data['filepath'] # this one without the dot i guess
     }
     
-    animation_path = SAVE_DIR + data['animation_data']
-    if not animation_path or not os.path.exists(animation_path):
-        return jsonify({'error': 'Invalid or missing animation data path'}), 400
+ #   animation_path = SAVE_DIR + data['animation_data']
+ #   if not animation_path or not os.path.exists(animation_path):
+ #       return jsonify({'error': 'Invalid or missing animation data path'}), 400
 
-    try:
-        with open(animation_path, "w") as f:
-            json.dump(out_data, f)
-    except Exception as e:
-        print(f"ERROR: Failed to export animation data: {e}")
+    # try:
+    #     with open(animation_path, "w") as f:
+    #         json.dump(out_data, f)
+    # except Exception as e:
+    #     print(f"ERROR: Failed to export animation data: {e}")
 
     # return, not sure what to do with it though since it's already saved
-    return jsonify({'mouthCues': output.get("mouthCues", [])})
+    return jsonify({'visemes': output.get("mouthCues", [])})
 
-if __name__ == "__main__":
+if __name__ == "__main__":    
     app.run(port=58762, debug=True)

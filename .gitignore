@@ -8,3 +8,6 @@ package-lock.json
 stream.py
 .gitattributes
 .DS_Store
+main\ (dict).js
+dictionary/cmudict-0.7b.txt
+dictionary/conv.py
