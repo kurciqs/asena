@@ -1,13 +1,6 @@
-data/*
-animations/*
-vrm_models/*
-__pychache__/*
-node_modules/*
-package.json
-package-lock.json
-stream.py
-.gitattributes
+__pycache__/
+archive/
+src/animations
+src/vrm_models
+src/system_prompt_tiger.txt
 .DS_Store
-main\ (dict).js
-dictionary/cmudict-0.7b.txt
-dictionary/conv.py

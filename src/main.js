@@ -1,8 +1,6 @@
 import * as ANI from './animation.js'
 
 // ------- CONFIGS AND GLOBALS -------
-const FLASK_SERVER = 'http://localhost:58762';
-const KOKORO_TTS = 'http://localhost:8880/dev/captioned_speech';
 const AUDIO_FOLDER = "/data/";
 const LIP_SYNC = "rhubarb"; // or "dictionary"
 
@@ -31,32 +29,18 @@ const phonemeToViseme = {
 };
 // https://housemd-quotes.com/
 
-// ------- FLASK BACKEND -------
-setInterval(checkFlask, 30000);
-function checkFlask() {
-    fetch(`${FLASK_SERVER}/status`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`DEAD: Flask server is not running at ${FLASK_SERVER}`);
-            }
-            console.log(`LOG: Flask server is running at ${FLASK_SERVER}.`);
-        })
-        .catch(error => {
-            console.error('ERROR: Flask server is not running:', error);
-            alert('ERROR: Flask server is not running. Please start the server and try again.');
-            throw error; // Exit the script
-        });
-}
-
 // ------- HTML ELEMENTS -------
 const textInput = document.getElementById('user-input-message');
 const chatContainer = document.getElementById("chat-display");
 const sendButton = document.getElementById('user-message-send');
+const chatPanel = document.getElementById("chat-panel");
+const dragHandle = document.getElementById("chat-drag-handle");
 
 // ------- DISPLAY -------
 function renderMessages() {
     chatContainer.innerHTML = ''
-    message_history.forEach(msg => {
+    for (let i = message_history.length - 1; i >= 0; i--) {
+        let msg = message_history[i]
         const msgDiv = document.createElement("div");
         switch (msg.role) {
             case "user":
@@ -75,7 +59,7 @@ function renderMessages() {
         }
         msgDiv.textContent = msg.content;
         chatContainer.appendChild(msgDiv);
-    });
+    }
 }
 
 // ------- CHATBOT LOGIC -------
@@ -90,15 +74,13 @@ let message_history = [
 ]
 
 // ------- HELPER FUNCTIONS -------
-async function chat(message) {
-    message_history.push({ role: "user", content: message });
-    renderMessages();
-    const chatResponse = await fetch(`${FLASK_SERVER}/chat`, {
+async function chat() {
+    const chatResponse = await fetch("/chat", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            //model: 'open-hermes-2.5-mistral-7b-quantized',
-            model: 'tiger-gemma-9b-v1',
+            model: 'open-hermes-2.5-mistral-7b-quantized',
+            // model: 'tiger-gemma-9b-v1',
             messages: message_history,
             temperature: 0.8,
             top_p: 0.95
@@ -111,17 +93,18 @@ async function chat(message) {
 
     const chatData = await chatResponse.json();
     const reply = chatData.choices[0].message.content;
-    message_history.push({ role: "assistant", content: reply });
     renderMessages();
 
     console.log("LOG: Asena responded:", reply);
 
     //let reply = "Since 2020, Blåhaj has also been associated with the LGBTQ and particularly transgender communities."
+    // let reply = "Oh, that's so sweet! EMOTION:happy Yes, I agree. ACTION:head_nod Who are you? EMOTION:surprised Oh, that's so sweet! EMOTION:sad Yes, I agree. ACTION:frowning Who are you? EMOTION:angry";
+
     return reply;
 }
 
 async function generateTTS(text) {
-    const ttsResponse = await fetch(KOKORO_TTS, {
+    const ttsResponse = await fetch("/tts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -138,6 +121,7 @@ async function generateTTS(text) {
         const errorText = await ttsResponse.text();
         throw new Error(`ERROR: TTS error: ${errorText}`);
     }
+    
     const ttsData = await ttsResponse.json();
     const audioBase64 = ttsData.audio;
     const timestamps = ttsData.timestamps;
@@ -155,7 +139,7 @@ async function generateTTS(text) {
     // if using rhubarb, we have to write the sound to a file
     if (LIP_SYNC === "rhubarb") {
         const audioPath = AUDIO_FOLDER + `tts.wav`;
-        await fetch(FLASK_SERVER + '/save_audio', {
+        await fetch('/save_audio', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -193,7 +177,7 @@ function convertToVisemes(kokoroWords) {
             visemes.push({
                 value: viseme,
                 start: start_time + i * phonemeDuration,
-                end: start_time + (i + 1) * phonemeDuration 
+                end: start_time + (i + 1) * phonemeDuration
             });
         }
         visemes.push({
@@ -209,7 +193,7 @@ function convertToVisemes(kokoroWords) {
 async function getVisemes(timestamps) {
     if (LIP_SYNC === "rhubarb") {
         const audioPath = AUDIO_FOLDER + `tts.wav`;
-        const response = await fetch(FLASK_SERVER + '/get_visemes', {
+        const response = await fetch('/get_visemes', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ filepath: audioPath })
@@ -227,6 +211,110 @@ async function getVisemes(timestamps) {
     }
 }
 
+// vibe-coded string parsing there's nothing i love llms for than not having to think about string parsing
+
+function decodeTaggedMessage(text) {
+    const tagRegex = /(EMOTION|ACTION):\s*([a-zA-Z_]+)/gi;
+    const tokens = [];
+    let cleanText = '';
+    let lastIndex = 0;
+
+    // This stores events with relative positions in the cleaned text
+    const emotions = [];
+    const actions = [];
+
+    // Go through all tags
+    for (const match of text.matchAll(tagRegex)) {
+        const [fullMatch, type, value] = match;
+        const matchStart = match.index;
+        const matchEnd = matchStart + fullMatch.length;
+
+        // Append clean text before the tag
+        cleanText += text.slice(lastIndex, matchStart);
+        lastIndex = matchEnd;
+
+        // Record the current position in the clean text
+        const cleanPos = cleanText.length;
+
+        if (type.toUpperCase() === 'EMOTION') {
+            emotions.push({
+                position: cleanPos,
+                value: value
+            });
+        } else if (type.toUpperCase() === 'ACTION') {
+            actions.push({
+                position: cleanPos,
+                value: value
+            });
+        }
+    }
+
+    // Append remaining clean text
+    cleanText += text.slice(lastIndex);
+    cleanText = cleanText.replace(/\s+/g, ' ').trim();
+
+    return {
+        text: cleanText,
+        emotions: emotions,
+        actions: actions
+    };
+}
+
+function getEmotions(timestamps, emotions) {
+    let emotionTimestamps = []
+    let currentText = "";
+    let last = 0;
+    // TODO: maybe optimise for exact words, spaces are a problem atm
+    timestamps.forEach((timestamp) => {
+        for (let i = last; i < emotions.length; i++) {
+            let emotion = emotions[i];
+            if (currentText.length >= emotion.position) {
+                emotionTimestamps.push({ value: emotion.value, start: timestamp.start_time, end: timestamp.end_time })
+                last++;
+                break;
+            }
+        }
+        if (timestamp.value === "!" || timestamp.value === "." || timestamp.value === "?" || timestamp.value === ",")
+            currentText += timestamp.word;
+        currentText += timestamp.word + 1; // spaces
+    });
+
+    let newEmotionTimestamps = [];
+    for (let i = 0; i < emotionTimestamps.length; i++) {
+        let emo = emotionTimestamps[i];
+
+        newEmotionTimestamps.push({ value: emo.value, start: emo.start, end: i === emotionTimestamps.length - 1 ? timestamps[timestamps.length - 1].end_time + 1 : emotionTimestamps[i + 1].start })
+    }
+    return newEmotionTimestamps;
+}
+
+function getActions(timestamps, actions) {
+    let actionTimestamps = []
+    let currentText = "";
+    let last = 0;
+    timestamps.forEach((timestamp) => {
+        for (let i = last; i < actions.length; i++) {
+            let action = actions[i];
+            if (currentText.length >= action.position) {
+                actionTimestamps.push({ value: action.value, start: timestamp.start_time })
+                last++;
+                break;
+            }
+        }
+        if (timestamp.value === "!" || timestamp.value === "." || timestamp.value === "?" || timestamp.value === ",")
+            currentText += timestamp.word;
+        currentText += timestamp.word + 1; // don't forget spaces
+    });
+
+    let newActionTimestamps = [];
+    for (let i = 0; i < actionTimestamps.length; i++) {
+        let ac = actionTimestamps[i];
+
+        newActionTimestamps.push({ value: ac.value, start: ac.start })
+    }
+    return newActionTimestamps;
+}
+
 async function handleTextResponse() {
     // lock
     if (handlingResponse) {
@@ -236,13 +324,16 @@ async function handleTextResponse() {
     handlingResponse = true;
 
     // input handling
-    const message = textInput.value.trim();
+    let message = textInput.value.trim();
     if (!message) {
         handlingResponse = false;
         return;
     }
     console.log('LOG: User sent:', message);
     textInput.value = '';
+    message += " (respond briefly)"
+
+    message_history.push({ role: "user", content: message });
     renderMessages();
 
     // input processing
@@ -252,11 +343,13 @@ async function handleTextResponse() {
 
         // get llm response
         let rawReply = await chat(message);
-        let parsedReply = parseTaggedMessage(rawReply);
+        let parsedReply = decodeTaggedMessage(rawReply);
+
         let asenaReply = parsedReply.text;
+        message_history.push({ role: "assistant", content: asenaReply });
+        renderMessages();
+
         console.log(parsedReply);
-        
-        console.log("LOG: Model output:", asenaReply);
 
         now = performance.now();
         const llmTime = now - start;
@@ -269,6 +362,10 @@ async function handleTextResponse() {
 
         // get visemes
         let visemes = await getVisemes(timestamps);
+        let emotions = getEmotions(timestamps, parsedReply.emotions);
+        let actions = getActions(timestamps, parsedReply.actions);
+        console.log(emotions)
+        console.log(actions)
 
         now = performance.now();
         const rhubarbTime = now - start;
@@ -277,9 +374,12 @@ async function handleTextResponse() {
         console.log("\n KOKORO:", kokoroTime - llmTime);
         console.log("RHUBARB:", rhubarbTime - kokoroTime);
         console.log("TOTAL:", now - start);
-        console.log("Duration:", audio.duration, "seconds\n");
-        
-        ANI.startExperience({ visemes: visemes, audio: audio });
+        audio.addEventListener("loadedmetadata", () => {
+            console.log("Duration:", audio.duration);
+        });
+
+        ANI.talk({ emotions: emotions, visemes: visemes, actions: actions, audio: audio });
+        // ANI.talk({ emotions: parsedReply.emotions, visemes: [], audio: new Audio() });
     } catch (error) {
         console.error("ERROR:", error);
     }
@@ -287,6 +387,7 @@ async function handleTextResponse() {
     handlingResponse = false;
 }
 
+// ------- UI FIDDLING -------
 sendButton.addEventListener('click', function (e) {
     console.log("LOG: Message sent, handling response.");
     handleTextResponse();
@@ -300,9 +401,6 @@ textInput.addEventListener('keydown', function (e) {
 });
 
 // because i take care to cite my sources: https://www.geeksforgeeks.org/html/draggable-element-using-javascript/
-const chatPanel = document.getElementById("chat-panel");
-const dragHandle = document.getElementById("chat-drag-handle");
-
 function onMouseDrag(event, element) {
     let leftValue = parseInt(window.getComputedStyle(chatPanel).left);
     let topValue = parseInt(window.getComputedStyle(chatPanel).top);
@@ -321,6 +419,35 @@ dragHandle.addEventListener("mousedown", (e) => {
     }, { once: true });
 });
 
-// initial system render, probably useless
+// hide containers with keyboard because based
+document.addEventListener('keydown', (event) => {
+    if (event.key === 's' || event.key === 'S') {
+        const el = document.getElementById('selections');
+        
+        const tag = document.activeElement.tagName.toLowerCase();
+        const isTyping = tag === "input" || tag === "textarea" || document.activeElement.isContentEditable;
+        if (isTyping) return; // don't trigger shortcuts while typing
+
+        if (el) {
+            el.style.display = (el.style.display === 'none') ? 'flex' : 'none';
+        }
+    }
+});
+
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'c' || event.key === 'C') {
+        const el = document.getElementById('chat-panel');
+
+        const tag = document.activeElement.tagName.toLowerCase();
+        const isTyping = tag === "input" || tag === "textarea" || document.activeElement.isContentEditable;
+        if (isTyping) return; // don't trigger shortcuts while typing
+
+        if (el) {
+            el.style.display = (el.style.display === 'none') ? 'flex' : 'none';
+        }
+    }
+});
+
+// -------- ACTUALLY DOING SOMETHING 🔥 --------
 renderMessages();
 ANI.loadThreeVRM();

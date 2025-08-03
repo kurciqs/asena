@@ -3,13 +3,15 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { VRMLoaderPlugin, VRMUtils } from '@pixiv/three-vrm';
 import { loadMixamoAnimation } from './load_mixamo_animation.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
 // ------- CONFIGS AND GLOBALS -------
 const MODELS_INDEX_PATH = '/vrm_models/models.json';
 const MODELS_PATH = "/vrm_models/"
 const ANIMATIONS_PATH = '/animations/';
 const ANIMATIONS_INDEX_PATH = '/animations/animations.json';
-const FLASK_SERVER = 'http://localhost:58762';
 
 // ------- ANIMATION AND RENDERING -------
 let animations = {};
@@ -30,41 +32,62 @@ let vrmModels = {};
 const animationSelect = document.getElementById('select-animation');
 const modelSelect = document.getElementById("select-model")
 let blinkTimeout = 240;
+const ANIMATION_CROSSFADE = 0.5;
 
+// pick one: angry, happy, relaxed, sad, Surprised, Extra (extra is the lol face)
+let currentExpression = { name: "Neutral", value: 1 }
+let expressionOptions = ["angry", "happy", "relaxed", "sad", "surprised"]
+let currentAnimation = null;
 // ------- THREE JS AND MORE RENDERING -------
-const renderer = new THREE.WebGLRenderer();
+// orga idk
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.shadowMap.enabled = true;
 document.getElementById("main-container").appendChild(renderer.domElement);
 renderer.domElement.id = "bg-canvas"
+const scene = new THREE.Scene();
+// camera
 const camera = new THREE.PerspectiveCamera(30.0, window.innerWidth / window.innerHeight, 0.1, 200.0);
 camera.position.set(0.0, 1.5, 2.0);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.screenSpacePanning = true;
 controls.target.set(0.0, 1.5, 0.0);
 controls.update();
-const scene = new THREE.Scene();
-const ambientLight = new THREE.AmbientLight(0xffffff, 2); // soft global light
-scene.add(ambientLight);
-const floorGeo = new THREE.PlaneGeometry(20, 20);
-const floorMat = new THREE.MeshStandardMaterial({ color: 0x5F93FF, roughness: 1 });
-const floor = new THREE.Mesh(floorGeo, floorMat);
-floor.rotation.x = -Math.PI / 2; // flip it on the side ig
-floor.position.y = -0.01;
-floor.receiveShadow = true;
-scene.add(floor);
+// light, could i give the llm control over this?
+const keyLight = new THREE.DirectionalLight(0xffffff, 1.0);
+keyLight.position.set(5, 5, 5);
+scene.add(keyLight);
+const fillLight = new THREE.DirectionalLight(0xffffff, 0.4);
+fillLight.position.set(-3, 3, 2);
+// scene.add(fillLight);
+const rimLight = new THREE.DirectionalLight(0xffeeee, 0.5);
+rimLight.position.set(0, 5, -5);
+scene.add(rimLight);
+// helper
 const axesHelper = new THREE.AxesHelper(5);
-scene.background = new THREE.Color(0xFFA1EC);
+// scene.background = new THREE.Color(0xFFA1EC);
 const gridHelper = new THREE.GridHelper(10, 10);
-scene.add(gridHelper);
+// scene.add(gridHelper);
+// scene.add(axesHelper);
+const helperRoot = new THREE.Group();
+helperRoot.renderOrder = 10000;
+scene.add(helperRoot);
+// orga idk
 let currentVrm = undefined;
 let currentMixer = undefined;
 const loader = new GLTFLoader();
 loader.crossOrigin = 'anonymous';
 loader.register((parser) => {
+    // return new VRMLoaderPlugin(parser, { helperRoot }); // debugs for if you wanna look locked in while having it open
     return new VRMLoaderPlugin(parser);
 });
+// lookat target, gives good humanoid effect
+const lookAtTarget = new THREE.Object3D();
+camera.add(lookAtTarget);
 
 function loadAllFBXAnimations(vrm, mixer, animationPath, indexPath) {
     animations = {};
@@ -99,6 +122,7 @@ function loadAllFBXAnimations(vrm, mixer, animationPath, indexPath) {
             })).then(() => {
                 if (idleFound && animations['idle']) {
                     animationSelect.value = 'idle';
+                    currentAnimation = animations['idle'];
                     playAnimationFromSelect();
                 }
                 console.log("LOG: Starting idle...")
@@ -132,7 +156,7 @@ function loadModel(url) {
             // Disable frustum culling
             vrm.scene.traverse((obj) => {
                 obj.frustumCulled = false;
-                if (obj.Mesh) {
+                if (obj.isMesh) {
                     obj.castShadow = true;
                     obj.receiveShadow = true;
                 }
@@ -141,6 +165,8 @@ function loadModel(url) {
             currentVrm = vrm;
             currentMixer = new THREE.AnimationMixer(currentVrm.scene);
             scene.add(vrm.scene);
+
+            currentVrm.lookAt.target = lookAtTarget;
 
             loadAllFBXAnimations(currentVrm, currentMixer, ANIMATIONS_PATH, ANIMATIONS_INDEX_PATH);
 
@@ -173,9 +199,9 @@ async function registerVRMModels(modelPath, indexPath) {
 
                 console.log("LOG: Registered model:", name)
                 // load animations with base dust loaded
-                if (name === "dust") {
+                if (name === "asena_sfw") {
                     loadModel(url);
-                    modelSelect.value = "dust"
+                    modelSelect.value = "asena_sfw"
                 }
             });
         })
@@ -194,31 +220,70 @@ export async function loadThreeVRM() {
 // insane blinking system i know 
 async function resetBlink() {
     await new Promise(res => setTimeout(res, 100)); // hold blink
-    const minInterval = 120; // in frames
-    const maxInterval = 360;
+    const minInterval = 60; // in frames
+    const maxInterval = 240;
     blinkTimeout = Math.random() * (maxInterval - minInterval) + minInterval;
 }
 
+function sleep(seconds) {
+    return new Promise(resolve => setTimeout(resolve, seconds * 1000));
+}
+
+export async function playAnimationByName(name) {
+    let animation = animations[name];
+    if (animation === currentAnimation) return; // fuck that
+    currentAnimation.fadeOut(ANIMATION_CROSSFADE);
+    animation.reset().fadeIn(ANIMATION_CROSSFADE).play();
+    currentAnimation = animation;
+
+    // IT'S A HOUSE OF CARDS BABAY BUT IT'S STABLE IT'S STABLE
+    await sleep(animation.getClip().duration - ANIMATION_CROSSFADE)
+
+    // go back to idle, only if we have not changed current since then PROBLEM if someone double requests the same animation, lets hope asena won't do that
+    if (animation === currentAnimation) {
+        animations["idle"].reset().fadeIn(ANIMATION_CROSSFADE).play()
+        currentAnimation = animations["idle"];
+        animation.fadeOut(ANIMATION_CROSSFADE)
+    }
+}
+
+export function setExpression(name, value) {
+    currentExpression = { name: name, value: value };
+}
+
+async function scheduleAnimationByName(name, time) {
+    await sleep(time);
+    playAnimationByName(name);
+}
+
 function animate() {
+    // handle resizing after like a week of ignoring it straight
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
 
     requestAnimationFrame(animate);
 
     const deltaTime = clock.getDelta();
 
     if (currentVrm) {
+        // blinking TODO: some emotions have closed eyes and blinking looks bad on them, go case by case 
         if (blinkTimeout <= 0) {
-            const s = Math.cos(Math.PI * clock.elapsedTime);
-            currentVrm.expressionManager.setValue('blinkLeft', 1);
-            currentVrm.expressionManager.setValue('blinkRight', 1);
+            let eyesClosed = false;
+            currentVrm.expressionManager.expressions.forEach((expr) => {
+                if (expr.name === "happy" && expr.weight > 0.5) eyesClosed = true;
+            });
+            if (!eyesClosed) {
+                currentVrm.expressionManager.setValue('blinkLeft', 1);
+                currentVrm.expressionManager.setValue('blinkRight', 1);
+            }
             resetBlink();
         }
         else {
             currentVrm.expressionManager.setValue('blinkLeft', 0.0);
             currentVrm.expressionManager.setValue('blinkRight', 0.0);
         }
-        
         currentVrm.update(deltaTime);
-
     }
 
     if (currentMixer) {
@@ -227,12 +292,14 @@ function animate() {
 
     }
 
+    // subtle circular eye movement i think aha it follows the camera now that's also cool ig
+    lookAtTarget.position.y = Math.sin(Math.PI * clock.elapsedTime) * 0.2;
+
     blinkTimeout--;
     renderer.render(scene, camera);
-
 }
 
-export function startExperience(data) {
+export function talk(data) {
     if (!animationsLoaded) {
         console.error('ERROR: Animations not loaded yet.');
         return;
@@ -268,7 +335,7 @@ export function startExperience(data) {
                 values.push(0.0);
             }
         })
-        if (times.length == 0) { times = [0.0]; values = [0.0]; }
+        if (times.length === 0) { times = [0.0]; values = [0.0]; }
         let currentTrack = new THREE.NumberKeyframeTrack(
             currentVrm.expressionManager.getExpressionTrackName(vrmExpression), // name
             times, // times
@@ -278,10 +345,40 @@ export function startExperience(data) {
         tracks.push(currentTrack);
     });
 
-    const mouthShapesTrack = new THREE.AnimationClip('MouthShapes', audio.duration, tracks);
+    expressionOptions.forEach((key) => {
+        let times = [0];
+        let values = [0];
+        data.emotions.forEach((emotion) => {
+            let rEmotion = emotion.value;
+            if (rEmotion === key) {
+                times.push(emotion.start - 0.05);
+                values.push(0.0);
+                times.push(emotion.start);
+                values.push(0.3);
+                times.push(emotion.end);
+                values.push(0.3);
+                times.push(emotion.end + 0.05);
+                values.push(0.0);
+            }
+        });
+
+        let currentTrack = new THREE.NumberKeyframeTrack(
+            currentVrm.expressionManager.getExpressionTrackName(key), // name
+            times, // times
+            values, // values
+            THREE.InterpolateLinear // interpolation
+        );
+        tracks.push(currentTrack);
+    });
+
+    data.actions.forEach((action) => {
+        scheduleAnimationByName(action.value, action.start)
+        // console.log(animations[action.value], currentMixer.time + action.start)
+    });
+
+    const mouthShapesTrack = new THREE.AnimationClip('MouthShapes', audio.duration + 1, tracks);
     const action = currentMixer.clipAction(mouthShapesTrack);
     action.setLoop(THREE.LoopOnce, 0);
-    action.clampWhenFinished = true;
     action.play();
     audio.play();
 }
@@ -292,11 +389,13 @@ function playAnimationFromSelect() {
     Object.keys(animations).forEach((animationName) => {
         if (selectedOption === animationName) {
             let animation = animations[animationName];
-            animation.reset().fadeIn(1.0).play();
+            animation.reset().fadeIn(ANIMATION_CROSSFADE).play();
+            currentAnimation = animation;
         }
         else if (!animations[animationName].paused) {
             let animation = animations[animationName];
-            animation.fadeOut(1.0);
+            animation.fadeOut(ANIMATION_CROSSFADE);
         }
     })
 }
+

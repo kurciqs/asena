@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory, Response
+from flask import Flask, request, jsonify, send_from_directory, Response, render_template
 import asyncio
 from flask_cors import CORS
 import requests
@@ -7,20 +7,31 @@ import json
 import base64 
 import subprocess
 
-SAVE_DIR = "."
+SAVE_DIR = "src"
 RHUBARB = "../rhubarb/rhubarb"
+LMS_API = "http://localhost:1234/v1/chat/completions"
+KOKORO_API = "http://localhost:8880/dev/captioned_speech"
 
-app = Flask(__name__, static_folder="./")
+app = Flask(__name__, static_folder="./src/")
 CORS(app)
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return send_from_directory("./src", "404.html"), 404
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    res = requests.post("http://localhost:1234/v1/chat/completions", json=request.json)
+    res = requests.post(LMS_API, json=request.json)
+    return jsonify(res.json())
+
+@app.route("/tts", methods=["POST"])
+def tts():
+    res = requests.post(KOKORO_API, json=request.json)
     return jsonify(res.json())
 
 @app.route("/")
-def index():
-    return "everybody lies"
+def serve_index():
+    return send_from_directory(app.static_folder, "index.html")
 
 @app.route("/<path:path>")
 def static_files(path):
@@ -28,7 +39,7 @@ def static_files(path):
 
 @app.route("/status")
 def status():
-    return "What usually happens when you poke something with a stick? It pokes back. s2e4"
+    return "What usually happens when you poke something with a stick? It pokes back. 2:4"
  
 @app.route('/save_audio', methods=['POST'])
 def save_audio():
@@ -80,14 +91,15 @@ def get_visemes():
 
     # first convert to correct format
     conv_path = filepath.replace(".wav", "_conv.wav")
+    
     # dawg if this subprocess fails, you don't even deserve to know it's so obscure
-    subprocess.run([
+    result = subprocess.run([
         "ffmpeg", "-y", "-i", filepath,
         "-ac", "1", "-ar", "44100", "-sample_fmt", "s16",
         conv_path
     ], capture_output=True, text=True)
-    
-    print(f"Converted {filepath} to {conv_path}")
+    if result.returncode != 0:
+        return jsonify({'error': 'FFMPEG failed', 'stderr': result.stderr}), 500
 
     result = subprocess.run(
         [RHUBARB, conv_path, "-f", "json"],
@@ -103,18 +115,8 @@ def get_visemes():
         "soundFile" : data['filepath'] # this one without the dot i guess
     }
     
- #   animation_path = SAVE_DIR + data['animation_data']
- #   if not animation_path or not os.path.exists(animation_path):
- #       return jsonify({'error': 'Invalid or missing animation data path'}), 400
-
-    # try:
-    #     with open(animation_path, "w") as f:
-    #         json.dump(out_data, f)
-    # except Exception as e:
-    #     print(f"ERROR: Failed to export animation data: {e}")
-
     # return, not sure what to do with it though since it's already saved
     return jsonify({'visemes': output.get("mouthCues", [])})
 
 if __name__ == "__main__":    
-    app.run(port=58762, debug=True)
+    app.run(port=3000, debug=True)
