@@ -4,3 +4,4 @@ src/animations
 src/vrm_models
 src/system_prompt_tiger.txt
 .DS_Store
+src/data/
