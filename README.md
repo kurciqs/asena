@@ -21,3 +21,6 @@ read the installation.md file.
 
 # img
 
+![asena in action1](src/res/image.png)
+![asena in action2](src/res/image2.png)
+![asena in action3](src/res/image3.png)
