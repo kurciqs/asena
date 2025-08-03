@@ -2,31 +2,31 @@
 step by step okay
 
 ## lm studio
-get lm studio (https://lmstudio.ai/), download your preferred model (i'd go for tiger-gemma-9b-v1 because it's completely uncensored), load it into memory and open the api on port 1234 (ask chatgpt for details this is trivial)
+get [lm studio](https://lmstudio.ai/), download your preferred model (i'd go for tiger-gemma-9b-v1 because it's completely uncensored), load it into memory and open the api on port 1234 (ask chatgpt for details this is trivial)
 
 ## kokoro-tts
-get docker desktop (https://www.docker.com/). make sure you have plenty of memory otherwise you'll need to reinstall docker twenty times like me. get this image: ghcr.io/remsky/kokoro-fastapi-cpu:latest. if you have a gpu, DEFINITELY GET THE GPU VERSIONS (i haven't tested them though but it should not be an issue). once it's downloaded, run the image and test if all is well by opening localhost:8880/web in your browser. you should see a text-to-speech generator. try out the voices and accents, it's quite fun and you can then change the voice in main.js. 
+get [docker desktop](https://www.docker.com/). make sure you have plenty of memory otherwise you'll need to reinstall docker twenty times like me. get this image: ghcr.io/remsky/kokoro-fastapi-cpu:latest. if you have a gpu, DEFINITELY GET THE GPU VERSIONS (i haven't tested them though but it should not be an issue). once it's downloaded, run the image and test if all is well by opening localhost:8880/web in your browser. you should see a text-to-speech generator. try out the voices and accents, it's quite fun and you can then change the voice in main.js. 
 
 ## rhubarb
-you can skip this if you set const LIP_SYNC = "dictionary" in main.js, because then the programm won't need viseme generation, it'll just fake it from the dictionary. it works fine but rhubarb is definitely much cleaner.
-install rhubarb (https://github.com/DanielSWolf/rhubarb-lip-sync/releases – get the one for your OS). make sure that in proxy.py, you have the correct path set to the rhubarb executable. you can test this by opening a cli in the directory of proxy.py and typing the path to the rhubarb. if rhubarb responds, you're golden.
+you can skip this if you set const LIP_SYNC = "dictionary" in main.js, because then the program won't need viseme generation, it'll just fake it from the dictionary. it works fine but rhubarb is definitely much cleaner.
+install [rhubarb](https://github.com/DanielSWolf/rhubarb-lip-sync/releases – get the one for your OS). make sure that in server.py, you have the correct path set to the rhubarb executable. you can test this by opening a cli in the directory of server.py and typing the path to the rhubarb. if rhubarb responds, you're golden.
 
 ## web crap
 like three.js and three-vrm and whatnot should all be covered by index.html, where they get imported from jsDelivr. this does require initial internet connection sadly, but the total project is still local as nothing ever escapes the computer. i'll try and do make it internet-independent soon.
 
 ## data files
-you need to create a vrm_models/ folder with an index file models.json which lists all models like this: ["dust.vrm", "asena_sfw.vrm", ...]. the same goes for animations/ and animations.json: ["talking1.fbx", "talking2.fbx", "thinking.fbx", ...]. there isn't any hardcoding regarding the animations yet and the llm doesn't have any control over them. they're there for you to play around with until kokoro responds, which might take damn long. also create a data/ folder, just to be sure. 
+you need to create an src/vrm_models/ folder with an index file models.json which lists all models like this: ["dust.vrm", "asena_sfw.vrm", ...]. the same goes for src/animations/ and animations.json: ["talking1.fbx", "talking2.fbx", "thinking.fbx", ...]. there isn't any hardcoding regarding the animations yet and the llm doesn't have any control over them. they're there for you to pslay around with until kokoro responds, which might take damn long. also create a src/data/ folder, just to be sure. 
 
 ## python deps
-install whatever proxy.py imports via pip. 
+install whatever server.py imports via pip. 
 
 ## other than that
-last but not least, you'll need animations and vrm models. load whatever mixamo animations you want into animations/ and models created with [vroid studio](https://hub.vroid.com/en/search/%23VRoidStudio) into vrm_models/. i'm not sure if i can share my models and anims because of licensing. 
+last but not least, you'll need animations and vrm models. load whatever mixamo animations you want into src/animations/ and models created with [vroid studio](https://hub.vroid.com/en/search/%23VRoidStudio) into vrm_models/. i'm not sure if i can share my models and anims because of licensing. 
 
 ah and also have ffmpeg installed (who doesn't?)
 
 ## running
 
-WOW! all has been unified into a clean flask app isn't that neat? just type python server.py. how cool is that?
+WOW! all has been unified into a clean flask app isn't that neat? just type "python server.py". how cool is that?
 
 good luck! and don't forget to adjust system_prompt.txt to your hearts content ;)
