@@ -1,7 +1,10 @@
 __pycache__/
 archive/
-src/animations
-src/vrm_models
+src/animations/*
+!src/animations/animations.json
+src/vrm_models/*
+!src/vrm_models/asena_sfw.vrm
+!src/vrm_models/models.json
 src/system_prompt_tiger.txt
 .DS_Store
 src/data/

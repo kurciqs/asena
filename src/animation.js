@@ -3,9 +3,6 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { VRMLoaderPlugin, VRMUtils } from '@pixiv/three-vrm';
 import { loadMixamoAnimation } from './load_mixamo_animation.js';
-import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
 // ------- CONFIGS AND GLOBALS -------
 const MODELS_INDEX_PATH = '/vrm_models/models.json';
@@ -350,25 +347,32 @@ export function talk(data) {
         let values = [0];
         data.emotions.forEach((emotion) => {
             let rEmotion = emotion.value;
+            let intensity = key === "happy" ? 0.3 : 0.5;
             if (rEmotion === key) {
                 times.push(emotion.start - 0.05);
                 values.push(0.0);
                 times.push(emotion.start);
-                values.push(0.3);
+                values.push(intensity);
                 times.push(emotion.end);
-                values.push(0.3);
+                values.push(intensity);
                 times.push(emotion.end + 0.05);
                 values.push(0.0);
             }
         });
-
+        
+        let trackName = currentVrm.expressionManager.getExpressionTrackName(key);
+        if (trackName) {
         let currentTrack = new THREE.NumberKeyframeTrack(
-            currentVrm.expressionManager.getExpressionTrackName(key), // name
+            trackName, // name
             times, // times
             values, // values
             THREE.InterpolateLinear // interpolation
-        );
+          );
         tracks.push(currentTrack);
+        }
+        else {
+    console.log("WARNING: Non-Existent expression requested:", key)
+    }
     });
 
     data.actions.forEach((action) => {

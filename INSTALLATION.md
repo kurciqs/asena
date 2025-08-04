@@ -20,13 +20,8 @@ you need to create an src/vrm_models/ folder with an index file models.json whic
 ## python deps
 install whatever server.py imports via pip. 
 
-## other than that
-last but not least, you'll need animations and vrm models. load whatever mixamo animations you want into src/animations/ and models created with [vroid studio](https://hub.vroid.com/en/search/%23VRoidStudio) into vrm_models/. i'm not sure if i can share my models and anims because of licensing. 
-
-ah and also have ffmpeg installed (who doesn't?)
-
 ## running
 
 WOW! all has been unified into a clean flask app isn't that neat? just type "python server.py". how cool is that?
-
 good luck! and don't forget to adjust system_prompt.txt to your hearts content ;)
+

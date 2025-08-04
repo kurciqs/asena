@@ -1,4 +1,5 @@
 import * as ANI from './animation.js'
+import * as EMO from "./emotion_classifier.js"
 
 // ------- CONFIGS AND GLOBALS -------
 const AUDIO_FOLDER = "/data/";
@@ -97,9 +98,7 @@ async function chat() {
 
     console.log("LOG: Asena responded:", reply);
 
-    //let reply = "Since 2020, Blåhaj has also been associated with the LGBTQ and particularly transgender communities."
     // let reply = "Oh, that's so sweet! EMOTION:happy Yes, I agree. ACTION:head_nod Who are you? EMOTION:surprised Oh, that's so sweet! EMOTION:sad Yes, I agree. ACTION:frowning Who are you? EMOTION:angry";
-
     return reply;
 }
 
@@ -121,7 +120,7 @@ async function generateTTS(text) {
         const errorText = await ttsResponse.text();
         throw new Error(`ERROR: TTS error: ${errorText}`);
     }
-    
+
     const ttsData = await ttsResponse.json();
     const audioBase64 = ttsData.audio;
     const timestamps = ttsData.timestamps;
@@ -171,7 +170,7 @@ function convertToVisemes(kokoroWords) {
 
         for (let i = 0; i < cleaned.length; i++) {
             const p = cleaned[i];
-            const viseme = phonemeToViseme[p] || "I"; // i think I looks kinda universal imo
+            const viseme = phonemeToViseme[p];
             if (!viseme) continue;
 
             visemes.push({
@@ -211,110 +210,8 @@ async function getVisemes(timestamps) {
     }
 }
 
-// vibe-coded string parsing there's nothing i love llms for than not having to think about string parsing
-
-function decodeTaggedMessage(text) {
-    const tagRegex = /(EMOTION|ACTION):\s*([a-zA-Z_]+)/gi;
-    const tokens = [];
-    let cleanText = '';
-    let lastIndex = 0;
-
-    // This stores events with relative positions in the cleaned text
-    const emotions = [];
-    const actions = [];
-
-    // Go through all tags
-    for (const match of text.matchAll(tagRegex)) {
-        const [fullMatch, type, value] = match;
-        const matchStart = match.index;
-        const matchEnd = matchStart + fullMatch.length;
-
-        // Append clean text before the tag
-        cleanText += text.slice(lastIndex, matchStart);
-        lastIndex = matchEnd;
-
-        // Record the current position in the clean text
-        const cleanPos = cleanText.length;
-
-        if (type.toUpperCase() === 'EMOTION') {
-            emotions.push({
-                position: cleanPos,
-                value: value
-            });
-        } else if (type.toUpperCase() === 'ACTION') {
-            actions.push({
-                position: cleanPos,
-                value: value
-            });
-        }
-    }
-
-    // Append remaining clean text
-    cleanText += text.slice(lastIndex);
-    cleanText = cleanText.replace(/\s+/g, ' ').trim();
-
-    return {
-        text: cleanText,
-        emotions: emotions,
-        actions: actions
-    };
-}
-
-function getEmotions(timestamps, emotions) {
-    let emotionTimestamps = []
-    let currentText = "";
-    let last = 0;
-    // TODO: maybe optimise for exact words, spaces are a problem atm
-    timestamps.forEach((timestamp) => {
-        for (let i = last; i < emotions.length; i++) {
-            let emotion = emotions[i];
-            if (currentText.length >= emotion.position) {
-                emotionTimestamps.push({ value: emotion.value, start: timestamp.start_time, end: timestamp.end_time })
-                last++;
-                break;
-            }
-        }
-        if (timestamp.value === "!" || timestamp.value === "." || timestamp.value === "?" || timestamp.value === ",")
-            currentText += timestamp.word;
-        currentText += timestamp.word + 1; // spaces
-    });
-
-    let newEmotionTimestamps = [];
-    for (let i = 0; i < emotionTimestamps.length; i++) {
-        let emo = emotionTimestamps[i];
-
-        newEmotionTimestamps.push({ value: emo.value, start: emo.start, end: i === emotionTimestamps.length - 1 ? timestamps[timestamps.length - 1].end_time + 1 : emotionTimestamps[i + 1].start })
-    }
-    return newEmotionTimestamps;
-}
-
-function getActions(timestamps, actions) {
-    let actionTimestamps = []
-    let currentText = "";
-    let last = 0;
-    timestamps.forEach((timestamp) => {
-        for (let i = last; i < actions.length; i++) {
-            let action = actions[i];
-            if (currentText.length >= action.position) {
-                actionTimestamps.push({ value: action.value, start: timestamp.start_time })
-                last++;
-                break;
-            }
-        }
-        if (timestamp.value === "!" || timestamp.value === "." || timestamp.value === "?" || timestamp.value === ",")
-            currentText += timestamp.word;
-        currentText += timestamp.word + 1; // don't forget spaces
-    });
-
-    let newActionTimestamps = [];
-    for (let i = 0; i < actionTimestamps.length; i++) {
-        let ac = actionTimestamps[i];
-
-        newActionTimestamps.push({ value: ac.value, start: ac.start })
-    }
-    return newActionTimestamps;
-}
-
+let ind = 0;
+// pretty much the main function
 async function handleTextResponse() {
     // lock
     if (handlingResponse) {
@@ -331,9 +228,19 @@ async function handleTextResponse() {
     }
     console.log('LOG: User sent:', message);
     textInput.value = '';
-    message += " (respond briefly)"
 
-    message_history.push({ role: "user", content: message });
+    // prompt bashing experiments
+    let spBASH = "";
+    if (ind % 3 === 2) {
+
+        message_history.push({ role: "system", content: "DO NOT FORGET TO INCLUDE THE CORRECT STAGE DIRECTIONS."});
+        spBASH = "Only use the following stage directions: smiles, giggles, sighs, frowns, blushes, relaxes, waves, nods, shakes head, crosses arms, shrugs, talks softly, hums, thanks, frowns deeply. Respond briefly.";
+    }
+    ind++;
+
+    message_history.push({ role: "user", content: message + spBASH });
+    console.log(message_history);
+
     renderMessages();
 
     // input processing
@@ -343,10 +250,10 @@ async function handleTextResponse() {
 
         // get llm response
         let rawReply = await chat(message);
-        let parsedReply = decodeTaggedMessage(rawReply);
+        let parsedReply = EMO.decodeTaggedMessage(rawReply);
 
         let asenaReply = parsedReply.text;
-        message_history.push({ role: "assistant", content: asenaReply });
+        message_history.push({ role: "assistant", content: rawReply });
         renderMessages();
 
         console.log(parsedReply);
@@ -362,24 +269,26 @@ async function handleTextResponse() {
 
         // get visemes
         let visemes = await getVisemes(timestamps);
-        let emotions = getEmotions(timestamps, parsedReply.emotions);
-        let actions = getActions(timestamps, parsedReply.actions);
+        let emotions = EMO.getEmotions(timestamps, parsedReply.emotions, parsedReply.text);
+        let actions = EMO.getActions(timestamps, parsedReply.actions, parsedReply.text);
+
         console.log(emotions)
         console.log(actions)
 
         now = performance.now();
         const rhubarbTime = now - start;
 
+        // time logging for testing
         console.log("\n LLM:", llmTime);
         console.log("\n KOKORO:", kokoroTime - llmTime);
         console.log("RHUBARB:", rhubarbTime - kokoroTime);
         console.log("TOTAL:", now - start);
+
         audio.addEventListener("loadedmetadata", () => {
             console.log("Duration:", audio.duration);
         });
 
         ANI.talk({ emotions: emotions, visemes: visemes, actions: actions, audio: audio });
-        // ANI.talk({ emotions: parsedReply.emotions, visemes: [], audio: new Audio() });
     } catch (error) {
         console.error("ERROR:", error);
     }
@@ -423,7 +332,7 @@ dragHandle.addEventListener("mousedown", (e) => {
 document.addEventListener('keydown', (event) => {
     if (event.key === 's' || event.key === 'S') {
         const el = document.getElementById('selections');
-        
+
         const tag = document.activeElement.tagName.toLowerCase();
         const isTyping = tag === "input" || tag === "textarea" || document.activeElement.isContentEditable;
         if (isTyping) return; // don't trigger shortcuts while typing

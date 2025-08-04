@@ -1,3 +1,7 @@
+import mimetypes
+mimetypes.add_type("application/javascript", ".js")
+mimetypes.add_type("text/css", ".css")
+
 from flask import Flask, request, jsonify, send_from_directory, Response, render_template
 import asyncio
 from flask_cors import CORS
@@ -10,6 +14,8 @@ import subprocess
 SAVE_DIR = "src"
 RHUBARB = "../rhubarb/rhubarb"
 LMS_API = "http://localhost:1234/v1/chat/completions"
+# outsource kokoro to a local stronger machine, improves performance drastically, you could even run the whole server there instead of on the laptop, with that performance kokoro is basically faster than lms. 
+# KOKORO_API = "http://192.168.1.110:8880/dev/captioned_speech"
 KOKORO_API = "http://localhost:8880/dev/captioned_speech"
 
 app = Flask(__name__, static_folder="./src/")
