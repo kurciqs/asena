@@ -3,8 +3,9 @@ import * as EMO from "./emotion_classifier.js"
 
 // ------- CONFIGS AND GLOBALS -------
 const AUDIO_FOLDER = "/data/";
-const LIP_SYNC = "rhubarb"; // or "dictionary"
+const LIP_SYNC = "dictionary"; // or "dictionary"
 const MEMORY_PATH = "/data/memory.json"
+let KOKORO_VOICE = "af_heart";
 let CONTEXT_WINDOW_MAX = 4000;
 let CONTEXT_WINDOW_CURRENT = 0;
 
@@ -41,6 +42,12 @@ const chatPanel = document.getElementById("chat-panel");
 const dragHandle = document.getElementById("chat-drag-handle");
 const contextWindowSize = document.getElementById("context-size");
 const saveButton = document.getElementById('saveMemoryBtn');
+const voiceSelect = document.getElementById("select-voice");
+
+function changeVoice() {
+    KOKORO_VOICE = voiceSelect.value;
+    console.log(KOKORO_VOICE)
+}
 
 // ------- DISPLAY -------
 function renderMessages() {
@@ -130,7 +137,7 @@ async function generateTTS(text) {
         body: JSON.stringify({
             model: "kokoro",
             input: text,
-            voice: "af_heart",
+            voice: KOKORO_VOICE,
             speed: 1.0,
             response_format: "wav",
             stream: false
@@ -405,3 +412,4 @@ async function saveMemoryToFile() {
 // -------- ACTUALLY DOING SOMETHING 🔥 --------
 renderMessages();
 ANI.loadThreeVRM();
+voiceSelect.addEventListener('change', changeVoice);

@@ -116,14 +116,14 @@ body {
 }
 
 #selections {
-    height: 40px;
-    max-width: 100vw;
+    max-width: 40vw;
     background-color: var(--primary-color);
     margin: 20px;
     padding: 15px 20px;
     border-radius: 16px;
     display: none;
     flex-wrap: wrap;
+    flex-direction: column;
     gap: 10px;
     pointer-events: auto;
     position: absolute;
@@ -241,4 +241,8 @@ body {
     color: #000;
     font-weight: bold;
     cursor: pointer;
+    margin: 8px;
+
+    right: 0px;
+    bottom: 0px;
 }

@@ -35,6 +35,7 @@ const ANIMATION_CROSSFADE = 0.5;
 let currentExpression = { name: "Neutral", value: 1 }
 let expressionOptions = ["angry", "happy", "relaxed", "sad", "surprised"]
 let currentAnimation = null;
+
 // ------- THREE JS AND MORE RENDERING -------
 // orga idk
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -347,7 +348,7 @@ export function talk(data) {
         let values = [0];
         data.emotions.forEach((emotion) => {
             let rEmotion = emotion.value;
-            let intensity = key === "happy" ? 0.3 : 0.5;
+            let intensity = key === "happy" ? 0.3 : 0.5; // being happy is very contageous, gotta level it, as per dr house
             if (rEmotion === key) {
                 times.push(emotion.start - 0.05);
                 values.push(0.0);
@@ -359,20 +360,31 @@ export function talk(data) {
                 values.push(0.0);
             }
         });
-        
+
         let trackName = currentVrm.expressionManager.getExpressionTrackName(key);
         if (trackName) {
-        let currentTrack = new THREE.NumberKeyframeTrack(
-            trackName, // name
-            times, // times
-            values, // values
-            THREE.InterpolateLinear // interpolation
-          );
-        tracks.push(currentTrack);
+            let currentTrack = new THREE.NumberKeyframeTrack(
+                trackName, // name
+                times, // times
+                values, // values
+                THREE.InterpolateLinear // interpolation
+            );
+            tracks.push(currentTrack);
         }
         else {
-    console.log("WARNING: Non-Existent expression requested:", key)
-    }
+            // surprise is capitalised with some vrms which i have, there might be others like this but that depends on the VRM you load, i can't deal with that. if surprised with a small s failed, do the same for Surprised with a capitalised S
+            console.log("WARNING: Non-Existent expression requested:", key)
+            if (key === "surprised") {
+                let currentTrack = new THREE.NumberKeyframeTrack(
+                    "Surprised", // name
+                    times, // times
+                    values, // values
+                    THREE.InterpolateLinear // interpolation
+                );
+                tracks.push(currentTrack);
+                console.log("LOG: Expression corrected to:", "Surprised")
+            }
+        }
     });
 
     data.actions.forEach((action) => {
