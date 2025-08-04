@@ -26,7 +26,9 @@ i also have to wait at least half a minute for longer responses, where most of t
 – [x] clean building and installation haha
 - [ ] 30000 iq model gaslighting strategy: inject tags into history randomly
 - [ ] beware of cap conventions with parameters ("Surprise" and "surprise")
+- [ ] keep track of token count and context window explosion
 - [x] untrimmed anims from mixamo
+- [ ] keep track of a backend message_history and a display one
 
 # img
 

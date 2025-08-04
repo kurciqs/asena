@@ -7,4 +7,5 @@ src/vrm_models/*
 !src/vrm_models/models.json
 src/system_prompt_tiger.txt
 .DS_Store
-src/data/
+src/data/*
+!src/data/memory.json

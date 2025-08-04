@@ -182,6 +182,7 @@ body {
     color: #000;
     font-weight: bold;
     cursor: pointer;
+    height: 100%;
 }
 
 #bg-canvas {
@@ -223,4 +224,21 @@ body {
     border-radius: 15px;
     max-width: 70%;
     margin: 20px;
+}
+
+#debug-div {
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    margin: 20px;
+}
+
+#saveMemoryBtn {
+    padding: 8px 12px;
+    border-radius: 10px;    
+    border: none;
+    background-color: var(--soft-color);
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
 }

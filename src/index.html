@@ -13,27 +13,31 @@
 
 <body>
 	<!-- gradient haha -->
-	<div id="bg"></div> 
+	<div id="bg"></div>
 	<div id="main-container">
 		<div id="selections">
 			<div id="animation-selector">
-				Animation:
+				animation:
 				<select name="select-animation" id="select-animation"></select>
 			</div>
 			<div id="model-selector">
-				Model:
+				model:
 				<select name="select-model" id="select-model"></select>
 			</div>
+			<button id="saveMemoryBtn">save memory</button>
 		</div>
 		<!-- CANVAS, inserted in js -->
 		<div id="chat-panel">
-			<div id="chat-drag-handle">Chat</div>
+			<div id="chat-drag-handle">chat</div>
 			<div id="chat-display"></div>
 			<div id="user-input-container">
-				<input type="text" id="user-input-message" placeholder='Talk to Asena...'>
-				<button id="user-message-send">Send</button>
+				<input type="text" id="user-input-message" placeholder='talk to asena...'>
+				<button id="user-message-send">send</button>
 			</div>
 		</div>
+	</div>
+	<div id="debug-div">
+		<p id="context-size">0%</p>
 	</div>
 	<script type="importmap">
 			{
@@ -44,7 +48,8 @@
                     "@pixiv/three-vrm": "https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3/lib/three-vrm.module.min.js"
 				}
 			}
-		</script>
+	</script>
+
 
 	<script type="module" src="/src/main.js"></script>
 </body>

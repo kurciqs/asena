@@ -4,6 +4,9 @@ import * as EMO from "./emotion_classifier.js"
 // ------- CONFIGS AND GLOBALS -------
 const AUDIO_FOLDER = "/data/";
 const LIP_SYNC = "rhubarb"; // or "dictionary"
+const MEMORY_PATH = "/data/memory.json"
+let CONTEXT_WINDOW_MAX = 4000;
+let CONTEXT_WINDOW_CURRENT = 0;
 
 // ------- DICTIONARY -------
 let cmuResponse = await fetch('/dictionary/cmudict.json');
@@ -36,6 +39,8 @@ const chatContainer = document.getElementById("chat-display");
 const sendButton = document.getElementById('user-message-send');
 const chatPanel = document.getElementById("chat-panel");
 const dragHandle = document.getElementById("chat-drag-handle");
+const contextWindowSize = document.getElementById("context-size");
+const saveButton = document.getElementById('saveMemoryBtn');
 
 // ------- DISPLAY -------
 function renderMessages() {
@@ -61,28 +66,42 @@ function renderMessages() {
         msgDiv.textContent = msg.content;
         chatContainer.appendChild(msgDiv);
     }
+    contextWindowSize.innerHTML = Math.round(CONTEXT_WINDOW_CURRENT / CONTEXT_WINDOW_MAX * 100);
 }
 
 // ------- CHATBOT LOGIC -------
 let spRequest = await fetch("/system_prompt.txt");
 let systemPrompt = await spRequest.text();
+let memories = [];
+let memoryReponse = await fetch('/data/memory.json');
+let memoryData = await memoryReponse.json();
+let memoryPrompt = "";
+memoryData.forEach((mem) => {
+    memoryPrompt += "- " + mem + "\n";
+    memories.push(mem);
+});
+
 let handlingResponse = false;
 let message_history = [
     {
         role: "system",
         content: systemPrompt,
+    },
+    {
+        role: "system",
+        content: "Previously remembered information:\n" + memoryPrompt,
     }
 ]
 
 // ------- HELPER FUNCTIONS -------
-async function chat() {
+async function chat(history) {
     const chatResponse = await fetch("/chat", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             model: 'open-hermes-2.5-mistral-7b-quantized',
             // model: 'tiger-gemma-9b-v1',
-            messages: message_history,
+            messages: history,
             temperature: 0.8,
             top_p: 0.95
         })
@@ -94,6 +113,8 @@ async function chat() {
 
     const chatData = await chatResponse.json();
     const reply = chatData.choices[0].message.content;
+    CONTEXT_WINDOW_CURRENT = chatData.usage.total_tokens;
+
     renderMessages();
 
     console.log("LOG: Asena responded:", reply);
@@ -233,12 +254,12 @@ async function handleTextResponse() {
     let spBASH = "";
     if (ind % 3 === 2) {
 
-        message_history.push({ role: "system", content: "DO NOT FORGET TO INCLUDE THE CORRECT STAGE DIRECTIONS."});
         spBASH = "Only use the following stage directions: smiles, giggles, sighs, frowns, blushes, relaxes, waves, nods, shakes head, crosses arms, shrugs, talks softly, hums, thanks, frowns deeply. Respond briefly.";
+        message_history.push({ role: "system", content: spBASH });
     }
     ind++;
 
-    message_history.push({ role: "user", content: message + spBASH });
+    message_history.push({ role: "user", content: message });
     console.log(message_history);
 
     renderMessages();
@@ -249,14 +270,24 @@ async function handleTextResponse() {
         let now = start;
 
         // get llm response
-        let rawReply = await chat(message);
+        let rawReply = await chat(message_history);
         let parsedReply = EMO.decodeTaggedMessage(rawReply);
 
         let asenaReply = parsedReply.text;
         message_history.push({ role: "assistant", content: rawReply });
-        renderMessages();
 
-        console.log(parsedReply);
+        // every five messages, store some imporant information
+        if (ind % 5 === 0) {
+            console.log("LOG: EXTRACTING MEMORY.")
+            let newMessageHistory = message_history.slice(); // copy to not fuck around with the real messageline
+            let prompt = "Summarize your recent dialogue (last 5 responses) with the user into 1–2 short bullet points that describe important facts, user preferences, or character behavior. Be concise, don't give an introduction.";
+            newMessageHistory.push({ role: "user", content: prompt });
+
+            let extractedMemory = "\n" + (await chat(newMessageHistory));
+            let mems = extractedMemory.split(/\n\s*-\s+/).map(s => s.trim()).filter(s => s.length > 0);
+            mems.forEach((mem) => { memories.push(mem) });
+        }
+        renderMessages();
 
         now = performance.now();
         const llmTime = now - start;
@@ -308,6 +339,9 @@ textInput.addEventListener('keydown', function (e) {
         handleTextResponse();
     }
 });
+saveButton.addEventListener('click', () => {
+    saveMemoryToFile(memories);
+});
 
 // because i take care to cite my sources: https://www.geeksforgeeks.org/html/draggable-element-using-javascript/
 function onMouseDrag(event, element) {
@@ -356,6 +390,17 @@ document.addEventListener('keydown', (event) => {
         }
     }
 });
+
+async function saveMemoryToFile() {
+    await fetch('/save_json', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            json_data: memories,
+            filename: MEMORY_PATH
+        })
+    });
+}
 
 // -------- ACTUALLY DOING SOMETHING 🔥 --------
 renderMessages();
