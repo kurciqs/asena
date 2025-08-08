@@ -22,6 +22,10 @@ you need to create an src/vrm_models/ folder with an index file models.json insi
 ## python deps
 install whatever server.py imports via pip. 
 
+## ffmpeg
+
+MAKE SURE YOU HAVE FFMPEG INSTALLED AND IN PATH, IF NOT JUST DOWNLOAD THE EXECUTABLE INTO THE SAME FOLDER AS SERVER.PY BUT YOU NEED FFMPEG FOR YOUR LIFE SO ADD IT TO PATH!!!
+
 ## running
 
 WOW! all has been unified into a clean flask app isn't that neat? just type "python server.py". how cool is that?

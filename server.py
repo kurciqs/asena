@@ -15,7 +15,7 @@ SAVE_DIR = "src"
 RHUBARB = "../rhubarb/rhubarb"
 LMS_API = "http://localhost:1234/v1/chat/completions"
 # outsource kokoro to a local stronger machine, improves performance drastically, you could even run the whole server there instead of on the laptop, with that performance kokoro is basically faster than lms. 
-# KOKORO_API = "http://192.168.1.110:8880/dev/captioned_speech"
+#KOKORO_API = "http://192.168.1.110:8880/dev/captioned_speech"
 KOKORO_API = "http://localhost:8880/dev/captioned_speech"
 
 app = Flask(__name__, static_folder="./src/")
@@ -32,7 +32,11 @@ def chat():
 
 @app.route("/tts", methods=["POST"])
 def tts():
-    res = requests.post(KOKORO_API, json=request.json)
+    res = requests.post(KOKORO_API, json=request.json, headers={
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST",
+        "Access-Control-Allow-Headers": "Content-Type",
+    })
     return jsonify(res.json())
 
 @app.route("/")

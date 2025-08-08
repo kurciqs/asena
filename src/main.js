@@ -3,7 +3,7 @@ import * as EMO from "./emotion_classifier.js"
 
 // ------- CONFIGS AND GLOBALS -------
 const AUDIO_FOLDER = "/data/";
-const LIP_SYNC = "dictionary"; // or "dictionary"
+const LIP_SYNC = "rhubarb"; // or "dictionary"
 const MEMORY_PATH = "/data/memory.json"
 let KOKORO_VOICE = "af_heart";
 let CONTEXT_WINDOW_MAX = 4000;
