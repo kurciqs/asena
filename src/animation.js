@@ -1,3 +1,4 @@
+import { LatestLoad, loadAnimationSet, withDeadline } from './asset_loading.js';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -119,138 +120,98 @@ loader.register((parser) => {
 const lookAtTarget = new THREE.Object3D();
 camera.add(lookAtTarget);
 
-function loadAllFBXAnimations(vrm, mixer, animationPath, indexPath) {
+const modelLoads = new LatestLoad();
+let assetState = { loading: false, model: null, requestedModel: null, loadMilliseconds: 0, missingClips: [], error: null };
+async function assetIndex(url) {
+    const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
+    if (!response.ok) throw new Error(`Asset index unavailable (${response.status})`);
+    return response.json();
+}
+
+export async function loadModel(url, name = modelSelect.value) {
+    const isCurrent = modelLoads.begin();
+    const started = performance.now();
+    let candidate = null;
+    stopPerformance();
     animationsLoaded = false;
-    animations = {};
-    currentAnimation = null;
-    animationSelect.innerHTML = '';
+    animationSelect.disabled = true;
+    assetState = { ...assetState, loading: true, requestedModel: name, error: null };
     notifyPlaybackState();
-    fetch(indexPath)
-        .then(response => response.json())
-        .then(animationFiles => {
-            let idleFound = false;
-            animationFiles.forEach(async (file) => {
-                const url = animationPath + file;
-                const clip = await loadMixamoAnimation(url, vrm);
-                const action = mixer.clipAction(clip);
-                const name = file.split('.').slice(0, -1).join('.');
-                animations[name] = action;
-                const option = document.createElement('option');
-                option.value = name;
-                option.textContent = name;
-                animationSelect.appendChild(option);
-                notifyPlaybackState();
-                console.log("LOG: Loaded animation:", name)
-                if (name === 'idle') idleFound = true;
-            });
-            animationSelect.addEventListener('change', playAnimationFromSelect);
-            Promise.all(animationFiles.map(file => {
-                const name = file.split('.').slice(0, -1).join('.');
-                return new Promise(resolve => {
-                    const check = () => {
-                        if (animations[name]) resolve();
-                        else setTimeout(check, 10);
-                    };
-                    check();
-                });
-            })).then(() => {
-                if (idleFound && animations['idle']) {
-                    animationSelect.value = 'idle';
-                    currentAnimation = animations['idle'];
-                    playAnimationFromSelect();
-                }
-                animationsLoaded = true;
-                notifyPlaybackState();
-                console.log("LOG: Starting idle...")
-            });
-        })
+    try {
+        const gltf = await withDeadline(loader.loadAsync(url), 30000, 'Avatar', late => VRMUtils.deepDispose(late.scene));
+        candidate = gltf.userData.vrm;
+        if (!candidate) throw new Error('The selected model is not a VRM avatar');
+        if (!isCurrent()) { VRMUtils.deepDispose(gltf.scene); return; }
+        VRMUtils.removeUnnecessaryVertices(gltf.scene);
+        VRMUtils.combineSkeletons(gltf.scene);
+        VRMUtils.combineMorphs(candidate);
+        VRMUtils.rotateVRM0(candidate);
+        candidate.scene.updateMatrixWorld(true);
+        const mixer = new THREE.AnimationMixer(candidate.scene);
+        const indexed = await assetIndex(ANIMATIONS_INDEX_PATH);
+        const result = await loadAnimationSet(indexed, file => loadMixamoAnimation(ANIMATIONS_PATH + file, candidate));
+        if (!isCurrent()) { VRMUtils.deepDispose(candidate.scene); return; }
+        stopPerformance();
+        currentMixer?.stopAllAction();
+        if (currentVrm) { scene.remove(currentVrm.scene); VRMUtils.deepDispose(currentVrm.scene); }
+        currentVrm = candidate;
+        currentMixer = mixer;
+        animations = Object.fromEntries([...result.clips].map(([key, clip]) => [key, mixer.clipAction(clip)]));
+        currentAnimation = null;
+        animationSelect.replaceChildren();
+        for (const key of Object.keys(animations)) {
+            const option = document.createElement('option'); option.value = key; option.textContent = key;
+            animationSelect.appendChild(option);
+        }
+        if (animations.idle) {
+            animationSelect.value = 'idle';
+            currentAnimation = animations.idle;
+            currentAnimation.play();
+        } else animationSelect.selectedIndex = -1; // Rest pose is safer than looping an arbitrary gesture.
+        candidate.lookAt && (candidate.lookAt.target = lookAtTarget);
+        candidate.scene.traverse(object => { object.frustumCulled = false; if (object.isMesh) object.castShadow = object.receiveShadow = true; });
+        scene.add(candidate.scene);
+        modelSelect.value = name;
+        animationsLoaded = true; // A usable avatar may have only a rest-pose gesture fallback.
+        animationSelect.disabled = !Object.keys(animations).length;
+        assetState = { loading: false, model: name, requestedModel: name,
+            loadMilliseconds: Math.round(performance.now() - started), missingClips: result.missing,
+            error: animations.idle ? null : 'Idle animation unavailable; using the avatar rest pose.' };
+        candidate = null;
+        notifyPlaybackState();
+    } catch (error) {
+        if (candidate) VRMUtils.deepDispose(candidate.scene);
+        if (!isCurrent()) return;
+        animationsLoaded = Boolean(currentVrm);
+        animationSelect.disabled = !Object.keys(animations).length;
+        if (assetState.model) modelSelect.value = assetState.model;
+        assetState = { ...assetState, loading: false, loadMilliseconds: Math.round(performance.now() - started), error: error.message };
+        notifyPlaybackState();
+    }
 }
 
-function loadModel(url) {
-
-    loader.load(
-
-        url,
-
-        (gltf) => {
-
-            const vrm = gltf.userData.vrm;
-            animationsLoaded = false;
-            // calling these functions greatly improves the performance
-            VRMUtils.removeUnnecessaryVertices(gltf.scene);
-            VRMUtils.combineSkeletons(gltf.scene);
-            VRMUtils.combineMorphs(vrm);
-
-            if (currentVrm) {
-
-                scene.remove(currentVrm.scene);
-                VRMUtils.deepDispose(currentVrm.scene);
-
-            }
-
-            // Disable frustum culling
-            vrm.scene.traverse((obj) => {
-                obj.frustumCulled = false;
-                if (obj.isMesh) {
-                    obj.castShadow = true;
-                    obj.receiveShadow = true;
-                }
-            });
-
-            currentVrm = vrm;
-            currentMixer = new THREE.AnimationMixer(currentVrm.scene);
-            scene.add(vrm.scene);
-
-            currentVrm.lookAt.target = lookAtTarget;
-
-            loadAllFBXAnimations(currentVrm, currentMixer, ANIMATIONS_PATH, ANIMATIONS_INDEX_PATH);
-
-            // rotate if the VRM is VRM0.0
-            VRMUtils.rotateVRM0(vrm);
-
-            console.log(vrm);
-        },
-
-        (progress) => console.log('Loading model...', 100.0 * (progress.loaded / progress.total), '%'),
-
-        (error) => console.error(error)
-
-    );
-
-}
-
-async function registerVRMModels(modelPath, indexPath) {
-    await fetch(indexPath)
-        .then(response => response.json())
-        .then(modelFiles => {
-            modelFiles.forEach(async (file) => {
-                const url = modelPath + file;
-                const name = file.split('.').slice(0, -1).join('.');
-                vrmModels[name] = url;
-                const option = document.createElement('option');
-                option.value = name;
-                option.textContent = name;
-                modelSelect.appendChild(option);
-
-                console.log("LOG: Registered model:", name)
-                // load animations with base dust loaded
-                if (name === "asena_sfw") {
-                    loadModel(url);
-                    modelSelect.value = "asena_sfw"
-                }
-            });
-        })
-}
-
+let rendererStarted = false;
 export async function loadThreeVRM() {
-    await registerVRMModels(MODELS_PATH, MODELS_INDEX_PATH);
-    modelSelect.addEventListener('change', function () {
-        console.log("LOG: Loading model", vrmModels[modelSelect.value], modelSelect.value);
-        loadModel(vrmModels[modelSelect.value]);
-    });
-    // initial three.js render, then it loops with requestAnimationFrame()
-    animate();
+    if (!rendererStarted) { rendererStarted = true; animate(); }
+    try {
+        const files = await assetIndex(MODELS_INDEX_PATH);
+        if (!Array.isArray(files) || !files.length || !files.every(file => typeof file === 'string' && /^[\w .-]+\.vrm$/i.test(file))) {
+            throw new Error('No valid avatars in the model index');
+        }
+        modelSelect.replaceChildren();
+        for (const file of files) {
+            const name = file.replace(/\.vrm$/i, '');
+            vrmModels[name] = MODELS_PATH + file;
+            const option = document.createElement('option'); option.value = name; option.textContent = name;
+            modelSelect.appendChild(option);
+        }
+        const preferred = vrmModels.asena_sfw ? 'asena_sfw' : Object.keys(vrmModels)[0];
+        modelSelect.value = preferred;
+        await loadModel(vrmModels[preferred], preferred);
+    } catch (error) { assetState.error = error.message; notifyPlaybackState(); }
 }
+modelSelect.addEventListener('change', () => loadModel(vrmModels[modelSelect.value], modelSelect.value));
+animationSelect.addEventListener('change', playAnimationFromSelect);
 
 // insane blinking system i know 
 async function resetBlink() {
@@ -338,7 +299,7 @@ function animate() {
 }
 
 export function getPlaybackState() {
-    return { ready: animationsLoaded, clips: Object.keys(animations),
+    return { ...assetState, ready: animationsLoaded, clips: Object.keys(animations),
         currentClip: Object.entries(animations).find(([, action]) => action === currentAnimation)?.[0] ?? null };
 }
 

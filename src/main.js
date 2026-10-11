@@ -577,6 +577,11 @@ companionForm.addEventListener('submit', (event) => {
     applyCompanionProfile(Object.fromEntries(new FormData(companionForm)));
 });
 renderMessages();
-if (replay) ANI.onPlaybackStateChange(() => inspectReplay({}));
+ANI.onPlaybackStateChange(state => {
+    if (state.loading) turnController.stop();
+    document.getElementById('avatar-status').textContent = state.loading ? 'Loading avatar…' :
+        state.error || (state.missingClips.length ? `${state.missingClips.length} optional animations unavailable` : 'Avatar ready');
+    inspectReplay({});
+});
 ANI.loadThreeVRM();
 voiceSelect.addEventListener('change', changeVoice);
