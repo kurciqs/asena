@@ -132,6 +132,11 @@ summary { cursor: pointer; font-size: 12px; font-weight: 600; }
 .danger-button { color: #8a424c; }
 #tools-backdrop { position: fixed; inset: 0; z-index: 19; background: rgba(38,32,66,.25); }
 #companion-dialog { width: min(560px,calc(100vw - 32px)); max-height: calc(100dvh - 32px); padding: 24px; border: 1px solid rgba(255,255,255,.8); border-radius: 20px; background: #f7f7fd; color: var(--ink); overflow-y: auto; box-shadow: 0 18px 60px #292b4555; }
+#companion-dialog { scrollbar-width: thin; scrollbar-color: #c4bedb transparent; }
+#companion-dialog::-webkit-scrollbar { width: 6px; }
+#companion-dialog::-webkit-scrollbar-track { background: transparent; margin-block: 16px; }
+#companion-dialog::-webkit-scrollbar-thumb { background: #c4bedb; border-radius: 10px; }
+#companion-dialog::-webkit-scrollbar-thumb:hover { background: #aaa1c9; }
 #companion-dialog::backdrop { background: rgba(38,32,66,.4); backdrop-filter: blur(4px); }
 #companion-form { display: flex; flex-direction: column; gap: 14px; }
 .companion-heading, .companion-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
