@@ -120,7 +120,7 @@ export class ReplaySession {
         this.active = structuredClone(this.turns[this.cursor++]);
         if (this.scenario.kind === 'recall') {
             const memory = history.find(message => message.role === 'system' &&
-                message.content.startsWith('Previously remembered information:\n'))?.content ?? '';
+                message.content.includes('Previously remembered information:\n'))?.content ?? '';
             if (!memory.split('\n').some(line => line === `- ${this.fixture.expectedMemory}`)) {
                 this.active = structuredClone(this.fixture.recall.withoutMemory);
             }

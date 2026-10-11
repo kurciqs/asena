@@ -1,3 +1,4 @@
+import { normalizeBudget, packConversation } from './context_budget.js';
 import { buildExpressionTracks } from './expression_tracks.js';
 import { requestJSON } from './service_client.js';
 import { loadAudioMetadata, repairWavHeader } from './audio.js';
@@ -11,7 +12,9 @@ import { createJsonViewer } from './json_viewer.js';
 // The server owns the mode. Invalid/missing configuration never defaults to live.
 const runtimeResponse = await fetch('/runtime', { cache: 'no-store' });
 if (!runtimeResponse.ok) throw new Error('Runtime configuration unavailable. Restart the website server.');
-const RUNTIME_MODE = readRuntimeMode(await runtimeResponse.json());
+const runtimeConfig = await runtimeResponse.json();
+const RUNTIME_MODE = readRuntimeMode(runtimeConfig);
+const contextBudget = normalizeBudget(runtimeConfig.budget);
 let replay = null;
 let profileStorage;
 if (RUNTIME_MODE === 'replay') {
@@ -24,8 +27,9 @@ if (RUNTIME_MODE === 'replay') {
 // ------- CONFIGS AND GLOBALS -------
 const LIP_SYNC = "rhubarb"; // or "dictionary"
 let KOKORO_VOICE = "af_heart";
-let CONTEXT_WINDOW_MAX = 4000;
-let CONTEXT_WINDOW_CURRENT = 0;
+let dialogueBudgetStats = null;
+let lastDialogueUsage = null;
+let lastExtractionUsage = null;
 let companionProfile = replay && !profileStorage.getItem(COMPANION_STORAGE_KEY) ?
     normalizeCompanionProfile(replay.fixture.profile) : loadCompanionProfile(profileStorage);
 
@@ -82,7 +86,8 @@ function inspectReplay(update) {
         ...replayInspection,
         animation: ANI.getPlaybackState(),
         testMemories: memories,
-        activeMemoryPrompt: message_history[1].content
+        activeMemoryPrompt: dialogueBudgetStats?.memoryPrompt ?? message_history[1].content,
+        context: { ...dialogueBudgetStats, dialogueUsage:lastDialogueUsage, extractionUsage:lastExtractionUsage }
     });
 }
 
@@ -114,6 +119,7 @@ function applyCompanionProfile(value) {
     }
     fillCompanionForm();
     renderCompanionProfile();
+    renderContextBudget();
 }
 
 function changeVoice() {
@@ -146,7 +152,18 @@ function renderMessages() {
         msgDiv.textContent = msg.content;
         chatContainer.appendChild(msgDiv);
     }
-    contextWindowSize.innerHTML = Math.round(CONTEXT_WINDOW_CURRENT / CONTEXT_WINDOW_MAX * 100);
+    renderContextBudget();
+}
+
+function previewBudget() {
+    return packConversation({ systemPrompt:message_history[0].content, memories, dialogue:message_history.slice(2), config:contextBudget });
+}
+function renderContextBudget() {
+    try {
+        const stats = previewBudget().stats;
+        contextWindowSize.textContent = `Context: ${stats.promptBound}/${stats.capacity} budget bound · ${stats.outputReserve} reserved for reply · ${stats.omittedMessages} messages omitted`;
+        contextWindowSize.title = `Conservative UTF-8 byte bound; actual prompt tokens from the last dialogue request: ${lastDialogueUsage?.prompt_tokens ?? 'not measured'}. Extraction usage is separate.`;
+    } catch (error) { contextWindowSize.textContent = error.message; }
 }
 
 // ------- CHATBOT LOGIC -------
@@ -181,8 +198,11 @@ let message_history = [
 // ------- HELPER FUNCTIONS -------
 async function chat(history, purpose = 'dialogue', turn = null) {
     turn?.assertCurrent();
+    const packed = packConversation({ systemPrompt:history[0].content, memories, dialogue:history.slice(2), config:contextBudget });
+    if (purpose === 'dialogue') dialogueBudgetStats = packed.stats;
+    renderContextBudget();
     if (replay) {
-        const reply = replay.reply(history, purpose);
+        const reply = replay.reply(packed.messages, purpose);
         inspectReplay(purpose === 'memory' ? { memoryExtraction: reply } :
             { scene: replay.active.label, rawReply: reply, phase: 'text ready' });
         return reply;
@@ -194,7 +214,8 @@ async function chat(history, purpose = 'dialogue', turn = null) {
         body: JSON.stringify({
             model: 'open-hermes-2.5-mistral-7b-quantized',
             // model: 'tiger-gemma-9b-v1',
-            messages: history,
+            messages: packed.messages,
+            max_tokens: packed.maxTokens,
             temperature: 0.8,
             top_p: 0.95
         })
@@ -203,7 +224,9 @@ async function chat(history, purpose = 'dialogue', turn = null) {
     turn?.assertCurrent();
     const reply = chatData.choices?.[0]?.message?.content;
     if (typeof reply !== 'string' || !reply.trim()) throw new Error('No usable reply was returned. Retry when ready.');
-    CONTEXT_WINDOW_CURRENT = chatData.usage.total_tokens;
+    const usage = chatData.usage && typeof chatData.usage === 'object' ? chatData.usage : null;
+    if (purpose === 'dialogue') lastDialogueUsage = usage;
+    else lastExtractionUsage = usage;
 
     renderMessages();
 

@@ -10,6 +10,7 @@ import subprocess
 import posixpath
 import threading
 ALIGNMENT_LOCK = threading.Lock()
+import context_budget as budget
 import private_storage as storage
 from pathlib import Path
 from service_contracts import ServiceError, require_payload, proxy_json, validate_chat_response, validate_tts_response, validate_visemes
@@ -69,7 +70,7 @@ def enforce_replay_boundary():
 
 @app.route("/runtime")
 def runtime():
-    return jsonify({"mode": RUNTIME_MODE})
+    return jsonify({"mode": RUNTIME_MODE, "budget": budget.public_config()})
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -77,7 +78,7 @@ def page_not_found(e):
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    payload = require_payload(request.get_json(silent=True), 'chat')
+    payload = budget.enforce_budget(require_payload(request.get_json(silent=True), 'chat'))
     return jsonify(validate_chat_response(proxy_json(LMS_API, payload, 'LM Studio')))
 
 @app.route("/tts", methods=["POST"])

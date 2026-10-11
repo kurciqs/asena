@@ -33,7 +33,8 @@ class ReplayBoundaryTests(unittest.TestCase):
                     self.assertEqual(self.client.get(path).status_code, 403)
 
     def test_runtime_and_fixture_assets_are_available(self):
-        self.assertEqual(self.client.get("/runtime").json, {"mode": "replay"})
+        self.assertEqual(self.client.get("/runtime").json["mode"], "replay")
+        self.assertEqual(self.client.get("/runtime").json["budget"], server.budget.public_config())
         for path in ("/", "/replay/benchmark.json", "/replay/silence.wav"):
             with self.subTest(path=path):
                 response = self.client.get(path)
@@ -49,7 +50,7 @@ class ReplayBoundaryTests(unittest.TestCase):
         with patch.object(server, "RUNTIME_MODE", "live"), patch.object(server, "proxy_json", return_value=result) as proxy:
             response = self.client.post("/chat", json=payload)
             self.assertEqual(response.status_code, 200)
-            proxy.assert_called_once_with(server.LMS_API, payload, "LM Studio")
+            proxy.assert_called_once_with(server.LMS_API, {**payload, "max_tokens": server.budget.OUTPUT_RESERVE}, "LM Studio")
 
 
 if __name__ == "__main__":
