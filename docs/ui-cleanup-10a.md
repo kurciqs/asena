@@ -1,6 +1,6 @@
 # TODO 10a — UI cleanup
 
-Implemented 11 October 2026. Jakub selected **draggable chat with Settings and Debug in one switchable side panel**, retaining the lavender/glass appearance. Manual design acceptance remains pending in TODO.md.
+Implemented and accepted by Jakub on 11 October 2026. Jakub selected **draggable chat with Settings and Debug in one switchable side panel**, retaining the lavender/glass appearance. TODO 10a is complete.
 
 ## What changed
 
@@ -51,4 +51,4 @@ No LLM, Kokoro, Docker workload or Rhubarb process was started. The temporary fi
 - Preview gestures, play the introduction, then inspect and collapse larger JSON branches.
 - Check the drawer and chat on a narrow window or phone layout.
 
-Leave TODO 10a unchecked until this review is accepted. Further visual adjustments can follow that review without changing the companion backend.
+Jakub accepted this review on 11 October 2026 after refinements to dropdown arrow spacing, glass transparency and scrollbar visibility. Scrollbars are hidden throughout the UI; scrolling remains available. The screenshots above show the initial implementation before those refinements.
