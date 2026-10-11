@@ -389,8 +389,8 @@ async function handleTextResponse() {
             turn.assertCurrent();
             const visemes = await getVisemes(timestamps, turn);
             turn.assertCurrent();
-            const emotions = EMO.getEmotions(timestamps, parsedReply.emotions, parsedReply.text);
-            const actions = EMO.getActions(timestamps, parsedReply.actions, parsedReply.text);
+            const emotions = EMO.getEmotions(timestamps, parsedReply.emotions, parsedReply.text, audio.duration);
+            const actions = EMO.getActions(timestamps, parsedReply.actions, parsedReply.text, new Set(ANI.getPlaybackState().clips));
             inspectReplay({ phase: 'performance prepared', spokenText: parsedReply.text, visemes, emotions, actions });
             turn.phase('speaking');
             await playPerformance({ audio, visemes, emotions, actions }, turn);

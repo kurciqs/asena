@@ -43,8 +43,8 @@ test('five benchmark replies use existing parsing and performance mapping withou
             // Kokoro returns punctuation as separate tokens, unlike the synthetic fixture.
             assert.equal(parsed.text.replace(/\s/g, ''), speech.timestamps.map(item => item.word).join(''));
             if (speech.spokenText) assert.equal(parsed.text, speech.spokenText);
-            actions.push(...getActions(speech.timestamps, parsed.actions).map(item => item.value));
-            assert.ok(Array.isArray(getEmotions(speech.timestamps, parsed.emotions)));
+            actions.push(...getActions(speech.timestamps, parsed.actions, parsed.text).map(item => item.value));
+            assert.ok(Array.isArray(getEmotions(speech.timestamps, parsed.emotions, parsed.text)));
             assert.ok(session.visemes().length > 0);
         }
         assert.deepEqual(actions, ['wave', 'head_shake', 'head_nod', 'shrugging']);
