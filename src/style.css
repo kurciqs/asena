@@ -442,3 +442,11 @@ body {
     .replay-mode #utility-panels { top: 12px; right: 12px; bottom: 12px; width: min(372px, calc(100vw - 24px)); }
     #replay-panel { max-height: 210px; padding: 12px; }
 }
+
+#debug-div { max-width: min(55vw, 700px); pointer-events: none; }
+#context-size { margin: 0; font: 12px/1.4 system-ui, sans-serif; }
+#speech-warning { margin: 0 20px 8px; font: 12px/1.4 system-ui, sans-serif; }
+#speech-warning:empty { display: none; }
+
+#debug-div { left: 20px; right: auto; bottom: 12px; margin: 0; padding: 6px 9px; border-radius: 6px; background: rgba(255,255,255,0.9); z-index: 3; }
+#avatar-status { color: var(--soft-color); font: 12px/1.4 system-ui, sans-serif; }

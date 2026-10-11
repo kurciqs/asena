@@ -1,4 +1,5 @@
-import { normalizeBudget, packConversation } from './context_budget.js';
+import { runtimeConfig, RUNTIME_MODE, contextBudget, assets } from './runtime_config.js';
+import { packConversation } from './context_budget.js';
 import { buildExpressionTracks } from './expression_tracks.js';
 import { requestJSON } from './service_client.js';
 import { loadAudioMetadata, repairWavHeader } from './audio.js';
@@ -6,15 +7,9 @@ import { TurnController } from './turn_controller.js';
 import * as ANI from './animation.js'
 import * as EMO from "./emotion_classifier.js"
 import { CLOSENESS, COMPANION_STORAGE_KEY, DEFAULT_COMPANION_PROFILE, buildCompanionPrompt, loadCompanionProfile, normalizeCompanionProfile, saveCompanionProfile } from './companion.js';
-import { REPLAY_MEMORY_KEY, ReplaySession, loadFixtureAudio, loadReplayMemories, readRuntimeMode, replayProfileStorage, saveReplayMemories } from './replay.js';
+import { REPLAY_MEMORY_KEY, ReplaySession, loadFixtureAudio, loadReplayMemories, replayProfileStorage, saveReplayMemories } from './replay.js';
 import { createJsonViewer } from './json_viewer.js';
 
-// The server owns the mode. Invalid/missing configuration never defaults to live.
-const runtimeResponse = await fetch('/runtime', { cache: 'no-store' });
-if (!runtimeResponse.ok) throw new Error('Runtime configuration unavailable. Restart the website server.');
-const runtimeConfig = await runtimeResponse.json();
-const RUNTIME_MODE = readRuntimeMode(runtimeConfig);
-const contextBudget = normalizeBudget(runtimeConfig.budget);
 let replay = null;
 let profileStorage;
 if (RUNTIME_MODE === 'replay') {
@@ -25,8 +20,8 @@ if (RUNTIME_MODE === 'replay') {
 }
 
 // ------- CONFIGS AND GLOBALS -------
-const LIP_SYNC = "rhubarb"; // or "dictionary"
-let KOKORO_VOICE = "af_heart";
+const LIP_SYNC = runtimeConfig.lipSync;
+let KOKORO_VOICE = runtimeConfig.voice;
 let dialogueBudgetStats = null;
 let lastDialogueUsage = null;
 let lastExtractionUsage = null;
@@ -35,9 +30,9 @@ let companionProfile = replay && !profileStorage.getItem(COMPANION_STORAGE_KEY) 
 
 // ------- DICTIONARY -------
 let cmudict = {};
-if (!replay) {
-    const cmuResponse = await fetch('/dictionary/cmudict.json');
-    cmudict = await cmuResponse.json();
+if (!replay && LIP_SYNC === 'dictionary') {
+    try { cmudict = await requestJSON(assets.dictionary, { timeoutMs:8000 }); }
+    catch { /* Missing optional dictionary leaves closed-mouth audio fallback. */ }
 }
 // gpt slop conversion i just don't care 
 const phonemeToViseme = {
@@ -167,16 +162,22 @@ function renderContextBudget() {
 }
 
 // ------- CHATBOT LOGIC -------
-let spRequest = await fetch("/system_prompt.txt");
+let spRequest = await fetch(assets.systemPrompt);
+if (!spRequest.ok) throw new Error('Companion prompt is missing. Run the setup check.');
 let systemPrompt = await spRequest.text();
 let memories = [];
 let memoryData;
+let memoryLoadError = null;
 if (replay) {
     memoryData = loadReplayMemories(localStorage);
 } else {
-    try { memoryData = (await requestJSON('/api/memories', { timeoutMs: 8000 })).memories; }
-    catch (error) { memoryData = []; document.getElementById('turn-status').textContent = error.message; }
-    if (!Array.isArray(memoryData)) memoryData = [];
+    try {
+        memoryData = (await requestJSON('/api/memories', { timeoutMs: 8000 })).memories;
+        if (!Array.isArray(memoryData) || !memoryData.every(memory => typeof memory === 'string')) throw new Error('Memory response is invalid. Existing data has been preserved.');
+    } catch (error) {
+        memoryData = []; memoryLoadError = error.message; saveButton.disabled = true;
+        document.getElementById('turn-status').textContent = `${error.message} Save is disabled until memory loads correctly.`;
+    }
 }
 let memoryPrompt = "";
 memoryData.forEach((mem) => {
@@ -212,8 +213,7 @@ async function chat(history, purpose = 'dialogue', turn = null) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            model: 'open-hermes-2.5-mistral-7b-quantized',
-            // model: 'tiger-gemma-9b-v1',
+            model: runtimeConfig.chatModel,
             messages: packed.messages,
             max_tokens: packed.maxTokens,
             temperature: 0.8,
@@ -412,7 +412,7 @@ async function handleTextResponse({ reuseUser = false } = {}) {
             turn.assertCurrent();
             inspectReplay({ phase: 'playback ended' });
             if (replay) {
-                replayMessage(replay.finished ? 'Showcase finished. Save test memory, then choose the recall scene.' :
+                replayMessage(replay.finished ? (replay.scenario.kind === 'benchmark' ? 'Showcase finished. Save test memory, then choose the recall scene.' : 'Scene finished. Restart it or choose another scene.') :
                     `Scene finished. Next: ${replay.turns[replay.cursor].label}.`);
                 textInput.value = replay.nextPrompt;
             }
@@ -584,6 +584,7 @@ async function saveMemoryToFile() {
         inspectReplay({ phase: 'test memory saved' });
         return;
     }
+    if (memoryLoadError) throw new Error('Save is disabled because memories could not load. Repair or reload them before saving.');
     await requestJSON('/api/memories', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -655,4 +656,8 @@ ANI.onPlaybackStateChange(state => {
     inspectReplay({});
 });
 ANI.loadThreeVRM();
+if (![...voiceSelect.options].some(option => option.value === KOKORO_VOICE)) {
+    voiceSelect.add(new Option(KOKORO_VOICE,KOKORO_VOICE));
+}
+voiceSelect.value = KOKORO_VOICE;
 voiceSelect.addEventListener('change', changeVoice);

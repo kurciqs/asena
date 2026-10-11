@@ -7,8 +7,7 @@ import time
 import requests
 
 MAX_RESPONSE_BYTES = 24 * 1024 * 1024
-NETWORK_TIMEOUT = (3, 30)
-NETWORK_DEADLINE = 90
+from config import NETWORK_TIMEOUT, NETWORK_DEADLINE
 
 
 class ServiceError(Exception):

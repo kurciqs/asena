@@ -4,7 +4,6 @@ mimetypes.add_type("text/css", ".css")
 
 from flask import Flask, request, jsonify, send_from_directory, abort
 import requests
-import os
 import json
 import subprocess
 import posixpath
@@ -15,16 +14,7 @@ import private_storage as storage
 from pathlib import Path
 from service_contracts import ServiceError, require_payload, proxy_json, validate_chat_response, validate_tts_response, validate_visemes
 
-STATIC_DIR = Path(__file__).resolve().parent / "src"
-RHUBARB = "../rhubarb/rhubarb"
-LMS_API = "http://localhost:1234/v1/chat/completions"
-# outsource kokoro to a local stronger machine, improves performance drastically, you could even run the whole server there instead of on the laptop, with that performance kokoro is basically faster than lms. 
-#KOKORO_API = "http://192.168.1.110:8880/dev/captioned_speech"
-KOKORO_API = "http://localhost:8880/dev/captioned_speech"
-
-RUNTIME_MODE = os.environ.get("ASENA_MODE", "live")
-if RUNTIME_MODE not in ("live", "replay"):
-    raise RuntimeError("ASENA_MODE must be live or replay; refusing an ambiguous launch")
+from config import STATIC_DIR, RHUBARB, FFMPEG, LMS_API, KOKORO_API, RUNTIME_MODE, HOST, PORT, PROCESS_TIMEOUT, CHAT_MODEL, VOICE, LIP_SYNC, ASSETS
 
 app = Flask(__name__, static_folder=None)
 app.config["MAX_CONTENT_LENGTH"] = 24 * 1024 * 1024
@@ -70,7 +60,7 @@ def enforce_replay_boundary():
 
 @app.route("/runtime")
 def runtime():
-    return jsonify({"mode": RUNTIME_MODE, "budget": budget.public_config()})
+    return jsonify({"mode": RUNTIME_MODE, "budget": budget.public_config(), "chatModel": CHAT_MODEL, "voice": VOICE, "lipSync": LIP_SYNC, "assets": ASSETS})
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -97,7 +87,8 @@ def static_files(path):
     if normalized == 'data' or normalized.startswith(('data/', '.runtime/')):
         return jsonify({'error': 'Private data is not a static resource.'}), 403
     resolved = (STATIC_DIR / relative).resolve()
-    if resolved.is_relative_to(STATIC_DIR) and resolved.relative_to(STATIC_DIR).parts[0].lower() == 'data':
+    resolved_parts = resolved.relative_to(STATIC_DIR).parts if resolved.is_relative_to(STATIC_DIR) else ()
+    if resolved_parts and resolved_parts[0].lower() == 'data':
         return jsonify({'error': 'Private data is not a static resource.'}), 403
     if not resolved.is_relative_to(STATIC_DIR) or any(part.startswith('.') for part in Path(relative).parts):
         abort(404)
@@ -145,13 +136,13 @@ def get_visemes():
         raise ServiceError('Audio alignment is busy. Retry shortly, or use audio without lip sync.',503)
     try:
         result = subprocess.run([
-            'ffmpeg', '-threads', '1', '-nostdin', '-y', '-i', str(filepath),
+            FFMPEG, '-threads', '1', '-nostdin', '-y', '-i', str(filepath),
             '-ac', '1', '-ar', '44100', '-sample_fmt', 's16', str(conv_path)
-        ], capture_output=True, text=True, timeout=30)
+        ], capture_output=True, text=True, timeout=PROCESS_TIMEOUT)
         if result.returncode != 0:
             raise ServiceError('Audio conversion failed. Check the WAV and ffmpeg, then retry.')
         result = subprocess.run([RHUBARB, str(conv_path), '-f', 'json'],
-                                capture_output=True, text=True, timeout=30)
+                                capture_output=True, text=True, timeout=PROCESS_TIMEOUT)
         if result.returncode != 0:
             raise ServiceError('Rhubarb alignment failed. Check the tool, then retry.')
         try:
@@ -171,6 +162,5 @@ def private_response_headers(response):
     response.headers['X-Content-Type-Options'] = 'nosniff'
     return response
 
-if __name__ == "__main__":    
-    app.run(host="127.0.0.1", port=int(os.environ.get("ASENA_PORT", "3000")),
-            debug=RUNTIME_MODE == "live", use_reloader=RUNTIME_MODE == "live")
+if __name__ == '__main__':
+    app.run(host=HOST, port=PORT, debug=False, use_reloader=False)

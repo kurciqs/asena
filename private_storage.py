@@ -10,8 +10,7 @@ import time
 import uuid
 from service_contracts import ServiceError, decode_wav
 
-ROOT = Path(__file__).resolve().parent
-DATA_DIR = ROOT / '.runtime'
+from config import ROOT, DATA_DIR
 LEGACY_MEMORY = ROOT / 'src/data/memory.json'
 LOCK = threading.RLock()
 MAX_MEMORY_BYTES = 512 * 1024

@@ -1,39 +1,36 @@
-# asena
+# Asena
 
-it's a working progress, but i've decided to commit the first STABLE version. it's basically an lmstudio -> kokoro tts -> rhubarb/dictionary -> three.js wrapper that is supposed to mimic grok [ani](https://www.reddit.com/r/grok/comments/1m7yg3o/just_tried_groks_new_ai_companion_ani_its_kinda/). i know my chances are slim but i'll try anyway. the main bottleneck at the moment is my local computing power. it's much better to run this on a computer with a gpu and more ram, host, and then use asena as a website. if you do that on your own network, the whole thing stays entirely local and private.
+Asena is a customizable local companion: LM Studio dialogue → Kokoro speech → Rhubarb mouth cues → a Three.js/VRM avatar. Choose a name, personality, relationship notes, preferences and friendly / affectionate / intimate closeness in **customize**. Those settings become model instructions; the selected model determines their quality.
 
-problems aside, if this works and is sufficiently fast, you can only imagine the power. the fact that it's running locally means that nobody is datamining you, the fact that you get to pick your llm means you can go as wild as you want with requests. plus it's entirely free and open source so you can add features or play around with it.
+The current milestone stabilizes the existing companion loop. Recorded replay works without loading AI models. Live Qwen dialogue and the combined workload still need a separately prepared test on the laptop. Streaming, an audio-clock scheduler, natural motion and long-term memory improvements remain in [TODO.md](TODO.md). See the [stabilization review](docs/stabilization-02-09.md) for changes and limitations.
 
-i think i'm pretty happy with how far i've come, there's not much else i want to add, so i'm calling this commit the "final" version until i get new ideas.
+## Start safely
 
-# installation
+Python 3.12 is the tested baseline. From the checkout:
 
-read the installation.md file.
+```sh
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python scripts/check_setup.py --mode replay
+ASENA_MODE=replay ASENA_PORT=3001 .venv/bin/python server.py
+```
 
-# offline replay
+Open [Asena](http://127.0.0.1:3001/). This starts only the website. The replay banner says **AI services blocked**. Five scripted scenes use saved Kokoro speech, existing gestures, and a test preference recalled after Save and reload. Stop cancels the turn; the collapsible inspector exposes its data. Test profile/memory stay separate from live data.
 
-To test the companion without LM Studio, Kokoro, Docker, or Rhubarb running, start `ASENA_MODE=replay ASENA_PORT=3001 python3 server.py` and open [the replay website](http://127.0.0.1:3001/). It plays five scripted benchmark scenes with saved Kokoro speech and Rhubarb mouth cues, and offers service-failure fixtures and isolated test memory. This mode tests the current pipeline; live model behavior remains unevaluated. See [replay instructions](docs/replay-mode.md).
+Three.js, VRM libraries and the font currently use CDN resources, so internet or previously cached resources are needed. “Offline replay” means no AI-service calls, not a fully disconnected browser. Frontend package URLs are exactly pinned; full vendoring has not been selected.
 
-# companion settings
+## Setup and development
 
-click **customize** in the chat header to choose your companion's name, personality, and how you want to relate. closeness can be friendly, affectionate, or intimate; you can also write your own relationship notes, preferences, and limits. settings are saved in your browser and included in the language model's instructions for the next reply. changing them keeps your current conversation, and reset restores the default profile. the model you run still determines how well the character follows these settings.
+- [Installation and configuration](INSTALLATION.md): replay, manually prepared live services, environment variables, verification.
+- [Avatar and animation assets](docs/assets.md): included avatar, Mixamo export/retargeting, missing-asset fallback.
+- [Replay guide](docs/replay-mode.md): scenes, inspection, failures, synthetic memory and recordings.
+- [Backlog](TODO.md), [architecture review](docs/architecture-health-check-2026-10-11.md), [benchmark](docs/companion-benchmark.md).
+- [Runtime lock](runtime-lock.json): dependency/backend versions and model file provenance. Runtime inspection records are snapshots, not live performance guarantees.
 
-# models and animations
+Memory remains a list of strings with manual Save. Live memory and temporary audio now live under ignored `.runtime/`, outside public assets. Existing local data has been preserved. Back up that directory yourself. Replay fixtures are public synthetic examples; do not add personal recordings there. Earlier Git history may contain the formerly tracked memory file.
 
-i have created the asena_sfw.vrm model myself with vroid studio so i permit all use i don't care what you do with it. it's also really easy to create models with vroid yourself. i just can't upload the mixamo animations because they are under the adobe license. in the animations.json file i have listed a few that you should get, they're entirely free and look really good: https://www.mixamo.com/. just type the name of the animation, download, put into src/animations/. if the model tries to call an animation that doesn't exist, the program will just ignore that so all you really need is an idle animation, because that one is force loaded and always running in the background.
+The website binds to `127.0.0.1`, rejects foreign origins, and does not support remote binding. If you later expose it remotely, add authentication/TLS deliberately. Configuring an inference endpoint on another private computer does not expose the website itself. Opening the site never starts LM Studio, Docker or Kokoro.
 
-# current issues
+The included `asena_sfw.vrm` is the author's VRoid Studio model, permitted for use by the project author. Mixamo FBX files are user-supplied and are not redistributed in this repository.
 
-i'm having trouble getting the llms to consistently output good action and emotion tags. they keep inventing new tags or keep reusing the same ones when it doesn't make sense. it's probably because i'm working with models of room temp iq but i just don't have the computing power for more. i'll try to prompt bully them into getting better or consider running a more advanced model OR maybe write a manual emotion classifier but that feels really robotic, i've tried it. that's what i'm working on in the emotion_classifier.js file, but i'm okay with the model deciding the tags itself. a 
-
-i also have to wait at least half a minute for longer responses, where most of the time is taken up by text-to-speech generation and it makes debugging and playtesting a pain.
-
-# todo
-
-- [ ] maybe get the mixamo links in the readme or in installation because i am so generous
-
-# img
-
-![asena in action1](res/image.png)
-![asena in action2](res/image2.png)
-![asena in action3](res/image3.png)
+![Asena](res/image.png)

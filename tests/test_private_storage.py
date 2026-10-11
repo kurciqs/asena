@@ -69,7 +69,7 @@ class PrivateStorageTests(unittest.TestCase):
         self.assertFalse((storage.DATA_DIR/'audio'/audio_id).exists())
 
     def test_private_static_routes_foreign_origins_and_rebinding_hosts_are_blocked(self):
-        for path in ('/data/memory.json','/src/data/memory.json','/DATA/memory.json','/.runtime/memory.json','/../server.py'):
+        for path in ('/data/memory.json','/src/data/memory.json','/DATA/memory.json','/.runtime/memory.json','/../server.py','/src/','/data'):
             response=self.client.get(path);self.assertIn(response.status_code,(403,404));response.close()
         with patch.object(storage,'read_memories',side_effect=AssertionError('private read')):
             for headers in ({'Origin':'https://example.com'},{'Host':'evil.example:3001'},{'Sec-Fetch-Site':'cross-site'}):

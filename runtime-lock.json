@@ -1,0 +1,14 @@
+{
+  "recorded": "2026-10-11",
+  "python": "3.12.9",
+  "node_tests": "23.9.0",
+  "browser": {"three": "0.176.0", "fflate": "0.7.4", "@pixiv/three-vrm": "3.5.5"},
+  "live_backends": {
+    "lm_studio": {"version": "0.4.16", "runtime_llama_cpp": "2.25.2", "runtime_mlx": "1.10.1", "inference_validated": false},
+    "chat_model": {"key": "qwen3.5-2b", "repository": "unsloth/Qwen3.5-2B-GGUF", "revision": "f6d5376be1edb4d416d56da11e5397a961aca8ae", "file": "Qwen3.5-2B-Q4_K_M.gguf", "bytes": 1280835840, "sha256": "aaf42c8b7c3cab2bf3d69c355048d4a0ee9973d48f16c731c0520ee914699223", "inference_validated": false},
+    "kokoro": {"image": "ghcr.io/remsky/kokoro-fastapi-cpu:v0.9.0", "platform": "linux/arm64", "manifest_digest": "sha256:ee3111d6a2c903ed62f3b4fa19543c6901205ed39fce3c177e895b34a8386b9c", "arm64_digest": "sha256:73940a712af75ff5f2558e5aafe71624b03bbd64c9dc60061794ae468969cc20", "recorded_fixture_voice": "af_heart", "combined_live_pipeline_validated": false},
+    "rhubarb": "1.14.0",
+    "ffmpeg": "7.1.1"
+  },
+  "note": "Live version records come from the documented inventory/download/recording runs. This lock starts nothing; fixture tests do not establish live model compatibility or speed. Frontend CDN imports are pinned but not vendored."
+}

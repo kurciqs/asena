@@ -13,7 +13,12 @@ export function loadMixamoAnimation( url, vrm ) {
 
 	const loader = new FBXLoader(); // A loader which loads FBX
 	return loader.loadAsync( url ).then( ( asset ) => {
-		const clip = asset.animations[0]; // extract the AnimationClip
+		const clip = asset.animations[0];
+        const hips = asset.getObjectByName('mixamorigHips');
+        if (!clip || !clip.tracks?.length || !hips || !Number.isFinite(hips.position.y) || Math.abs(hips.position.y) < 0.00001) {
+            throw new Error('Expected animated Mixamo FBX with a valid mixamorigHips bone');
+        }
+        asset.updateMatrixWorld(true); // extract the AnimationClip
 
 		const tracks = []; // KeyframeTracks compatible with VRM will be added here
 
@@ -23,7 +28,7 @@ export function loadMixamoAnimation( url, vrm ) {
 		const _vec3 = new THREE.Vector3();
 
 		// Adjust with reference to hips height.
-		const motionHipsHeight = asset.getObjectByName( 'mixamorigHips' ).position.y;
+		const motionHipsHeight = hips.position.y;
 		const vrmHipsHeight = vrm.humanoid.normalizedRestPose.hips.position[ 1 ];
 		const hipsPositionScale = vrmHipsHeight / motionHipsHeight;
 

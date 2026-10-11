@@ -1,3 +1,4 @@
+import { assets } from './runtime_config.js';
 import { buildExpressionTracks } from './expression_tracks.js';
 import { LatestLoad, loadAnimationSet, withDeadline } from './asset_loading.js';
 import * as THREE from 'three';
@@ -7,10 +8,10 @@ import { VRMLoaderPlugin, VRMUtils } from '@pixiv/three-vrm';
 import { loadMixamoAnimation } from './load_mixamo_animation.js';
 
 // ------- CONFIGS AND GLOBALS -------
-const MODELS_INDEX_PATH = '/vrm_models/models.json';
-const MODELS_PATH = "/vrm_models/"
-const ANIMATIONS_PATH = '/animations/';
-const ANIMATIONS_INDEX_PATH = '/animations/animations.json';
+const MODELS_INDEX_PATH = assets.modelsIndex;
+const MODELS_PATH = assets.models;
+const ANIMATIONS_PATH = assets.animations;
+const ANIMATIONS_INDEX_PATH = assets.animationsIndex;
 
 // ------- ANIMATION AND RENDERING -------
 let animations = {};
