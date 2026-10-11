@@ -4,7 +4,7 @@
     --muted: #62677e;
     --accent: #55538d;
     --line: rgba(70, 70, 115, .16);
-    --glass: rgba(249, 249, 255, .90);
+    --glass: rgba(249, 249, 255, .86);
     --soft: #f2f2fa;
     --primary-color: #292b45;
     --secondary-color: #62677e;
@@ -49,7 +49,7 @@ p { margin: 0; }
     display: flex; flex-direction: column; width: clamp(300px, 31vw, 390px); height: min(76dvh, 660px);
     min-width: 280px; min-height: 330px; max-width: calc(100vw - 40px); max-height: calc(100dvh - 40px);
     resize: both; overflow: hidden; border: 1px solid rgba(255,255,255,.72); border-radius: 20px;
-    background: rgba(248,249,255,.84); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    background: rgba(248,249,255,.80); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
     box-shadow: 0 14px 45px rgba(47,43,91,.16);
 }
 #chat-drag-handle { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 9px; flex-shrink: 0; cursor: grab; user-select: none; touch-action: none; }
@@ -131,7 +131,7 @@ summary { cursor: pointer; font-size: 12px; font-weight: 600; }
 .reset-section > p { margin: 9px 0; }
 .danger-button { color: #8a424c; }
 #tools-backdrop { position: fixed; inset: 0; z-index: 19; background: rgba(38,32,66,.25); }
-#companion-dialog { width: min(560px,calc(100vw - 32px)); max-height: calc(100dvh - 32px); padding: 24px; border: 1px solid rgba(255,255,255,.8); border-radius: 20px; background: #f7f7fd; color: var(--ink); overflow-y: auto; box-shadow: 0 18px 60px #292b4555; }
+#companion-dialog { width: min(560px,calc(100vw - 32px)); max-height: calc(100dvh - 32px); padding: 24px; border: 1px solid rgba(255,255,255,.8); border-radius: 20px; background: rgba(247,247,253,.96); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); color: var(--ink); overflow-y: auto; box-shadow: 0 18px 60px #292b4555; }
 #companion-dialog { scrollbar-width: thin; scrollbar-color: #c4bedb transparent; }
 #companion-dialog::-webkit-scrollbar { width: 6px; }
 #companion-dialog::-webkit-scrollbar-track { background: transparent; margin-block: 16px; }
