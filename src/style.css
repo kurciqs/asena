@@ -19,7 +19,17 @@ button:hover:not(:disabled) { background: #eeedf8; border-color: #a5a0c7; }
 button:disabled, input:disabled, select:disabled { opacity: .55; cursor: default; }
 button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 3px solid #8278c5; outline-offset: 3px; }
 input:not([type="checkbox"]), select, textarea { width: 100%; min-width: 0; border: 1px solid var(--line); border-radius: 9px; padding: 10px 12px; background: #fff; }
-select { cursor: pointer; }
+select {
+    cursor: pointer;
+    appearance: none;
+    padding-right: 36px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='m2 4 4 4 4-4' fill='none' stroke='%2362677e' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+}
+@media (forced-colors: active) {
+    select { appearance: auto; background-image: none; }
+}
 textarea { resize: vertical; }
 p { margin: 0; }
 .eyebrow { display: block; font-size: 10px; font-weight: 700; letter-spacing: .13em; color: var(--muted); }
