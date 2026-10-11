@@ -47,8 +47,12 @@ export function packConversation({ systemPrompt, memories = [], dialogue = [], c
         kept = [...group,...kept]; promptBound += groupCost;
     }
     messages.push(...kept);
+    const instructionsBound = byteTokens(systemPrompt), memoryBound = byteTokens(memoryPrompt);
+    const dialogueBound = kept.reduce((sum,message)=>sum+byteTokens(message.content),0);
+    const overheadBound = promptBound-instructionsBound-memoryBound-dialogueBound;
     return { messages, maxTokens:config.outputReserve, stats: {
         capacity:config.capacity, promptBound, outputReserve:config.outputReserve, keptMessages:kept.length,
+        instructionsBound, memoryBound, dialogueBound, overheadBound,
         omittedMessages:dialogue.length-kept.length, selectedMemories:selectedMemories.length, omittedMemories:memories.length-selectedMemories.length,
         memoryPrompt, counting:'conservative UTF-8 byte bound',
     } };

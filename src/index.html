@@ -1,87 +1,128 @@
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
 
 <head>
 	<meta charset="utf-8" />
 	<title>asena</title>
 	<link rel="icon" type="image/png" href="/favicon.png">
 	<meta name="viewport"
-		content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+		content="width=device-width, initial-scale=1.0" />
 	<link rel="stylesheet" href="src/style.css">
 </head>
 
 <body>
 	<!-- gradient haha -->
 	<div id="bg"></div>
-	<div id="utility-panels">
-	<aside id="replay-panel" hidden aria-label="Offline replay">
-		<div class="replay-heading">
-			<strong>Offline replay · AI services blocked</strong>
-			<button id="replay-toggle" type="button" aria-expanded="true" aria-controls="replay-body">Hide debug</button>
-		</div>
-		<button id="replay-settings" type="button" aria-controls="selections">Settings</button>
-		<div id="replay-body">
-		<p id="replay-description">Scripted dialogue with saved audio and mouth timings. Your test profile and memories stay separate.</p>
-		<label for="replay-case">Scene</label>
-		<select id="replay-case"></select>
-		<p id="replay-status" role="status" aria-live="polite"></p>
-		<div class="replay-buttons">
-			<button id="replay-restart" type="button">Restart scene</button>
-			<button id="replay-save" type="button">Save test memory</button>
-			<button id="replay-clear" type="button">Clear test memory</button>
-		</div>
-		<details>
-			<summary>Inspect this turn</summary>
-			<div class="json-tools"><button id="replay-collapse" type="button">Collapse all</button></div>
-			<div id="replay-inspector" aria-label="Turn data"></div>
-		</details>
-		</div>
-	</aside>
-		<div id="selections">
-			<div id="animation-selector">
-				animation:
-				<select name="select-animation" id="select-animation"></select>
-			</div>
-			<div id="model-selector">
-				model:
-				<select name="select-model" id="select-model"></select>
-			</div>
-			<div id="voice-selector">
-				voice:
-				<select name="select-voice" id="select-voice">
-					<option>af_heart</option>
-					<option>af_bella</option>
-					<option>af_nicole</option>
-					<option>am_adam</option>
-				</select>
-			</div>
-			<button id="saveMemoryBtn" disabled>save memory</button>
-			<div><label for="render-quality">Rendering</label><select id="render-quality"><option value="balanced">Balanced</option><option value="low">Low power</option><option value="high" selected>High detail</option></select></div>
-			<label><input id="render-shadows" type="checkbox"> Shadows</label>
-			<button id="avatar-retry" type="button">Retry avatar</button>
-			<p id="avatar-status" role="status">Loading avatar…</p>
-		</div>
-	</div>
+    <div id="tools-backdrop" hidden></div>
+    <aside id="utility-panels" hidden aria-labelledby="tools-title">
+        <header class="tools-heading">
+            <div><span class="eyebrow">YOUR COMPANION</span><h2 id="tools-title">Companion tools</h2></div>
+            <button id="tools-close" type="button" class="icon-button" aria-label="Close tools">×</button>
+        </header>
+        <div id="tools-tabs" role="tablist" aria-label="Companion tools">
+            <button id="settings-tab" type="button" role="tab" aria-selected="true" aria-controls="selections">Settings</button>
+            <button id="debug-tab" type="button" role="tab" aria-selected="false" aria-controls="replay-panel" tabindex="-1" hidden>Debug &amp; replay</button>
+        </div>
+        <section id="selections" role="tabpanel" aria-labelledby="settings-tab">
+            <div class="settings-group">
+                <h3>Character &amp; voice</h3>
+                <label for="select-model">Avatar</label><select name="select-model" id="select-model" disabled></select>
+                <label for="select-voice">Voice</label><select name="select-voice" id="select-voice">
+                    <option value="af_heart">Heart · American female</option><option value="af_bella">Bella · American female</option>
+                    <option value="af_nicole">Nicole · American female</option><option value="am_adam">Adam · American male</option>
+                </select>
+                <p id="voice-note" class="field-hint">Used for the next spoken reply.</p>
+            </div>
+            <div class="settings-group">
+                <h3>Display</h3>
+                <label for="render-quality">Rendering quality</label><select id="render-quality">
+                    <option value="high" selected>High detail</option><option value="balanced">Balanced</option><option value="low">Low power</option>
+                </select>
+                <p class="field-hint">High detail: 60 fps. Low power: 30 fps and a smaller drawing buffer.</p>
+                <label class="check-label"><input id="render-shadows" type="checkbox"> Enable shadows</label>
+                <p class="field-hint">Only affects scenes with shadow-casting lights.</p>
+            </div>
+            <div class="settings-group">
+                <h3>Animation preview</h3>
+                <label for="select-animation">Gesture</label><select name="select-animation" id="select-animation" disabled></select>
+                <p class="field-hint">Preview the available clips. Conversation playback returns to idle.</p>
+                <p id="avatar-status" class="field-status" role="status">Loading avatar…</p>
+                <button id="avatar-retry" type="button">Reload avatar</button>
+            </div>
+            <div class="settings-group">
+                <h3>Memory</h3>
+                <p id="memory-note" class="field-hint">Save learned facts on this computer.</p>
+                <button id="saveMemoryBtn" type="button" disabled>Save memories</button>
+                <p id="memory-save-status" class="field-status" role="status" aria-live="polite"></p>
+            </div>
+            <p class="shortcut-hint">S opens settings · C shows or hides chat · Esc closes tools</p>
+        </section>
+        <section id="replay-panel" hidden role="tabpanel" aria-labelledby="debug-tab">
+            <div class="replay-heading"><span class="mode-badge">Offline replay</span><span class="field-hint">AI services are off</span></div>
+            <div id="replay-body">
+                <p id="replay-description" class="field-hint">Saved dialogue and audio. Test memories stay separate.</p>
+                <label for="replay-case">Replay scene</label><select id="replay-case"></select>
+                <p id="replay-status" class="field-status" role="status" aria-live="polite"></p>
+                <div class="replay-buttons">
+                    <button id="replay-restart" type="button">Restart scene</button>
+                    <button id="replay-save" type="button">Save test memories</button>
+                </div>
+                <details id="turn-inspection">
+                    <summary>Inspect this turn</summary>
+                    <div class="json-tools"><button id="replay-collapse" type="button">Collapse all JSON</button></div>
+                    <div id="replay-inspector" aria-label="Turn data"></div>
+                </details>
+                <details class="reset-section"><summary>Reset test memories</summary>
+                    <p class="field-hint">Clears the saved replay facts in this browser. Your live memory file is separate.</p>
+                    <button id="replay-clear" type="button" class="danger-button">Clear test memories</button>
+                </details>
+            </div>
+        </section>
+    </aside>
 	<div id="main-container">
 		<!-- CANVAS, inserted in js -->
-		<div id="chat-panel">
-			<div id="chat-drag-handle">
-				<span id="companion-label">Asena · Friendly</span>
-				<button id="customize-companion" type="button">customize</button>
-				<button id="settings-toggle" type="button">settings</button>
-			</div>
-			<div id="chat-display"></div>
-			<div id="user-input-container">
-				<input type="text" id="user-input-message" placeholder='talk to asena...' disabled>
-				<button id="user-message-send" disabled>send</button>
-				<button id="turn-retry" hidden type="button">Retry</button>
-                    <button id="turn-stop" type="button" disabled>Stop</button>
-			</div>
-			<p id="speech-warning" role="status"></p>
-            <p id="turn-status" role="status" aria-live="polite">Ready</p>
-			<p id="startup-status" role="status">Starting companion…</p>
-		</div>
+        <section id="chat-panel" aria-label="Conversation">
+            <header id="chat-drag-handle">
+                <div class="chat-identity"><span class="eyebrow">COMPANION</span><span id="companion-label">Asena · Friendly</span></div>
+                <button id="chat-minimize" class="icon-button" type="button" aria-label="Hide chat">−</button>
+            </header>
+            <nav class="chat-toolbar" aria-label="Conversation tools">
+                <button id="customize-companion" type="button">Customize</button>
+                <button id="settings-toggle" type="button" aria-controls="utility-panels" aria-expanded="false">Settings</button>
+                <button id="debug-toggle" type="button" aria-controls="utility-panels" aria-expanded="false" hidden>Debug</button>
+                <span id="chat-mode" class="mode-badge" hidden>Replay</span>
+            </nav>
+            <div class="conversation-body">
+                <div id="chat-empty"><span class="empty-mark" aria-hidden="true">✦</span><h2>A little company.</h2><p>Say hello, or shape your companion with Customize.</p></div>
+                <div id="chat-display" aria-label="Messages"></div>
+            </div>
+            <div class="chat-footer">
+                <p id="speech-warning" class="notice" role="status"></p>
+                <p id="startup-status" class="notice" role="status">Starting companion…</p>
+                <div id="user-input-container">
+                    <label class="visually-hidden" for="user-input-message">Your message</label>
+                    <input type="text" id="user-input-message" placeholder="Talk to Asena…" autocomplete="off" disabled>
+                    <button id="user-message-send" type="button" class="primary-button" disabled>Send</button>
+                </div>
+                <div class="turn-controls"><p id="turn-status" role="status" aria-live="polite">Starting…</p>
+                    <div><button id="turn-retry" hidden type="button">Retry</button><button id="turn-stop" type="button" disabled>Stop</button></div>
+                </div>
+                <details id="context-panel">
+                    <summary><span id="context-size">Context estimate · loading</span></summary>
+                    <p class="field-hint">Conservative text-size estimate, not an exact token count. Instructions and saved memories count before your first message.</p>
+                    <dl class="context-breakdown">
+                        <div><dt>Instructions &amp; personality</dt><dd id="context-instructions">—</dd></div>
+                        <div><dt>Memory context</dt><dd id="context-memories">—</dd></div>
+                        <div><dt>Conversation</dt><dd id="context-conversation">—</dd></div>
+                        <div><dt>Formatting &amp; safety padding</dt><dd id="context-overhead">—</dd></div>
+                        <div><dt>Reserved for the reply</dt><dd id="context-reserve">—</dd></div>
+                    </dl>
+                    <p id="context-status" class="field-hint"></p><p id="context-actual" class="field-hint"></p>
+                </details>
+            </div>
+        </section>
+        <button id="chat-restore" type="button" hidden>Open chat</button>
 	</div>
 	<dialog id="companion-dialog" aria-labelledby="companion-dialog-title">
 		<form id="companion-form">
@@ -110,9 +151,6 @@
 			</div>
 		</form>
 	</dialog>
-	<div id="debug-div">
-		<p id="context-size">0%</p>
-	</div>
 	<script type="importmap">
 			{
 				"imports": {

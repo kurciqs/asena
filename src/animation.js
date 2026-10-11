@@ -186,7 +186,7 @@ export async function loadModel(url, name = modelSelect.value) {
         currentAnimation = null;
         animationSelect.replaceChildren();
         for (const key of library.files.keys()) {
-            const option = document.createElement('option'); option.value = key; option.textContent = key;
+            const option = document.createElement('option'); option.value = key; option.textContent = key.replaceAll('_',' ').replace(/^./,letter=>letter.toUpperCase());
             animationSelect.appendChild(option);
         }
         if (animations.idle) {
@@ -237,6 +237,7 @@ export async function loadThreeVRM() {
         }
         const preferred = vrmModels.asena_sfw ? 'asena_sfw' : Object.keys(vrmModels)[0];
         modelSelect.value = preferred;
+        modelSelect.disabled = false;
         await loadModel(vrmModels[preferred], preferred);
     } catch (error) { assetState.error = error.message; if (!currentVrm) renderLoop.stop(); notifyPlaybackState(); }
 }
@@ -313,7 +314,9 @@ function animate(deltaTime) {
         expressionPlayback.peakMouthWeight = Math.max(expressionPlayback.peakMouthWeight, ...Object.values(mouth.weights));
         expressionPlayback.peakMouthMorphWeight = Math.max(expressionPlayback.peakMouthMorphWeight, mouth.morphWeight);
     }
-    if (elapsedTime - lastPlaybackNotification > (performanceAction ? 0.25 : 1) && document.getElementById('replay-inspector')?.closest('details')?.open) {
+    if (elapsedTime - lastPlaybackNotification > (performanceAction ? 0.25 : 1) &&
+        !document.getElementById('utility-panels').hidden && !document.getElementById('replay-panel').hidden &&
+        document.getElementById('replay-inspector')?.closest('details')?.open) {
         lastPlaybackNotification = elapsedTime;
         notifyPlaybackState();
     }

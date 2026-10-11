@@ -17,9 +17,11 @@ ASENA_MODE=replay ASENA_PORT=3001 .venv/bin/python server.py
 
 Open [Asena](http://127.0.0.1:3001/). This starts only the website. The replay banner says **AI services blocked**. Five scripted scenes use saved Kokoro speech, existing gestures, and a test preference recalled after Save and reload. Stop cancels the turn; the collapsible inspector exposes its data. Test profile/memory stay separate from live data.
 
-Use **settings → Rendering** for Balanced, Low power or High detail. High detail is the default; saved choices take precedence. Low power caps the avatar at 30 fps and pixel ratio 1. Idle is the only startup gesture; others load/cache when needed. Hidden tabs stop drawing. Text input opens after avatar and data startup settle. Settings remain available during startup; avatar failure permits text-only use afterward.
+Drag the chat by its header, or hide it and use **Open chat** to restore it. Settings and Debug share a switchable tools panel; Debug is available in replay mode. **S** opens settings, **C** shows/hides chat, and **Esc** closes tools. Expand **Context estimate** to see instructions, memories, conversation and padding. See the [UI cleanup review](docs/ui-cleanup-10a.md) for screenshots and manual checks.
 
-Three.js, VRM libraries and the font currently use CDN resources, so the avatar needs internet or previously cached resources. “Offline replay” means no AI-service calls, not a fully disconnected browser. Frontend package URLs are exactly pinned; full vendoring has not been selected. The [full TODO 02–10 report](docs/implementation-report-02-10.md) records changes, regression fixes, verification and review steps.
+Use **Settings → Display → Rendering quality** for Balanced, Low power or High detail. High detail is the default; saved choices take precedence. Low power caps the avatar at 30 fps and pixel ratio 1. Idle is the only startup gesture; others load/cache when needed. Hidden tabs stop drawing. Text input opens after avatar and data startup settle. Settings remain available during startup; avatar failure permits text-only use afterward.
+
+Three.js and VRM libraries currently use CDN resources, so the avatar needs internet or previously cached resources. The UI uses system fonts. “Offline replay” means no AI-service calls, not a fully disconnected browser. Frontend package URLs are exactly pinned; full vendoring has not been selected. The [full TODO 02–10 report](docs/implementation-report-02-10.md) records changes, regression fixes, verification and review steps.
 
 ## Setup and development
 

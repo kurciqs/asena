@@ -37,3 +37,16 @@ test('accepted memory and profile changes are reflected in the next packed reque
     assert.match(next.messages[0].content,/Alex prefers mint tea/);
     assert.doesNotMatch(first.messages[0].content,/mint tea/);
 });
+
+test('the displayed context breakdown accounts for the packed input, including omitted history and Unicode',()=>{
+    for(const dialogue of [[],Array.from({length:20},(_,i)=>({role:'user',content:`问候 ${i} 🌸`.repeat(6)}))]) {
+        const {messages,stats}=packConversation({systemPrompt:'Current personality 🌸',memories:['Tea preference 茶'],dialogue,config});
+        assert.equal(stats.instructionsBound,byteTokens('Current personality 🌸'));
+        assert.equal(stats.memoryBound,byteTokens(stats.memoryPrompt));
+        assert.equal(stats.dialogueBound,messages.slice(1).reduce((sum,message)=>sum+byteTokens(message.content),0));
+        assert.equal(stats.instructionsBound+stats.memoryBound+stats.dialogueBound+stats.overheadBound,stats.promptBound);
+        assert.ok(stats.overheadBound>0);
+        if(!dialogue.length) assert.equal(stats.dialogueBound,0,'the starting overhead must not be shown as conversation');
+        else assert.ok(stats.omittedMessages>0);
+    }
+});

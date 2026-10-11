@@ -10,6 +10,7 @@ import { RENDER_STORAGE_KEY, renderPreferences } from './render_policy.js';
 import * as EMO from "./emotion_classifier.js"
 import { CLOSENESS, COMPANION_STORAGE_KEY, DEFAULT_COMPANION_PROFILE, buildCompanionPrompt, loadCompanionProfile, normalizeCompanionProfile, saveCompanionProfile } from './companion.js';
 import { REPLAY_MEMORY_KEY, ReplaySession, loadFixtureAudio, loadReplayMemories, replayProfileStorage, saveReplayMemories } from './replay.js';
+import { createToolPanel, wireChatLayout } from './ui_panels.js';
 import { createJsonViewer } from './json_viewer.js';
 
 let replay = null;
@@ -36,8 +37,8 @@ async function getDictionary() {
 const textInput = document.getElementById('user-input-message');
 const chatContainer = document.getElementById("chat-display");
 const sendButton = document.getElementById('user-message-send');
-const chatPanel = document.getElementById("chat-panel");
-const dragHandle = document.getElementById("chat-drag-handle");
+const toolPanel = createToolPanel();
+const chatLayout = wireChatLayout();
 const contextWindowSize = document.getElementById("context-size");
 const saveButton = document.getElementById('saveMemoryBtn');
 const voiceSelect = document.getElementById("select-voice");
@@ -74,7 +75,7 @@ function fillCompanionForm() {
 
 function renderCompanionProfile() {
     companionLabel.textContent = `${companionProfile.name} · ${CLOSENESS[companionProfile.closeness].label}`;
-    textInput.placeholder = `talk to ${companionProfile.name}...`;
+    textInput.placeholder = `Talk to ${companionProfile.name}…`;
     document.title = companionProfile.name;
 }
 
@@ -102,7 +103,7 @@ function changeVoice() {
 // ------- DISPLAY -------
 function renderMessages() {
     chatContainer.innerHTML = ''
-    for (let i = message_history.length - 1; i >= 0; i--) {
+    for (let i = 0; i < message_history.length; i++) {
         let msg = message_history[i]
         if (msg.role === 'system') continue;
         const msgDiv = document.createElement("div");
@@ -121,9 +122,13 @@ function renderMessages() {
             default:
                 break;
         }
-        msgDiv.textContent = msg.content;
+        const author=document.createElement('span'); author.className='message-author';
+        author.textContent=msg.role==='user' ? 'You' : companionProfile.name;
+        msgDiv.append(author,document.createTextNode(msg.content));
         chatContainer.appendChild(msgDiv);
     }
+    document.getElementById('chat-empty').hidden=message_history.some(message=>message.role!=='system');
+    chatContainer.scrollTop=chatContainer.scrollHeight;
     renderContextBudget();
 }
 
@@ -131,11 +136,29 @@ function previewBudget() {
     return packConversation({ systemPrompt:message_history[0].content, memories, dialogue:message_history.slice(2), config:contextBudget });
 }
 function renderContextBudget() {
+    const format = value=>value.toLocaleString('en-US');
     try {
         const stats = previewBudget().stats;
-        contextWindowSize.textContent = `Context: ${stats.promptBound}/${stats.capacity} budget bound · ${stats.outputReserve} reserved for reply · ${stats.omittedMessages} messages omitted`;
-        contextWindowSize.title = `Conservative UTF-8 byte bound; actual prompt tokens from the last dialogue request: ${lastDialogueUsage?.prompt_tokens ?? 'not measured'}. Extraction usage is separate.`;
-    } catch (error) { contextWindowSize.textContent = error.message; }
+        contextWindowSize.textContent = `Context estimate · ${format(stats.promptBound)} / ${format(stats.capacity)}`;
+        contextWindowSize.title = 'Conservative UTF-8 text-size bound, not an exact token count.';
+        for (const [id,value] of Object.entries({instructions:stats.instructionsBound, memories:stats.memoryBound,
+            conversation:stats.dialogueBound, overhead:stats.overheadBound, reserve:stats.outputReserve})) {
+            document.getElementById(`context-${id}`).textContent=format(value);
+        }
+        document.getElementById('context-status').textContent =
+            `${stats.keptMessages ? `${stats.keptMessages} conversation messages included.` : 'No conversation messages yet.'} `+
+            `${stats.selectedMemories} memories included.`+
+            (stats.omittedMessages ? ` ${stats.omittedMessages} older messages left out of this request.` : '')+
+            (stats.omittedMemories ? ` ${stats.omittedMemories} memories left out of this request.` : '');
+        document.getElementById('context-actual').textContent = Number.isFinite(lastDialogueUsage?.prompt_tokens)
+            ? `Last model request: ${format(lastDialogueUsage.prompt_tokens)} actual input tokens. This may differ from the current estimate.`
+            : replay ? 'Recorded replay does not measure model token usage.' : 'Actual model usage will appear after a reply, if provided by the service.';
+    } catch (error) {
+        contextWindowSize.textContent='Context needs attention';
+        document.getElementById('context-status').textContent=error.message;
+        document.getElementById('context-actual').textContent='';
+        for(const id of ['instructions','memories','conversation','overhead','reserve']) document.getElementById(`context-${id}`).textContent='—';
+    }
 }
 
 // ------- CHATBOT LOGIC -------
@@ -270,6 +293,7 @@ const turnController = new TurnController(state => {
     const labels = { idle: 'Ready', requesting: 'Getting a reply', 'preparing-speech': 'Preparing speech',
         speaking: 'Speaking', completed: 'Finished', stopped: 'Stopped', failed: 'Failed' };
     document.getElementById('turn-status').textContent = state.error || labels[state.phase];
+    document.getElementById('turn-status').dataset.phase = state.phase;
     document.getElementById('turn-stop').disabled = !['requesting', 'preparing-speech', 'speaking'].includes(state.phase);
     inspectReplay({ turn: state, phase: state.phase });
 });
@@ -444,63 +468,24 @@ textInput.addEventListener('keydown', function (e) {
     }
 });
 saveButton.addEventListener('click', () => {
-    saveMemoryToFile().catch(error => { document.getElementById('turn-status').textContent = error.message; replayMessage(error.message); });
+    saveMemoryToFile().catch(error => { document.getElementById('memory-save-status').textContent = error.message; replayMessage(error.message); });
 });
 
-// because i take care to cite my sources: https://www.geeksforgeeks.org/html/draggable-element-using-javascript/
-function onMouseDrag(event, element) {
-    let leftValue = parseInt(window.getComputedStyle(chatPanel).left);
-    let topValue = parseInt(window.getComputedStyle(chatPanel).top);
-    let x = `${leftValue + event.movementX}px`;
-    let y = `${topValue + event.movementY}px`;
-    chatPanel.style.left = x;
-    chatPanel.style.top = y;
-}
+function toggleSettings() { toolPanel.toggle('settings'); }
 
-dragHandle.addEventListener("mousedown", (e) => {
-    if (e.target.closest('button')) return;
-    const onMove = (event) => onMouseDrag(event, dragHandle);
-
-    document.addEventListener("mousemove", onMove);
-    document.addEventListener("mouseup", () => {
-        document.removeEventListener("mousemove", onMove);
-    }, { once: true });
-});
-
-// hide containers with keyboard because based
-function toggleSettings() {
-    const settings = document.getElementById('selections');
-    settings.style.display = getComputedStyle(settings).display === 'none' ? 'flex' : 'none';
-}
-
-document.addEventListener('keydown', (event) => {
-    if (event.key === 's' || event.key === 'S') {
-        const tag = document.activeElement.tagName.toLowerCase();
-        const isTyping = tag === "input" || tag === "textarea" || document.activeElement.isContentEditable;
-        if (isTyping) return; // don't trigger shortcuts while typing
-
-        toggleSettings();
-    }
-});
-
-document.addEventListener('keydown', (event) => {
-    if (event.key === 'c' || event.key === 'C') {
-        const el = document.getElementById('chat-panel');
-
-        const tag = document.activeElement.tagName.toLowerCase();
-        const isTyping = tag === "input" || tag === "textarea" || document.activeElement.isContentEditable;
-        if (isTyping) return; // don't trigger shortcuts while typing
-
-        if (el) {
-            el.style.display = (el.style.display === 'none') ? 'flex' : 'none';
-        }
-    }
+document.addEventListener('keydown',event=>{
+    const active=document.activeElement;
+    if (document.getElementById('companion-dialog').open || active.closest('#utility-panels') ||
+        ['INPUT','TEXTAREA','SELECT'].includes(active.tagName) || active.isContentEditable || event.ctrlKey || event.metaKey || event.altKey) return;
+    if (event.key.toLowerCase()==='s') {event.preventDefault();toggleSettings();}
+    if (event.key.toLowerCase()==='c') {event.preventDefault();chatLayout.toggle();}
 });
 
 async function saveMemoryToFile() {
     if (replay) {
         saveReplayMemories(localStorage, memories);
         replayMessage(`Saved ${memories.length} test ${memories.length === 1 ? 'memory' : 'memories'} in this browser. Your real memory file was not changed.`);
+        document.getElementById('memory-save-status').textContent=`Saved ${memories.length} test memories.`;
         inspectReplay({ phase: 'test memory saved' });
         return;
     }
@@ -510,21 +495,20 @@ async function saveMemoryToFile() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ memories })
     });
-    document.getElementById('turn-status').textContent = `Saved ${memories.length} memories.`;
+    document.getElementById('memory-save-status').textContent = `Saved ${memories.length} memories.`;
 }
 
 // -------- ACTUALLY DOING SOMETHING 🔥 --------
 function setupReplayUI() {
     document.body.classList.add('replay-mode');
-    document.getElementById('replay-panel').hidden = false;
-    document.getElementById('replay-settings').addEventListener('click', toggleSettings);
-    document.getElementById('replay-toggle').addEventListener('click', () => {
-        const body = document.getElementById('replay-body');
-        const toggle = document.getElementById('replay-toggle');
-        body.hidden = !body.hidden;
-        toggle.textContent = body.hidden ? 'Show debug' : 'Hide debug';
-        toggle.setAttribute('aria-expanded', String(!body.hidden));
-    });
+    toolPanel.enableDebug();
+    document.getElementById('chat-mode').hidden=false;
+    if (innerWidth>=1000) toolPanel.open('debug',document.getElementById('debug-toggle'),false);
+    document.getElementById('voice-note').textContent='Recorded scenes use their saved voice.';
+    document.getElementById('memory-note').textContent='Test memories are saved in this browser, separate from your live memories.';
+    saveButton.textContent='Save test memories';
+    document.getElementById('chat-empty').querySelector('h2').textContent='Try a saved scene.';
+    document.getElementById('chat-empty').querySelector('p').textContent='Play the introduction, or choose a different scene in Debug.';
     document.getElementById('replay-collapse').addEventListener('click', () => replayJsonViewer.collapseAll());
     const selector = document.getElementById('replay-case');
     for (const scenario of replay.fixture.cases) {
@@ -535,7 +519,7 @@ function setupReplayUI() {
     }
     selector.value = replay.scenario.id;
     document.getElementById('replay-description').textContent = replay.fixture.recording
-        ? 'Scripted dialogue with saved Kokoro audio and Rhubarb mouth cues. Your test profile and memories stay separate.'
+        ? 'Saved dialogue, voice and mouth timings. Test profile and memories stay separate.'
         : 'Scripted dialogue with silent audio and synthetic mouth timings. Your test profile and memories stay separate.';
     selector.addEventListener('change', () => {
         const url = new URL(location.href);
@@ -544,14 +528,14 @@ function setupReplayUI() {
     });
     document.getElementById('replay-restart').addEventListener('click', () => location.reload());
     document.getElementById('replay-save').addEventListener('click', () => {
-        saveMemoryToFile().catch(error => { document.getElementById('turn-status').textContent = error.message; replayMessage(error.message); });
+        saveMemoryToFile().catch(error => { document.getElementById('memory-save-status').textContent = error.message; replayMessage(error.message); });
     });
     document.getElementById('replay-clear').addEventListener('click', () => {
         localStorage.removeItem(REPLAY_MEMORY_KEY);
         location.reload();
     });
     textInput.value = replay.nextPrompt;
-    sendButton.textContent = 'play scene';
+    sendButton.textContent = 'Play scene';
     voiceSelect.disabled = true;
     replayMessage('Starting scripted replay. Text will be available when startup finishes.');
     inspectReplay({ phase: 'ready', fixture: replay.fixture.description });
@@ -602,6 +586,7 @@ function changeRenderSettings() {
 qualitySelect.addEventListener('change',changeRenderSettings);
 shadowsCheck.addEventListener('change',changeRenderSettings);
 document.getElementById('settings-toggle').addEventListener('click',toggleSettings);
+document.getElementById('debug-toggle').addEventListener('click',()=>toolPanel.toggle('debug'));
 document.getElementById('avatar-retry').addEventListener('click',()=>{
     if (ANI.module) ANI.loadThreeVRM();
     else location.reload(); // Browsers cache failed module evaluation; reload retries that graph.
@@ -650,10 +635,12 @@ async function bootstrap() {
         } else {
             memoryLoadError = results[1].reason?.message ?? 'Invalid memory response.';
             warnings.push(`${memoryLoadError} Memory saving is disabled to preserve existing data.`);
+            document.getElementById('memory-save-status').textContent='Memory could not load. Saving is disabled to preserve existing data.';
             document.getElementById('replay-save').disabled = true;
         }
         message_history[0].content = buildCompanionPrompt(systemPrompt,companionProfile);
         message_history[1].content = 'Previously remembered information:\n'+memories.map(memory=>'- '+memory+'\n').join('');
+        document.getElementById('turn-status').textContent='Ready';
         startupReady = true; textInput.disabled = sendButton.disabled = ANI.getPlaybackState().loading;
         renderMessages(); inspectReplay({});
         startupStatus.textContent = warnings.join(' ');
