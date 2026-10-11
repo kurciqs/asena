@@ -5,7 +5,7 @@ export const RENDER_PROFILES = Object.freeze({
 });
 export const RENDER_STORAGE_KEY = 'asena.render.v1';
 export function renderPreferences(value = {}) {
-    return {quality:Object.hasOwn(RENDER_PROFILES,value?.quality) ? value.quality : 'balanced', shadows:value?.shadows === true};
+    return {quality:Object.hasOwn(RENDER_PROFILES,value?.quality) ? value.quality : 'high', shadows:value?.shadows === true};
 }
 export function pixelRatio(value, deviceRatio) {
     return Math.max(0.5,Math.min(Number.isFinite(deviceRatio) ? deviceRatio : 1,RENDER_PROFILES[value.quality].pixelRatio));

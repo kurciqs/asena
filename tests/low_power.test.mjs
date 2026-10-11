@@ -30,7 +30,7 @@ test('low power halves render/update work on a 120Hz display, with no hidden wor
     assert.equal(pixelRatio(renderPreferences({quality:'low'}),3),1);
     assert.equal(pixelRatio(renderPreferences({quality:'balanced'}),3),1.5);
     assert.equal(pixelRatio(renderPreferences({quality:'high'}),3),2);
-    assert.deepEqual(renderPreferences({quality:'corrupt',shadows:'true'}),{quality:'balanced',shadows:false});
+    assert.deepEqual(renderPreferences({quality:'corrupt',shadows:'true'}),{quality:'high',shadows:false});
 });
 
 test('blink onset and duration do not double when rendering drops from 60 to 30Hz', () => {
