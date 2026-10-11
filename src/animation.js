@@ -1,3 +1,4 @@
+import { buildExpressionTracks } from './expression_tracks.js';
 import { LatestLoad, loadAnimationSet, withDeadline } from './asset_loading.js';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -325,82 +326,18 @@ export function talk(data) {
     activeAudio = audio;
     audio.currentTime = 0;
 
-    // TODO: this breaks on empty animationData
-    let tracks = [];
-    Object.keys(rhubarbToVRM).forEach((key) => {
-        const vrmExpression = rhubarbToVRM[key];
-        let times = [];
-        let values = [];
-        data.visemes.forEach((viseme) => {
-            if (viseme.value === key) {
-                times.push((viseme.start + viseme.end) / 2);
-                values.push(1.0);
-            }
-            else {
-                times.push(viseme.end);
-                values.push(0.0);
-            }
-        })
-        if (times.length === 0) { times = [0.0]; values = [0.0]; }
-        let currentTrack = new THREE.NumberKeyframeTrack(
-            currentVrm.expressionManager.getExpressionTrackName(vrmExpression), // name
-            times, // times
-            values, // values
-            THREE.InterpolateLinear // interpolation
-        );
-        tracks.push(currentTrack);
+    const descriptors = buildExpressionTracks({ duration: audio.duration, visemes: data.visemes, emotions: data.emotions }, name => {
+        const expression = currentVrm.expressionManager.expressions.find(expression => expression.name.toLowerCase() === name.toLowerCase());
+        return expression ? currentVrm.expressionManager.getExpressionTrackName(expression.name) : null;
     });
-
-    expressionOptions.forEach((key) => {
-        let times = [0];
-        let values = [0];
-        data.emotions.forEach((emotion) => {
-            let rEmotion = emotion.value;
-            let intensity = key === "happy" ? 0.3 : 0.5; // being happy is very contageous, gotta level it, as per dr house
-            if (rEmotion === key) {
-                times.push(emotion.start - 0.05);
-                values.push(0.0);
-                times.push(emotion.start);
-                values.push(intensity);
-                times.push(emotion.end);
-                values.push(intensity);
-                times.push(emotion.end + 0.05);
-                values.push(0.0);
-            }
-        });
-
-        let trackName = currentVrm.expressionManager.getExpressionTrackName(key);
-        if (trackName) {
-            let currentTrack = new THREE.NumberKeyframeTrack(
-                trackName, // name
-                times, // times
-                values, // values
-                THREE.InterpolateLinear // interpolation
-            );
-            tracks.push(currentTrack);
-        }
-        else {
-            // surprise is capitalised with some vrms which i have, there might be others like this but that depends on the VRM you load, i can't deal with that. if surprised with a small s failed, do the same for Surprised with a capitalised S
-            console.log("WARNING: Non-Existent expression requested:", key)
-            if (key === "surprised") {
-                let currentTrack = new THREE.NumberKeyframeTrack(
-                    "Surprised", // name
-                    times, // times
-                    values, // values
-                    THREE.InterpolateLinear // interpolation
-                );
-                tracks.push(currentTrack);
-                console.log("LOG: Expression corrected to:", "Surprised")
-            }
-        }
-    });
+    const tracks = descriptors.map(track => new THREE.NumberKeyframeTrack(track.name, track.times, track.values, THREE.InterpolateLinear));
 
     data.actions.forEach((action) => {
         scheduleAnimationByName(action.value, action.start)
         // console.log(animations[action.value], currentMixer.time + action.start)
     });
 
-    const mouthShapesTrack = new THREE.AnimationClip('MouthShapes', audio.duration + 1, tracks);
+    const mouthShapesTrack = new THREE.AnimationClip('MouthShapes', audio.duration, tracks);
     const action = currentMixer.clipAction(mouthShapesTrack);
     action.setLoop(THREE.LoopOnce, 0);
     action.play();

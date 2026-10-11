@@ -1,3 +1,4 @@
+import { loadAudioMetadata, repairWavHeader } from './audio.js';
 import { TurnController } from './turn_controller.js';
 import * as ANI from './animation.js'
 import * as EMO from "./emotion_classifier.js"
@@ -253,7 +254,7 @@ async function generateTTS(text, turn) {
         throw new Error("ERROR: Empty audio content");
     }
 
-    const audioBytes = Uint8Array.from(atob(audioBase64), c => c.charCodeAt(0));
+    const audioBytes = repairWavHeader(Uint8Array.from(atob(audioBase64), c => c.charCodeAt(0)));
     const audioBlob = new Blob([audioBytes], { type: "audio/wav" });
     const audioURL = URL.createObjectURL(audioBlob);
 
@@ -274,6 +275,8 @@ async function generateTTS(text, turn) {
         });
     }
 
+    await loadAudioMetadata(audio, { signal: turn.signal });
+    turn.assertCurrent();
     return { audio, timestamps };
 }
 
