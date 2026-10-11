@@ -1,0 +1,5 @@
+{
+  "repository": "https://github.com/wass08/wawa-lipsync",
+  "revision": "312dc31a1ee998248aae3431474f455bfc3ae3e1",
+  "note": "Upstream algorithms; relative import paths adjusted for the isolated offline harness. FFT input is a documented emulation of Web Audio byte spectra."
+}

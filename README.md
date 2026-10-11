@@ -33,6 +33,7 @@ Three.js and VRM libraries currently use CDN resources, so the avatar needs inte
 - [Backlog](TODO.md), [architecture review](docs/architecture-health-check-2026-10-11.md), [benchmark](docs/companion-benchmark.md).
 - [Speech and lip-sync decision plan](docs/speech-and-lip-sync-plan-2026-10-11.md): realistic live mouth-motion alternatives, local TTS shortlist, optional cloud comparisons and evaluation required before streaming changes.
 - [Voice listening room](http://localhost:3001/voice-samples.html): twelve Kokoro, Pocket, Nano, Turbo, Qwen and Supertonic recordings; [sample provenance and limits](docs/voice-audition-2026-10-12.md). No models run when listening.
+- [Lip-sync studio](http://localhost:3001/lip-sync-samples.html): compare nine mouth-motion methods on the same three saved Kokoro lines and Asena's actual face; [preparation, measurements and limitations](docs/lip-sync-audition-2026-10-12.md). Kokoro is the selected voice; mouth-method selection remains open.
 - [Runtime lock](runtime-lock.json): dependency/backend versions and model file provenance. Runtime inspection records are snapshots, not live performance guarantees.
 
 Memory remains a list of strings with manual Save. Live memory and temporary audio now live under ignored `.runtime/`, outside public assets. Existing local data has been preserved. Back up that directory yourself. Replay fixtures are public synthetic examples; do not add personal recordings there. Earlier Git history may contain the formerly tracked memory file.

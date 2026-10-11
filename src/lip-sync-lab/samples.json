@@ -1,0 +1,941 @@
+{
+  "version": 1,
+  "prepared": "2026-10-12",
+  "voice": "Kokoro af_heart",
+  "cases": [
+    {
+      "id": "intro",
+      "label": "Mutual introduction",
+      "audio": "/replay/intro.wav",
+      "duration": 3.862766439909297,
+      "sampleRate": 44100,
+      "text": "I'm Asena. Nice to meet you, Alex—excellent choice of company.",
+      "audioSha256": "61cc73d4e6fa265bdc3a51a89016a5fdbe41198274066adb10bb5d91e0607a7a",
+      "data": "/lip-sync-lab/intro.json"
+    },
+    {
+      "id": "teasing",
+      "label": "Flirty teasing",
+      "audio": "/replay/teasing.wav",
+      "duration": 3.743061224489796,
+      "sampleRate": 44100,
+      "text": "I was aiming for charming. You'll have to tell me how close I got.",
+      "audioSha256": "83c3d8df3acb6f70428d8d026a607e938404b30c035c0d14b89805e153c853a9",
+      "data": "/lip-sync-lab/teasing.json"
+    },
+    {
+      "id": "disagreement",
+      "label": "Warm disagreement",
+      "audio": "/replay/disagreement.wav",
+      "duration": 4.561836734693878,
+      "sampleRate": 44100,
+      "text": "Oh, Alex, you'd get bored. I'll help you out, but you'll still have to earn agreement.",
+      "audioSha256": "f8de49f8c7df2c0b9589ede28042530c6326250dd108ea687c0bf2526cb97252",
+      "data": "/lip-sync-lab/disagreement.json"
+    }
+  ],
+  "methods": [
+    {
+      "id": "rhubarb",
+      "label": "Rhubarb · corrected & blended",
+      "notes": "Same recorded Rhubarb cues, source-correct shapes and 40ms transition blending. No re-analysis."
+    },
+    {
+      "id": "legacy",
+      "label": "Current renderer · reference",
+      "notes": "Current letter mapping and triangular pulses. Includes the known Rhubarb alphabet mismatch."
+    },
+    {
+      "id": "rhubarb-batches",
+      "label": "Rhubarb · short overlapping batches",
+      "notes": "One-second retained regions, ±250ms context, one worker. Same corrected adapter. Compare seams and pronunciation loss."
+    },
+    {
+      "id": "dictionary",
+      "label": "Dictionary · estimated timing",
+      "notes": "CMU phones split evenly inside saved word timestamps. This is an approximation, not Kokoro-native phone durations."
+    },
+    {
+      "id": "headaudio",
+      "label": "HeadAudio · MFCC classifier",
+      "notes": "Upstream model and processor run offline; 15 source visemes projected onto Asena. Source frame-centre timestamps are retained; live buffering is not measured."
+    },
+    {
+      "id": "wawa",
+      "label": "Wawa · frequency heuristic",
+      "notes": "Upstream Wawa algorithm on emulated Web Audio spectra. 2048 FFT, default smoothing, 60fps analysis."
+    },
+    {
+      "id": "frequency",
+      "label": "lipsync-engine · frequency bands",
+      "notes": "Upstream FrequencyAnalyzer on emulated Web Audio inputs. 256 FFT, default controls. Its separate A–F alphabet is not used."
+    },
+    {
+      "id": "amplitude",
+      "label": "Amplitude only · simple control",
+      "notes": "Energy opens one vowel. Included to reveal timing versus articulation; it cannot distinguish sounds."
+    },
+    {
+      "id": "lam",
+      "label": "LAM · neural continuous weights",
+      "notes": "One-second fixed ONNX windows, 500ms hop, overlapped predictions. Provisional 52-channel-to-VRoid adapter; eye and brow coefficients are excluded."
+    }
+  ],
+  "measurements": {
+    "intro": {
+      "preparationMilliseconds": 86.0215,
+      "headAudioEvents": 187,
+      "unknownDictionaryWords": [
+        "Asena"
+      ]
+    },
+    "teasing": {
+      "preparationMilliseconds": 45.868583,
+      "headAudioEvents": 184,
+      "unknownDictionaryWords": []
+    },
+    "disagreement": {
+      "preparationMilliseconds": 49.37495799999999,
+      "headAudioEvents": 223,
+      "unknownDictionaryWords": []
+    }
+  },
+  "rhubarbBatches": {
+    "intro": {
+      "cues": [
+        {
+          "start": 0,
+          "end": 0.04,
+          "value": "X"
+        },
+        {
+          "start": 0.04,
+          "end": 0.09,
+          "value": "B"
+        },
+        {
+          "start": 0.09,
+          "end": 0.17,
+          "value": "A"
+        },
+        {
+          "start": 0.17,
+          "end": 0.45,
+          "value": "B"
+        },
+        {
+          "start": 0.45,
+          "end": 0.66,
+          "value": "C"
+        },
+        {
+          "start": 0.66,
+          "end": 1,
+          "value": "B"
+        },
+        {
+          "start": 1,
+          "end": 1.09,
+          "value": "C"
+        },
+        {
+          "start": 1.09,
+          "end": 1.16,
+          "value": "B"
+        },
+        {
+          "start": 1.16,
+          "end": 1.3,
+          "value": "F"
+        },
+        {
+          "start": 1.3,
+          "end": 1.38,
+          "value": "A"
+        },
+        {
+          "start": 1.38,
+          "end": 1.45,
+          "value": "B"
+        },
+        {
+          "start": 1.45,
+          "end": 1.63,
+          "value": "F"
+        },
+        {
+          "start": 1.63,
+          "end": 1.6800000000000002,
+          "value": "E"
+        },
+        {
+          "start": 1.6800000000000002,
+          "end": 2,
+          "value": "C"
+        },
+        {
+          "start": 2,
+          "end": 2.25,
+          "value": "B"
+        },
+        {
+          "start": 2.25,
+          "end": 2.32,
+          "value": "C"
+        },
+        {
+          "start": 2.32,
+          "end": 2.74,
+          "value": "B"
+        },
+        {
+          "start": 2.74,
+          "end": 2.81,
+          "value": "E"
+        },
+        {
+          "start": 2.81,
+          "end": 2.95,
+          "value": "B"
+        },
+        {
+          "start": 2.95,
+          "end": 3,
+          "value": "C"
+        },
+        {
+          "start": 3,
+          "end": 3.01,
+          "value": "B"
+        },
+        {
+          "start": 3.01,
+          "end": 3.15,
+          "value": "C"
+        },
+        {
+          "start": 3.15,
+          "end": 3.23,
+          "value": "A"
+        },
+        {
+          "start": 3.23,
+          "end": 3.5,
+          "value": "B"
+        },
+        {
+          "start": 3.5,
+          "end": 3.8600000000000003,
+          "value": "X"
+        }
+      ],
+      "measurements": [
+        {
+          "window": 0,
+          "inputStart": 0,
+          "inputEnd": 1.25,
+          "seconds": 4.695357249991503
+        },
+        {
+          "window": 1,
+          "inputStart": 0.75,
+          "inputEnd": 2.25,
+          "seconds": 3.30947679199744
+        },
+        {
+          "window": 2,
+          "inputStart": 1.75,
+          "inputEnd": 3.25,
+          "seconds": 3.3581991670071147
+        },
+        {
+          "window": 3,
+          "inputStart": 2.75,
+          "inputEnd": 3.862766439909297,
+          "seconds": 1.811000249988865
+        }
+      ],
+      "windowSeconds": 1.5,
+      "hopSeconds": 1,
+      "contextSeconds": 0.25,
+      "threads": 1,
+      "recognizer": "pocketSphinx"
+    },
+    "teasing": {
+      "cues": [
+        {
+          "start": 0,
+          "end": 0.05,
+          "value": "X"
+        },
+        {
+          "start": 0.05,
+          "end": 0.11,
+          "value": "C"
+        },
+        {
+          "start": 0.11,
+          "end": 0.16,
+          "value": "B"
+        },
+        {
+          "start": 0.16,
+          "end": 0.23,
+          "value": "F"
+        },
+        {
+          "start": 0.23,
+          "end": 0.37,
+          "value": "B"
+        },
+        {
+          "start": 0.37,
+          "end": 0.44,
+          "value": "C"
+        },
+        {
+          "start": 0.44,
+          "end": 0.51,
+          "value": "B"
+        },
+        {
+          "start": 0.51,
+          "end": 0.59,
+          "value": "A"
+        },
+        {
+          "start": 0.59,
+          "end": 0.71,
+          "value": "B"
+        },
+        {
+          "start": 0.71,
+          "end": 0.78,
+          "value": "G"
+        },
+        {
+          "start": 0.78,
+          "end": 1,
+          "value": "B"
+        },
+        {
+          "start": 1,
+          "end": 1.06,
+          "value": "B"
+        },
+        {
+          "start": 1.06,
+          "end": 1.1400000000000001,
+          "value": "A"
+        },
+        {
+          "start": 1.1400000000000001,
+          "end": 1.31,
+          "value": "B"
+        },
+        {
+          "start": 1.31,
+          "end": 1.67,
+          "value": "X"
+        },
+        {
+          "start": 1.67,
+          "end": 1.75,
+          "value": "F"
+        },
+        {
+          "start": 1.75,
+          "end": 1.89,
+          "value": "C"
+        },
+        {
+          "start": 1.89,
+          "end": 1.96,
+          "value": "B"
+        },
+        {
+          "start": 1.96,
+          "end": 2,
+          "value": "F"
+        },
+        {
+          "start": 2,
+          "end": 2.09,
+          "value": "B"
+        },
+        {
+          "start": 2.09,
+          "end": 2.23,
+          "value": "C"
+        },
+        {
+          "start": 2.23,
+          "end": 2.31,
+          "value": "A"
+        },
+        {
+          "start": 2.31,
+          "end": 2.37,
+          "value": "B"
+        },
+        {
+          "start": 2.37,
+          "end": 2.56,
+          "value": "C"
+        },
+        {
+          "start": 2.56,
+          "end": 2.77,
+          "value": "E"
+        },
+        {
+          "start": 2.77,
+          "end": 2.91,
+          "value": "B"
+        },
+        {
+          "start": 2.91,
+          "end": 2.98,
+          "value": "C"
+        },
+        {
+          "start": 2.98,
+          "end": 3,
+          "value": "D"
+        },
+        {
+          "start": 3,
+          "end": 3.15,
+          "value": "D"
+        },
+        {
+          "start": 3.15,
+          "end": 3.2,
+          "value": "C"
+        },
+        {
+          "start": 3.2,
+          "end": 3.38,
+          "value": "B"
+        },
+        {
+          "start": 3.38,
+          "end": 3.74,
+          "value": "X"
+        }
+      ],
+      "measurements": [
+        {
+          "window": 0,
+          "inputStart": 0,
+          "inputEnd": 1.25,
+          "seconds": 2.272556958021596
+        },
+        {
+          "window": 1,
+          "inputStart": 0.75,
+          "inputEnd": 2.25,
+          "seconds": 2.2313569160178304
+        },
+        {
+          "window": 2,
+          "inputStart": 1.75,
+          "inputEnd": 3.25,
+          "seconds": 2.761018499964848
+        },
+        {
+          "window": 3,
+          "inputStart": 2.75,
+          "inputEnd": 3.743061224489796,
+          "seconds": 1.619342333986424
+        }
+      ],
+      "windowSeconds": 1.5,
+      "hopSeconds": 1,
+      "contextSeconds": 0.25,
+      "threads": 1,
+      "recognizer": "pocketSphinx"
+    },
+    "disagreement": {
+      "cues": [
+        {
+          "start": 0,
+          "end": 0.05,
+          "value": "X"
+        },
+        {
+          "start": 0.05,
+          "end": 0.14,
+          "value": "E"
+        },
+        {
+          "start": 0.14,
+          "end": 0.28,
+          "value": "F"
+        },
+        {
+          "start": 0.28,
+          "end": 0.56,
+          "value": "C"
+        },
+        {
+          "start": 0.56,
+          "end": 0.77,
+          "value": "B"
+        },
+        {
+          "start": 0.77,
+          "end": 0.91,
+          "value": "C"
+        },
+        {
+          "start": 0.91,
+          "end": 0.99,
+          "value": "A"
+        },
+        {
+          "start": 0.99,
+          "end": 1,
+          "value": "E"
+        },
+        {
+          "start": 1,
+          "end": 1.26,
+          "value": "E"
+        },
+        {
+          "start": 1.26,
+          "end": 1.4,
+          "value": "B"
+        },
+        {
+          "start": 1.4,
+          "end": 1.85,
+          "value": "X"
+        },
+        {
+          "start": 1.85,
+          "end": 1.92,
+          "value": "H"
+        },
+        {
+          "start": 1.92,
+          "end": 2,
+          "value": "C"
+        },
+        {
+          "start": 2,
+          "end": 2.02,
+          "value": "C"
+        },
+        {
+          "start": 2.02,
+          "end": 2.1,
+          "value": "A"
+        },
+        {
+          "start": 2.1,
+          "end": 2.25,
+          "value": "F"
+        },
+        {
+          "start": 2.25,
+          "end": 2.39,
+          "value": "C"
+        },
+        {
+          "start": 2.39,
+          "end": 2.54,
+          "value": "B"
+        },
+        {
+          "start": 2.54,
+          "end": 2.58,
+          "value": "A"
+        },
+        {
+          "start": 2.58,
+          "end": 2.79,
+          "value": "F"
+        },
+        {
+          "start": 2.79,
+          "end": 3,
+          "value": "B"
+        },
+        {
+          "start": 3,
+          "end": 3.06,
+          "value": "B"
+        },
+        {
+          "start": 3.06,
+          "end": 3.13,
+          "value": "H"
+        },
+        {
+          "start": 3.13,
+          "end": 3.27,
+          "value": "C"
+        },
+        {
+          "start": 3.27,
+          "end": 3.34,
+          "value": "G"
+        },
+        {
+          "start": 3.34,
+          "end": 3.48,
+          "value": "F"
+        },
+        {
+          "start": 3.48,
+          "end": 3.62,
+          "value": "E"
+        },
+        {
+          "start": 3.62,
+          "end": 3.69,
+          "value": "C"
+        },
+        {
+          "start": 3.69,
+          "end": 3.9,
+          "value": "B"
+        },
+        {
+          "start": 3.9,
+          "end": 3.98,
+          "value": "A"
+        },
+        {
+          "start": 3.98,
+          "end": 4,
+          "value": "B"
+        },
+        {
+          "start": 4,
+          "end": 4.13,
+          "value": "C"
+        },
+        {
+          "start": 4.13,
+          "end": 4.2,
+          "value": "B"
+        },
+        {
+          "start": 4.2,
+          "end": 4.5600000000000005,
+          "value": "X"
+        }
+      ],
+      "measurements": [
+        {
+          "window": 0,
+          "inputStart": 0,
+          "inputEnd": 1.25,
+          "seconds": 2.6891629999736324
+        },
+        {
+          "window": 1,
+          "inputStart": 0.75,
+          "inputEnd": 2.25,
+          "seconds": 2.5568499590153806
+        },
+        {
+          "window": 2,
+          "inputStart": 1.75,
+          "inputEnd": 3.25,
+          "seconds": 2.766380208020564
+        },
+        {
+          "window": 3,
+          "inputStart": 2.75,
+          "inputEnd": 4.25,
+          "seconds": 2.3686334579833783
+        },
+        {
+          "window": 4,
+          "inputStart": 3.75,
+          "inputEnd": 4.561836734693878,
+          "seconds": 1.5047170839970931
+        }
+      ],
+      "windowSeconds": 1.5,
+      "hopSeconds": 1,
+      "contextSeconds": 0.25,
+      "threads": 1,
+      "recognizer": "pocketSphinx"
+    }
+  },
+  "neural": {
+    "provenance": {
+      "repository": "adolon-ai/lam-a2e",
+      "revision": "80b0a40592fcccd1455c88dfba9d7791bbeff6c0",
+      "sourceConfig": {
+        "model_type": "wav2vec2-a2e",
+        "task": "audio-to-expression",
+        "framework": "onnx",
+        "opset_version": 14,
+        "min_ort_version": "1.17.0",
+        "sample_rate": 16000,
+        "input_samples": 16000,
+        "output_fps": 30,
+        "num_blendshapes": 52,
+        "blendshape_standard": "ARKit",
+        "parameters": 100528020,
+        "upstream": {
+          "repo": "https://github.com/aigc3d/LAM_Audio2Expression",
+          "paper": "LAM: Large Avatar Model for One-Shot Animatable Gaussian Head",
+          "venue": "SIGGRAPH 2025",
+          "license": "Apache-2.0"
+        },
+        "inputs": {
+          "audio": {
+            "shape": [
+              "batch",
+              "samples"
+            ],
+            "dtype": "float32",
+            "description": "Raw audio at 16kHz. Use 16000 samples (1s) for 30fps output."
+          },
+          "identity": {
+            "shape": [
+              "batch",
+              12
+            ],
+            "dtype": "float32",
+            "description": "One-hot identity vector. 12 classes, use [1,0,...,0] for neutral."
+          }
+        },
+        "outputs": {
+          "blendshapes": {
+            "shape": [
+              "batch",
+              30,
+              52
+            ],
+            "dtype": "float32",
+            "description": "ARKit blendshape weights at 30fps"
+          },
+          "asr_logits": {
+            "shape": [
+              "batch",
+              49,
+              32
+            ],
+            "dtype": "float32",
+            "description": "CTC ASR logits at 50fps (~24K params auxiliary head)"
+          }
+        },
+        "recommended": {
+          "path": "model_fp16.onnx",
+          "format": "external_data",
+          "precision": "float16_surgical",
+          "graph_size_kb": 385,
+          "weights_size_mb": 192,
+          "conversion": "Surgical fp16: decomposed LayerNorm subgraphs kept in fp32",
+          "fidelity": "cosine >0.9999 vs fp32, magnitude ratio 0.998-1.002",
+          "backends": [
+            "webgpu",
+            "wasm"
+          ]
+        },
+        "variants": {
+          "fp16_surgical": {
+            "path": "model_fp16.onnx",
+            "format": "external_data",
+            "size_mb": 192,
+            "precision": "float16",
+            "note": "Recommended. Decomposed LayerNorm preserved in fp32.",
+            "backends": [
+              "webgpu",
+              "wasm"
+            ]
+          },
+          "fp32": {
+            "path": "fp32/model.onnx",
+            "format": "external_data",
+            "size_mb": 384,
+            "precision": "float32",
+            "backends": [
+              "webgpu",
+              "wasm"
+            ]
+          },
+          "fp32_single_file": {
+            "path": "model.onnx",
+            "format": "single_file",
+            "size_mb": 384,
+            "precision": "float32",
+            "note": "Legacy backwards-compat. Prefer external data variants.",
+            "backends": [
+              "webgpu",
+              "wasm"
+            ]
+          },
+          "fp16_naive": {
+            "path": "fp16/model.onnx",
+            "format": "external_data",
+            "size_mb": 192,
+            "precision": "float16",
+            "note": "Superseded by root model_fp16.onnx (surgical conversion).",
+            "backends": [
+              "webgpu",
+              "wasm"
+            ]
+          },
+          "int8": {
+            "path": "int8/model.onnx",
+            "format": "external_data",
+            "size_mb": 97,
+            "precision": "int8_dynamic",
+            "note": "NOT RECOMMENDED. Visibly degraded output. Wav2Vec2 weights too sensitive for int8.",
+            "backends": [
+              "wasm"
+            ]
+          }
+        },
+        "blendshape_names": [
+          "eyeBlinkLeft",
+          "eyeLookDownLeft",
+          "eyeLookInLeft",
+          "eyeLookOutLeft",
+          "eyeLookUpLeft",
+          "eyeSquintLeft",
+          "eyeWideLeft",
+          "eyeBlinkRight",
+          "eyeLookDownRight",
+          "eyeLookInRight",
+          "eyeLookOutRight",
+          "eyeLookUpRight",
+          "eyeSquintRight",
+          "eyeWideRight",
+          "jawForward",
+          "jawLeft",
+          "jawRight",
+          "jawOpen",
+          "mouthClose",
+          "mouthFunnel",
+          "mouthPucker",
+          "mouthLeft",
+          "mouthRight",
+          "mouthSmileLeft",
+          "mouthSmileRight",
+          "mouthFrownLeft",
+          "mouthFrownRight",
+          "mouthDimpleLeft",
+          "mouthDimpleRight",
+          "mouthStretchLeft",
+          "mouthStretchRight",
+          "mouthRollLower",
+          "mouthRollUpper",
+          "mouthShrugLower",
+          "mouthShrugUpper",
+          "mouthPressLeft",
+          "mouthPressRight",
+          "mouthLowerDownLeft",
+          "mouthLowerDownRight",
+          "mouthUpperUpLeft",
+          "mouthUpperUpRight",
+          "browDownLeft",
+          "browDownRight",
+          "browInnerUp",
+          "browOuterUpLeft",
+          "browOuterUpRight",
+          "cheekPuff",
+          "cheekSquintLeft",
+          "cheekSquintRight",
+          "noseSneerLeft",
+          "noseSneerRight",
+          "tongueOut"
+        ]
+      },
+      "note": "Sample preparation only; CPU worker will be time- and RSS-limited."
+    },
+    "channelOrder": {
+      "names": [
+        "browDownLeft",
+        "browDownRight",
+        "browInnerUp",
+        "browOuterUpLeft",
+        "browOuterUpRight",
+        "cheekPuff",
+        "cheekSquintLeft",
+        "cheekSquintRight",
+        "eyeBlinkLeft",
+        "eyeBlinkRight",
+        "eyeLookDownLeft",
+        "eyeLookDownRight",
+        "eyeLookInLeft",
+        "eyeLookInRight",
+        "eyeLookOutLeft",
+        "eyeLookOutRight",
+        "eyeLookUpLeft",
+        "eyeLookUpRight",
+        "eyeSquintLeft",
+        "eyeSquintRight",
+        "eyeWideLeft",
+        "eyeWideRight",
+        "jawForward",
+        "jawLeft",
+        "jawOpen",
+        "jawRight",
+        "mouthClose",
+        "mouthDimpleLeft",
+        "mouthDimpleRight",
+        "mouthFrownLeft",
+        "mouthFrownRight",
+        "mouthFunnel",
+        "mouthLeft",
+        "mouthLowerDownLeft",
+        "mouthLowerDownRight",
+        "mouthPressLeft",
+        "mouthPressRight",
+        "mouthPucker",
+        "mouthRight",
+        "mouthRollLower",
+        "mouthRollUpper",
+        "mouthShrugLower",
+        "mouthShrugUpper",
+        "mouthSmileLeft",
+        "mouthSmileRight",
+        "mouthStretchLeft",
+        "mouthStretchRight",
+        "mouthUpperUpLeft",
+        "mouthUpperUpRight",
+        "noseSneerLeft",
+        "noseSneerRight",
+        "tongueOut"
+      ],
+      "source": "https://github.com/aigc3d/LAM_Audio2Expression/blob/02a703c3ea7d8e360eb43098eca85ee98a083529/models/utils.py",
+      "note": "Official LAM output order; community export config lists a different order. This correction is required for meaningful mouth motion."
+    },
+    "onnxruntime": "1.22.1",
+    "peakRssBytes": 562626560,
+    "windowSeconds": 1,
+    "hopSeconds": 0.5
+  },
+  "unavailable": [
+    {
+      "name": "Kokoro native phone durations / HeadTTS",
+      "reason": "Saved fixtures contain words, not synthesis duration tensors. A matching metadata capture would require a separately prepared Kokoro run; guessed durations are not presented as native."
+    },
+    {
+      "name": "SG Com",
+      "reason": "Commercial SDK access/licensing needed; no account or purchase arranged."
+    },
+    {
+      "name": "MetaHuman Realistic / uLipSync",
+      "reason": "Unreal/Unity integrations; no compatible standalone Asena solver verified. Installing either engine is outside this removable small test."
+    },
+    {
+      "name": "NeuroSync",
+      "reason": "Gated model and unverified maintained local API. No licence acceptance or account setup."
+    },
+    {
+      "name": "Audio2Face Swift/MLX",
+      "reason": "Identity-specific geometry coefficients require a separate geometry retargeting implementation; treating them as VRM/ARKit weights would be invalid."
+    }
+  ]
+}

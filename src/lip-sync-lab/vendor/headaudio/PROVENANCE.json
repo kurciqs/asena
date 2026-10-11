@@ -1,0 +1,6 @@
+{
+  "repository": "https://github.com/met4citizen/HeadAudio",
+  "revision": "d3af5f9ff86ab6b2b1913d411a4e1922ec101953",
+  "license": "MIT",
+  "note": "Unmodified processor sources; offline model outputs, not browser worklet timing."
+}

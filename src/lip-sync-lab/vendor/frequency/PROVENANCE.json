@@ -1,0 +1,5 @@
+{
+  "repository": "https://github.com/Amoner/lipsync-engine",
+  "revision": "d4f1d4aaf85be9bf8a6e2264f828dd8cab019a92",
+  "note": "Upstream algorithms; relative import paths adjusted for the isolated offline harness. FFT input is a documented emulation of Web Audio byte spectra."
+}
