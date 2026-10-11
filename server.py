@@ -2,17 +2,19 @@ import mimetypes
 mimetypes.add_type("application/javascript", ".js")
 mimetypes.add_type("text/css", ".css")
 
-from flask import Flask, request, jsonify, send_from_directory, Response, render_template
-from flask_cors import CORS
+from flask import Flask, request, jsonify, send_from_directory, abort
 import requests
 import os
 import json
-import base64 
 import subprocess
 import posixpath
+import threading
+ALIGNMENT_LOCK = threading.Lock()
+import private_storage as storage
+from pathlib import Path
 from service_contracts import ServiceError, require_payload, proxy_json, validate_chat_response, validate_tts_response, validate_visemes
 
-SAVE_DIR = "src"
+STATIC_DIR = Path(__file__).resolve().parent / "src"
 RHUBARB = "../rhubarb/rhubarb"
 LMS_API = "http://localhost:1234/v1/chat/completions"
 # outsource kokoro to a local stronger machine, improves performance drastically, you could even run the whole server there instead of on the laptop, with that performance kokoro is basically faster than lms. 
@@ -23,8 +25,7 @@ RUNTIME_MODE = os.environ.get("ASENA_MODE", "live")
 if RUNTIME_MODE not in ("live", "replay"):
     raise RuntimeError("ASENA_MODE must be live or replay; refusing an ambiguous launch")
 
-app = Flask(__name__, static_folder="./src/")
-CORS(app)
+app = Flask(__name__, static_folder=None)
 app.config["MAX_CONTENT_LENGTH"] = 24 * 1024 * 1024
 
 @app.errorhandler(ServiceError)
@@ -39,18 +40,31 @@ def process_timeout(error):
 def process_missing(error):
     return jsonify({"error": "A required local file or speech tool is unavailable.", "retryable": True}), 503
 
+@app.errorhandler(OSError)
+def storage_failure(error):
+    return jsonify({"error": "Local storage could not be read or saved. Existing memories have been preserved.", "retryable": True}), 503
+
 @app.errorhandler(413)
 def oversized_request(error):
     return jsonify({"error": "Request is too large.", "retryable": False}), 413
 
 @app.before_request
 def enforce_replay_boundary():
+    # The website is loopback-only. Reject foreign origins and DNS-rebinding hosts.
+    if request.host.split(':')[0] not in ('127.0.0.1', 'localhost'):
+        return jsonify({'error': 'This server only accepts local website hosts.'}), 403
+    origin = request.headers.get('Origin')
+    if origin and origin != request.host_url.rstrip('/'):
+        return jsonify({'error': 'Cross-origin requests are not allowed.'}), 403
+    if request.headers.get('Sec-Fetch-Site') == 'cross-site':
+        return jsonify({'error': 'Cross-site requests are not allowed.'}), 403
+
     if RUNTIME_MODE == "replay" and request.method not in ("GET", "HEAD", "OPTIONS"):
         return jsonify({"error": "Offline replay blocks backend calls and server writes."}), 403
     replay_path = posixpath.normpath(request.path).lower()
     if RUNTIME_MODE == "replay" and (replay_path in (
         "/chat", "/tts", "/get_visemes", "/save_audio", "/save_json"
-    ) or replay_path.startswith(("/data/", "/src/data/"))):
+    ) or replay_path.startswith(("/data/", "/src/data/", "/api/"))):
         return jsonify({"error": "This resource is unavailable in offline replay."}), 403
 
 @app.route("/runtime")
@@ -59,7 +73,7 @@ def runtime():
 
 @app.errorhandler(404)
 def page_not_found(e):
-    return send_from_directory("./src", "404.html"), 404
+    return send_from_directory(STATIC_DIR, "404.html"), 404
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -73,97 +87,88 @@ def tts():
 
 @app.route("/")
 def serve_index():
-    return send_from_directory(app.static_folder, "index.html")
+    return send_from_directory(STATIC_DIR, "index.html")
 
 @app.route("/<path:path>")
 def static_files(path):
-    return send_from_directory(app.static_folder, path)
+    relative = path[4:] if path.startswith('src/') else path
+    normalized = posixpath.normpath(relative).lower()
+    if normalized == 'data' or normalized.startswith(('data/', '.runtime/')):
+        return jsonify({'error': 'Private data is not a static resource.'}), 403
+    resolved = (STATIC_DIR / relative).resolve()
+    if resolved.is_relative_to(STATIC_DIR) and resolved.relative_to(STATIC_DIR).parts[0].lower() == 'data':
+        return jsonify({'error': 'Private data is not a static resource.'}), 403
+    if not resolved.is_relative_to(STATIC_DIR) or any(part.startswith('.') for part in Path(relative).parts):
+        abort(404)
+    return send_from_directory(STATIC_DIR, relative)
 
 @app.route("/status")
 def status():
     return "What usually happens when you poke something with a stick? It pokes back. 2:4"
  
 @app.route('/save_audio', methods=['POST'])
-def save_audio():
-    data = request.json
-    if not data or 'audio' not in data or 'filename' not in data:
-        return jsonify({'error': 'Missing audio or filename'}), 400
-    
-    audio_b64 = data['audio']
-    filename = data['filename']
-    
-    try:
-        audio_bytes = base64.b64decode(audio_b64)
-    except Exception as e:
-        return jsonify({'error': f'Invalid base64 data: {str(e)}'}), 400
-    
-    # Save directory (make sure this exists or create it) 
-    file_path = SAVE_DIR + filename    
-    with open(file_path, 'wb') as f:
-        f.write(audio_bytes)
-   
-    return jsonify({'status': 'success', 'saved_to': file_path})
-
 @app.route('/save_json', methods=['POST'])
-def save_json():
-    data = request.json
-    if not data or 'json_data' not in data or 'filename' not in data:
-        return jsonify({'error': 'Missing json_data or filename'}), 400
-    
-    json_data = data['json_data']
-    filename = data['filename']
-    
-    file_path = SAVE_DIR + filename
+def obsolete_write():
+    return jsonify({'error': 'Client file paths are no longer supported. Use the private resource APIs.'}), 410
 
-    try:
-        with open(file_path, 'w', encoding='utf-8') as f:
-            json.dump(json_data, f, indent=2, ensure_ascii=False)
-    except Exception as e:
-        print(str(e))
-        return jsonify({'error': f'Failed to save JSON: {str(e)}'}), 500
-    
-    return jsonify({'status': 'success', 'saved_to': file_path})
+@app.route('/api/memories', methods=['GET', 'PUT'])
+def memory_resource():
+    if request.method == 'GET':
+        return jsonify({'memories': storage.read_memories()})
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict) or set(data) != {'memories'}:
+        raise ServiceError('Expected only a memories list; filenames are not accepted.',400)
+    storage.save_memories(data['memories'])
+    return jsonify({'status': 'saved', 'count': len(data['memories'])})
+
+@app.route('/api/audio', methods=['POST'])
+def audio_resource():
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict) or set(data) != {'audio'}:
+        raise ServiceError('Expected only WAV audio; filenames are not accepted.',400)
+    return jsonify({'audio_id': storage.store_audio(data['audio'])}), 201
+
+@app.route('/api/audio/<audio_id>', methods=['DELETE'])
+def release_audio(audio_id):
+    storage.delete_audio(audio_id)
+    return jsonify({'status': 'released'})
 
 @app.route('/get_visemes', methods=['POST'])
 def get_visemes():
     data = request.get_json(silent=True)
-    if not isinstance(data, dict) or not isinstance(data.get('filepath'), str):
-        raise ServiceError('Missing audio file path.', 400)
-    filepath = SAVE_DIR + data['filepath']
-    if not filepath or not os.path.exists(filepath):
-        return jsonify({'error': 'Invalid or missing file path'}), 400
-
-    # first convert to correct format
-    conv_path = filepath.replace(".wav", "_conv.wav")
-    
-    # dawg if this subprocess fails, you don't even deserve to know it's so obscure
-    result = subprocess.run([
-        "ffmpeg", "-threads", "1", "-y", "-i", filepath,
-        "-ac", "1", "-ar", "44100", "-sample_fmt", "s16",
-        conv_path
-    ], capture_output=True, text=True, timeout=30)
-    if result.returncode != 0:
-        return jsonify({'error': 'Audio conversion failed. Check the WAV and ffmpeg, then retry.', 'retryable': True}), 500
-
-    result = subprocess.run(
-        [RHUBARB, conv_path, "-f", "json"],
-        capture_output=True,
-        text=True, timeout=30
-    )
-    if result.returncode != 0:
-        return jsonify({'error': 'Rhubarb alignment failed. Check the tool, then retry.', 'retryable': True}), 500
-
+    if not isinstance(data, dict) or set(data) != {'audio_id'}:
+        raise ServiceError('Expected a server-issued audio resource ID.',400)
+    filepath = storage.audio_path(data['audio_id'])
+    conv_path = filepath.with_name('aligned.wav')
+    if not ALIGNMENT_LOCK.acquire(blocking=False):
+        raise ServiceError('Audio alignment is busy. Retry shortly, or use audio without lip sync.',503)
     try:
-        output = json.loads(result.stdout)
-    except ValueError as error:
-        raise ServiceError("Rhubarb returned invalid JSON.") from error
-    out_data = {
-        "visemes": output.get("mouthCues", []),
-        "soundFile" : data['filepath'] # this one without the dot i guess
-    }
-    
-    # return, not sure what to do with it though since it's already saved
-    return jsonify({'visemes': validate_visemes(output.get("mouthCues", []))})
+        result = subprocess.run([
+            'ffmpeg', '-threads', '1', '-nostdin', '-y', '-i', str(filepath),
+            '-ac', '1', '-ar', '44100', '-sample_fmt', 's16', str(conv_path)
+        ], capture_output=True, text=True, timeout=30)
+        if result.returncode != 0:
+            raise ServiceError('Audio conversion failed. Check the WAV and ffmpeg, then retry.')
+        result = subprocess.run([RHUBARB, str(conv_path), '-f', 'json'],
+                                capture_output=True, text=True, timeout=30)
+        if result.returncode != 0:
+            raise ServiceError('Rhubarb alignment failed. Check the tool, then retry.')
+        try:
+            output = json.loads(result.stdout)
+            if not isinstance(output,dict): raise ValueError('Expected object')
+        except ValueError as error:
+            raise ServiceError('Rhubarb returned invalid JSON.') from error
+        return jsonify({'visemes': validate_visemes(output.get('mouthCues', []))})
+    finally:
+        storage.delete_audio(data['audio_id'])
+        ALIGNMENT_LOCK.release()
+
+@app.after_request
+def private_response_headers(response):
+    if request.path.startswith(('/api/', '/chat', '/tts', '/get_visemes')):
+        response.headers['Cache-Control'] = 'no-store'
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    return response
 
 if __name__ == "__main__":    
     app.run(host="127.0.0.1", port=int(os.environ.get("ASENA_PORT", "3000")),

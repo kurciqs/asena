@@ -1,7 +1,10 @@
 import base64
+import io
+import wave
 import json
 import subprocess
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 import requests
 import server
@@ -48,7 +51,10 @@ class ServiceContractTests(unittest.TestCase):
             self.assertEqual(error.exception.status,504)
 
     def test_audio_survives_missing_word_timing_but_invalid_audio_fails(self):
-        wav=b'RIFF'+b'\x00'*4+b'WAVE'+b'\x00'*32
+        output=io.BytesIO()
+        with wave.open(output,'wb') as handle:
+            handle.setparams((1,2,24000,0,'NONE','NONE'));handle.writeframes(b'\x00\x00'*24)
+        wav=output.getvalue()
         value=contracts.validate_tts_response({'audio':base64.b64encode(wav).decode(),'timestamps':None})
         self.assertEqual(value['timestamps'],[])
         self.assertTrue(value['warnings'])
@@ -58,9 +64,9 @@ class ServiceContractTests(unittest.TestCase):
             with self.assertRaises(contracts.ServiceError): contracts.validate_visemes(cues)
 
     def test_subprocess_deadline_and_missing_tool_are_visible(self):
-        with patch.object(server.os.path,'exists',return_value=True), patch.object(server.subprocess,'run',side_effect=subprocess.TimeoutExpired('fixture',30)) as process:
-            result=self.client.post('/get_visemes',json={'filepath':'/data/test.wav'})
+        with patch.object(server.storage,'audio_path',return_value=Path('/tmp/fixture/input.wav')), patch.object(server.storage,'delete_audio'), patch.object(server.subprocess,'run',side_effect=subprocess.TimeoutExpired('fixture',30)) as process:
+            result=self.client.post('/get_visemes',json={'audio_id':'a'*32})
             self.assertEqual(result.status_code,504)
             self.assertEqual(process.call_args.kwargs['timeout'],30)
-        with patch.object(server.os.path,'exists',return_value=True), patch.object(server.subprocess,'run',side_effect=FileNotFoundError()):
-            self.assertEqual(self.client.post('/get_visemes',json={'filepath':'/data/test.wav'}).status_code,503)
+        with patch.object(server.storage,'audio_path',return_value=Path('/tmp/fixture/input.wav')), patch.object(server.storage,'delete_audio'), patch.object(server.subprocess,'run',side_effect=FileNotFoundError()):
+            self.assertEqual(self.client.post('/get_visemes',json={'audio_id':'a'*32}).status_code,503)

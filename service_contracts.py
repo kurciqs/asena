@@ -2,6 +2,7 @@
 import base64
 import json
 import math
+import struct
 import time
 import requests
 
@@ -94,6 +95,20 @@ def decode_wav(audio):
         raise ServiceError('Invalid base64 audio.', 400) from error
     if len(blob) < 44 or blob[:4] != b'RIFF' or blob[8:12] != b'WAVE':
         raise ServiceError('Expected WAV audio.', 400)
+    offset, format_info, audio_size = 12, None, None
+    while offset + 8 <= len(blob):
+        kind, size = blob[offset:offset+4], struct.unpack_from('<I',blob,offset+4)[0]
+        if kind == b'fmt ' and 16 <= size <= len(blob)-offset-8:
+            format_info = struct.unpack_from('<HHIIHH',blob,offset+8)
+        if kind == b'data':
+            audio_size = min(size,len(blob)-offset-8)
+            break
+        offset += 8 + size + size % 2
+    if format_info is None or audio_size is None:
+        raise ServiceError('WAV format or audio data is missing.',400)
+    encoding, channels, rate, byte_rate, block, bits = format_info
+    if encoding != 1 or channels not in (1,2) or bits != 16 or not 8000 <= rate <= 192000 or block != channels * 2 or byte_rate != rate * block or audio_size < block or audio_size % block or audio_size / byte_rate > 600:
+        raise ServiceError('Expected a bounded PCM16 WAV recording.',400)
     return blob
 
 

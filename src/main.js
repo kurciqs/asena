@@ -22,9 +22,7 @@ if (RUNTIME_MODE === 'replay') {
 }
 
 // ------- CONFIGS AND GLOBALS -------
-const AUDIO_FOLDER = "/data/";
 const LIP_SYNC = "rhubarb"; // or "dictionary"
-const MEMORY_PATH = "/data/memory.json"
 let KOKORO_VOICE = "af_heart";
 let CONTEXT_WINDOW_MAX = 4000;
 let CONTEXT_WINDOW_CURRENT = 0;
@@ -159,8 +157,9 @@ let memoryData;
 if (replay) {
     memoryData = loadReplayMemories(localStorage);
 } else {
-    const memoryResponse = await fetch('/data/memory.json');
-    memoryData = await memoryResponse.json();
+    try { memoryData = (await requestJSON('/api/memories', { timeoutMs: 8000 })).memories; }
+    catch (error) { memoryData = []; document.getElementById('turn-status').textContent = error.message; }
+    if (!Array.isArray(memoryData)) memoryData = [];
 }
 let memoryPrompt = "";
 memoryData.forEach((mem) => {
@@ -252,23 +251,25 @@ async function generateTTS(text, turn) {
     const audio = new Audio(audioURL);
     turn.own(() => { audio.pause(); URL.revokeObjectURL(audioURL); });
 
-    // if using rhubarb, we have to write the sound to a file
-    if (LIP_SYNC === "rhubarb") {
-        const audioPath = AUDIO_FOLDER + `tts.wav`;
-        await requestJSON('/save_audio', {
-            signal: turn.signal,
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                audio: audioBase64,
-                filename: audioPath
-            })
-        });
+    let audioId = null;
+    if (LIP_SYNC === 'rhubarb') {
+        try {
+            const saved = await requestJSON('/api/audio', {
+                signal: turn.signal, method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ audio: audioBase64 })
+            });
+            audioId = saved.audio_id;
+            // Server expiry is a backstop if a cancelled upload response loses its ID.
+            turn.own(() => { requestJSON(`/api/audio/${audioId}`, { method: 'DELETE', timeoutMs: 5000 }).catch(() => {}); });
+        } catch (error) {
+            if (turn.signal.aborted) throw error;
+            speechWarning(`Audio storage unavailable; lip sync will be skipped. ${error.message}`);
+        }
     }
 
     await loadAudioMetadata(audio, { signal: turn.signal });
     turn.assertCurrent();
-    return { audio, timestamps };
+    return { audio, timestamps, audioId };
 }
 
 function convertToVisemes(kokoroWords) {
@@ -309,16 +310,16 @@ function convertToVisemes(kokoroWords) {
     return visemes;
 }
 
-async function getVisemes(timestamps, turn) {
+async function getVisemes(timestamps, turn, audioId) {
     turn.assertCurrent();
     if (replay) return replay.visemes();
     if (LIP_SYNC === "rhubarb") {
-        const audioPath = AUDIO_FOLDER + `tts.wav`;
+        if (!audioId) throw new Error('Audio resource unavailable.');
         const data = await requestJSON('/get_visemes', {
             signal: turn.signal,
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ filepath: audioPath })
+            body: JSON.stringify({ audio_id: audioId })
         });
         return data.visemes;
     }
@@ -412,11 +413,11 @@ function speechWarning(message) {
 async function prepareAndPlay(parsedReply, turn) {
     turn.phase('preparing-speech');
     speechWarning('');
-    const { audio, timestamps } = await generateTTS(parsedReply.text, turn);
+    const { audio, timestamps, audioId } = await generateTTS(parsedReply.text, turn);
     turn.assertCurrent();
     let visemes = [], emotions = [], actions = [];
     try {
-        visemes = await getVisemes(timestamps, turn);
+        visemes = await getVisemes(timestamps, turn, audioId);
         if (!Array.isArray(visemes)) throw new Error('Missing mouth cues.');
         buildExpressionTracks({ duration: audio.duration, visemes }, name => name);
     } catch (error) {
@@ -560,14 +561,12 @@ async function saveMemoryToFile() {
         inspectReplay({ phase: 'test memory saved' });
         return;
     }
-    await requestJSON('/save_json', {
-        method: 'POST',
+    await requestJSON('/api/memories', {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            json_data: memories,
-            filename: MEMORY_PATH
-        })
+        body: JSON.stringify({ memories })
     });
+    document.getElementById('turn-status').textContent = `Saved ${memories.length} memories.`;
 }
 
 // -------- ACTUALLY DOING SOMETHING 🔥 --------
