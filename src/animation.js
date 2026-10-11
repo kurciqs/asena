@@ -36,6 +36,37 @@ const ANIMATION_CROSSFADE = 0.5;
 let currentExpression = { name: "Neutral", value: 1 }
 let expressionOptions = ["angry", "happy", "relaxed", "sad", "surprised"]
 let currentAnimation = null;
+let activeAudio = null;
+let performanceAction = null;
+let performanceGeneration = 0;
+let gestureGeneration = 0;
+const gestureTimers = new Set();
+function scheduleGesture(callback, seconds) {
+    const timer = setTimeout(() => { gestureTimers.delete(timer); callback(); }, Math.max(0, seconds) * 1000);
+    gestureTimers.add(timer);
+}
+export function stopPerformance() {
+    performanceGeneration++;
+    gestureGeneration++;
+    for (const timer of gestureTimers) clearTimeout(timer);
+    gestureTimers.clear();
+    if (activeAudio) { activeAudio.pause(); try { activeAudio.currentTime = 0; } catch {} activeAudio = null; }
+    if (performanceAction && currentMixer) {
+        const clip = performanceAction.getClip();
+        performanceAction.stop(); currentMixer.uncacheClip(clip); performanceAction = null;
+    }
+    if (currentVrm) {
+        for (const name of new Set([...Object.values(rhubarbToVRM), ...expressionOptions])) {
+            if (currentVrm.expressionManager.getExpression(name)) currentVrm.expressionManager.setValue(name, 0);
+        }
+    }
+    if (animations.idle) {
+        if (currentAnimation && currentAnimation !== animations.idle) currentAnimation.fadeOut(ANIMATION_CROSSFADE);
+        animations.idle.reset().fadeIn(ANIMATION_CROSSFADE).play();
+        currentAnimation = animations.idle;
+    }
+    notifyPlaybackState();
+}
 
 // ------- THREE JS AND MORE RENDERING -------
 // orga idk
@@ -233,33 +264,34 @@ function sleep(seconds) {
     return new Promise(resolve => setTimeout(resolve, seconds * 1000));
 }
 
-export async function playAnimationByName(name) {
-    let animation = animations[name];
-    if (animation === currentAnimation) return; // fuck that
-    currentAnimation.fadeOut(ANIMATION_CROSSFADE);
+export function playAnimationByName(name) {
+    const animation = animations[name];
+    if (!animation || !currentMixer) return false;
+    const generation = ++gestureGeneration;
+    const performance = performanceGeneration;
+    currentAnimation?.fadeOut(ANIMATION_CROSSFADE);
     animation.reset().fadeIn(ANIMATION_CROSSFADE).play();
     currentAnimation = animation;
     notifyPlaybackState();
-
-    // IT'S A HOUSE OF CARDS BABAY BUT IT'S STABLE IT'S STABLE
-    await sleep(animation.getClip().duration - ANIMATION_CROSSFADE)
-
-    // go back to idle, only if we have not changed current since then PROBLEM if someone double requests the same animation, lets hope asena won't do that
-    if (animation === currentAnimation) {
-        animations["idle"].reset().fadeIn(ANIMATION_CROSSFADE).play()
-        currentAnimation = animations["idle"];
-        animation.fadeOut(ANIMATION_CROSSFADE)
-        notifyPlaybackState();
-    }
+    scheduleGesture(() => {
+        if (generation !== gestureGeneration || performance !== performanceGeneration) return;
+        if (animation === currentAnimation && animations.idle) {
+            animations.idle.reset().fadeIn(ANIMATION_CROSSFADE).play();
+            currentAnimation = animations.idle;
+            animation.fadeOut(ANIMATION_CROSSFADE);
+            notifyPlaybackState();
+        }
+    }, animation.getClip().duration - ANIMATION_CROSSFADE);
+    return true;
 }
 
 export function setExpression(name, value) {
     currentExpression = { name: name, value: value };
 }
 
-async function scheduleAnimationByName(name, time) {
-    await sleep(time);
-    playAnimationByName(name);
+function scheduleAnimationByName(name, time) {
+    const generation = performanceGeneration;
+    scheduleGesture(() => { if (generation === performanceGeneration) playAnimationByName(name); }, time);
 }
 
 function animate() {
@@ -324,23 +356,13 @@ function notifyPlaybackState() {
 
 export function talk(data) {
     if (!animationsLoaded) {
-        console.error('ERROR: Animations not loaded yet.');
-        return;
+        throw new Error('Avatar animations are not ready.');
     }
 
-    let audio = data.audio;
-    audio.pause();
+    stopPerformance();
+    const audio = data.audio;
+    activeAudio = audio;
     audio.currentTime = 0;
-
-    // Remove old mouthShapesTrack actions
-    if (currentMixer) {
-        currentMixer._actions.forEach(act => {
-            if (act._clip && act._clip.name === 'MouthShapes') {
-                act.stop();
-                currentMixer.uncacheAction(act._clip);
-            }
-        });
-    }
 
     // TODO: this breaks on empty animationData
     let tracks = [];
@@ -421,10 +443,12 @@ export function talk(data) {
     const action = currentMixer.clipAction(mouthShapesTrack);
     action.setLoop(THREE.LoopOnce, 0);
     action.play();
+    performanceAction = action;
     return audio.play();
 }
 
 function playAnimationFromSelect() {
+    gestureGeneration++;
     const selectedOption = animationSelect.value;
 
     Object.keys(animations).forEach((animationName) => {

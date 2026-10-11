@@ -1,3 +1,4 @@
+import { TurnController } from './turn_controller.js';
 import * as ANI from './animation.js'
 import * as EMO from "./emotion_classifier.js"
 import { CLOSENESS, COMPANION_STORAGE_KEY, DEFAULT_COMPANION_PROFILE, buildCompanionPrompt, loadCompanionProfile, normalizeCompanionProfile, saveCompanionProfile } from './companion.js';
@@ -164,7 +165,6 @@ memoryData.forEach((mem) => {
     memories.push(mem);
 });
 
-let handlingResponse = false;
 let message_history = [
     {
         role: "system",
@@ -177,7 +177,8 @@ let message_history = [
 ]
 
 // ------- HELPER FUNCTIONS -------
-async function chat(history, purpose = 'dialogue') {
+async function chat(history, purpose = 'dialogue', turn = null) {
+    turn?.assertCurrent();
     if (replay) {
         const reply = replay.reply(history, purpose);
         inspectReplay(purpose === 'memory' ? { memoryExtraction: reply } :
@@ -185,6 +186,7 @@ async function chat(history, purpose = 'dialogue') {
         return reply;
     }
     const chatResponse = await fetch("/chat", {
+        signal: turn?.signal,
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -201,6 +203,7 @@ async function chat(history, purpose = 'dialogue') {
     }
 
     const chatData = await chatResponse.json();
+    turn?.assertCurrent();
     const reply = chatData.choices[0].message.content;
     CONTEXT_WINDOW_CURRENT = chatData.usage.total_tokens;
 
@@ -211,15 +214,19 @@ async function chat(history, purpose = 'dialogue') {
     return reply;
 }
 
-async function generateTTS(text) {
+async function generateTTS(text, turn) {
+    turn.assertCurrent();
     if (replay) {
         const speech = replay.speech();
         inspectReplay({ phase: 'loading fixture audio', audio: speech.audio, timestamps: speech.timestamps,
             speech, alignment: replay.active.alignment });
-        const audio = await loadFixtureAudio(speech.audio);
+        const audio = await loadFixtureAudio(speech.audio, undefined, 8000, turn.signal);
+        turn.assertCurrent();
+        turn.own(() => audio.pause());
         return { audio, timestamps: speech.timestamps };
     }
     const ttsResponse = await fetch("/tts", {
+        signal: turn.signal,
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -238,6 +245,7 @@ async function generateTTS(text) {
     }
 
     const ttsData = await ttsResponse.json();
+    turn.assertCurrent();
     const audioBase64 = ttsData.audio;
     const timestamps = ttsData.timestamps;
     console.log(timestamps)
@@ -250,11 +258,13 @@ async function generateTTS(text) {
     const audioURL = URL.createObjectURL(audioBlob);
 
     const audio = new Audio(audioURL);
+    turn.own(() => { audio.pause(); URL.revokeObjectURL(audioURL); });
 
     // if using rhubarb, we have to write the sound to a file
     if (LIP_SYNC === "rhubarb") {
         const audioPath = AUDIO_FOLDER + `tts.wav`;
         await fetch('/save_audio', {
+            signal: turn.signal,
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -305,11 +315,13 @@ function convertToVisemes(kokoroWords) {
     return visemes;
 }
 
-async function getVisemes(timestamps) {
+async function getVisemes(timestamps, turn) {
+    turn.assertCurrent();
     if (replay) return replay.visemes();
     if (LIP_SYNC === "rhubarb") {
         const audioPath = AUDIO_FOLDER + `tts.wav`;
         const response = await fetch('/get_visemes', {
+            signal: turn.signal,
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ filepath: audioPath })
@@ -328,155 +340,105 @@ async function getVisemes(timestamps) {
 }
 
 let ind = 0;
-// pretty much the main function
-async function handleTextResponse() {
-    // lock
-    if (handlingResponse) {
-        console.log("LOG: Already handling a response, ignoring button click.");
-        return;
-    }
-    handlingResponse = true;
+const turnController = new TurnController(state => {
+    const labels = { idle: 'Ready', requesting: 'Getting a reply', 'preparing-speech': 'Preparing speech',
+        speaking: 'Speaking', completed: 'Finished', stopped: 'Stopped', failed: 'Failed' };
+    document.getElementById('turn-status').textContent = state.error || labels[state.phase];
+    document.getElementById('turn-stop').disabled = !['requesting', 'preparing-speech', 'speaking'].includes(state.phase);
+    inspectReplay({ turn: state });
+});
 
+async function handleTextResponse() {
     if (replay && !ANI.getPlaybackState().ready) {
         replayMessage('The avatar is still loading. Try again once it is visible.');
-        inspectReplay({ phase: 'waiting for avatar' });
-        handlingResponse = false;
         return;
     }
-    if (replay && replay.finished) {
+    if (replay?.finished) {
         replayMessage('This scene is finished. Restart it or choose another scene.');
-        handlingResponse = false;
         return;
     }
-
-    // input handling
-    let message = textInput.value.trim();
-    if (!message) {
-        handlingResponse = false;
-        return;
-    }
-    console.log('LOG: User sent:', message);
+    const message = textInput.value.trim();
+    if (!message) return;
     textInput.value = '';
-
-    ind++;
-
-    message_history.push({ role: "user", content: message });
-    console.log(message_history);
-
-    renderMessages();
-
-    // input processing
-    try {
+    await turnController.run(async turn => {
+        turn.own(() => ANI.stopPerformance());
+        message_history.push({ role: 'user', content: message });
         if (replay) {
-            sendButton.disabled = true;
-            replayMessage(`Playing scripted scene ${replay.cursor + 1} of ${replay.turns.length}. Using saved audio.`);
             replayInspection = {};
             inspectReplay({ phase: 'requesting fixture' });
         }
-        const start = performance.now();
-        let now = start;
-
-        // get llm response
-        let rawReply = await chat(message_history);
-        let parsedReply = EMO.decodeTaggedMessage(rawReply);
-        inspectReplay({ parsedReply });
-
-        let asenaReply = parsedReply.text;
-        message_history.push({ role: "assistant", content: rawReply });
-
-        // every five messages, store some imporant information
-        if (ind % 5 === 0) {
-            console.log("LOG: EXTRACTING MEMORY.")
-            let newMessageHistory = message_history.slice(); // copy to not fuck around with the real messageline
-            let prompt = "Summarize your recent dialogue (last 5 responses) with the user into 1–2 short bullet points that describe important facts, user preferences, or character behavior. Be concise, don't give an introduction.";
-            newMessageHistory.push({ role: "user", content: prompt });
-
-            let extractedMemory = "\n" + (await chat(newMessageHistory, 'memory'));
-            let mems = extractedMemory.split(/\n\s*-\s+/).map(s => s.trim()).filter(s => s.length > 0);
-            mems.forEach((mem) => { memories.push(mem) });
-            inspectReplay({ phase: 'memory extracted' });
-        }
         renderMessages();
-
-        now = performance.now();
-        const llmTime = now - start;
-
-        // generate tts file with timestamps
-        let { audio, timestamps } = await generateTTS(asenaReply);
-
-        now = performance.now();
-        const kokoroTime = now - start;
-
-        // get visemes
-        let visemes = await getVisemes(timestamps);
-        let emotions = EMO.getEmotions(timestamps, parsedReply.emotions, parsedReply.text);
-        let actions = EMO.getActions(timestamps, parsedReply.actions, parsedReply.text);
-        inspectReplay({ phase: 'performance prepared', spokenText: asenaReply, visemes, emotions, actions });
-
-        console.log(emotions)
-        console.log(actions)
-
-        now = performance.now();
-        const rhubarbTime = now - start;
-
-        // time logging for testing
-        console.log("\n LLM:", llmTime);
-        console.log("\n KOKORO:", kokoroTime - llmTime);
-        console.log("RHUBARB:", rhubarbTime - kokoroTime);
-        console.log("TOTAL:", now - start);
-
-        audio.addEventListener("loadedmetadata", () => {
-            console.log("Duration:", audio.duration);
-        });
-
-        const performanceData = { emotions, visemes, actions, audio };
-        if (replay) {
-            await playReplay(performanceData);
+        try {
+            const rawReply = await chat(message_history, 'dialogue', turn);
+            turn.assertCurrent();
+            const parsedReply = EMO.decodeTaggedMessage(rawReply);
+            inspectReplay({ parsedReply });
+            message_history.push({ role: 'assistant', content: rawReply });
+            ind++;
+            if (ind % 5 === 0) {
+                const extractionHistory = [...message_history, { role: 'user', content:
+                    'Summarize the recent dialogue into 1–2 short bullet points of explicitly stated user facts and preferences.' }];
+                const extracted = await chat(extractionHistory, 'memory', turn);
+                turn.assertCurrent();
+                memories.push(...('\n' + extracted).split(/\n\s*-\s+/).map(item => item.trim()).filter(Boolean));
+                inspectReplay({ phase: 'memory extracted' });
+            }
+            renderMessages();
+            turn.phase('preparing-speech');
+            const { audio, timestamps } = await generateTTS(parsedReply.text, turn);
+            turn.assertCurrent();
+            const visemes = await getVisemes(timestamps, turn);
+            turn.assertCurrent();
+            const emotions = EMO.getEmotions(timestamps, parsedReply.emotions, parsedReply.text);
+            const actions = EMO.getActions(timestamps, parsedReply.actions, parsedReply.text);
+            inspectReplay({ phase: 'performance prepared', spokenText: parsedReply.text, visemes, emotions, actions });
+            turn.phase('speaking');
+            await playPerformance({ audio, visemes, emotions, actions }, turn);
+            turn.assertCurrent();
             inspectReplay({ phase: 'playback ended' });
-            replayMessage(replay.finished ?
-                (replay.scenario.kind === 'benchmark' ? 'Showcase finished. Save test memory, then choose the recall scene.' : 'Scene finished. Restart to repeat it.') :
-                `Scene finished. Next: ${replay.turns[replay.cursor].label}.`);
-            textInput.value = replay.nextPrompt;
-        } else {
-            ANI.talk(performanceData);
+            if (replay) {
+                replayMessage(replay.finished ? 'Showcase finished. Save test memory, then choose the recall scene.' :
+                    `Scene finished. Next: ${replay.turns[replay.cursor].label}.`);
+                textInput.value = replay.nextPrompt;
+            }
+        } catch (error) {
+            if (!turn.signal.aborted) {
+                replayMessage(error.message);
+                inspectReplay({ phase: 'failed', error: error.message });
+            }
+            throw error;
         }
-    } catch (error) {
-        console.error("ERROR:", error);
-        replayMessage(error.message);
-        inspectReplay({ phase: 'failed', error: error.message });
-    }
-
-    handlingResponse = false;
-    if (replay) sendButton.disabled = false;
+    });
 }
 
-async function playReplay(data) {
+async function playPerformance(data, turn) {
+    turn.assertCurrent();
     return new Promise((resolve, reject) => {
         const audio = data.audio;
         const cleanup = () => {
             clearTimeout(timer);
             audio.removeEventListener('ended', ended);
             audio.removeEventListener('error', failed);
+            turn.signal.removeEventListener('abort', aborted);
         };
         const ended = () => { cleanup(); resolve(); };
-        const failed = () => {
-            cleanup();
-            audio.pause();
-            reject(new Error('Replay playback failed or timed out. No speech service was called.'));
-        };
-        const timer = setTimeout(failed, (audio.duration + 8) * 1000);
+        const failed = () => { cleanup(); reject(new Error('Audio playback failed or timed out.')); };
+        const aborted = () => { cleanup(); reject(new DOMException('Turn stopped', 'AbortError')); };
+        const timer = setTimeout(failed, (Number.isFinite(audio.duration) ? audio.duration + 8 : 30) * 1000);
         audio.addEventListener('ended', ended);
         audio.addEventListener('error', failed);
+        turn.signal.addEventListener('abort', aborted, { once: true });
         inspectReplay({ phase: 'playing', duration: audio.duration });
-        try {
-            Promise.resolve(ANI.talk(data)).catch(failed);
-        } catch {
-            failed();
-        }
+        try { Promise.resolve(ANI.talk(data)).catch(failed); } catch { failed(); }
     });
 }
 
 // ------- UI FIDDLING -------
+document.getElementById('turn-stop').addEventListener('click', () => {
+    turnController.stop();
+    replayMessage('Stopped. Choose the next scene or restart this one.');
+    if (replay) textInput.value = replay.nextPrompt;
+});
 sendButton.addEventListener('click', function (e) {
     console.log("LOG: Message sent, handling response.");
     handleTextResponse();

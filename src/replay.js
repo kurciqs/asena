@@ -145,7 +145,7 @@ export class ReplaySession {
     }
 }
 
-export function loadFixtureAudio(path, createAudio = url => new Audio(url), timeoutMs = 8000) {
+export function loadFixtureAudio(path, createAudio = url => new Audio(url), timeoutMs = 8000, signal) {
     assertAudioPath(path);
     return new Promise((resolve, reject) => {
         const audio = createAudio(path);
@@ -153,6 +153,7 @@ export function loadFixtureAudio(path, createAudio = url => new Audio(url), time
             clearTimeout(timer);
             audio.removeEventListener('loadedmetadata', ready);
             audio.removeEventListener('error', failed);
+            signal?.removeEventListener('abort', aborted);
         };
         const ready = () => {
             if (!Number.isFinite(audio.duration) || audio.duration <= 0) {
@@ -167,10 +168,16 @@ export function loadFixtureAudio(path, createAudio = url => new Audio(url), time
             audio.pause();
             reject(new Error(`Replay audio unavailable or invalid: ${path}. No TTS was called.`));
         };
+        const aborted = () => {
+            cleanup(); audio.pause();
+            reject(new DOMException('Turn stopped', 'AbortError'));
+        };
         const timer = setTimeout(failed, timeoutMs);
         audio.preload = 'auto';
         audio.addEventListener('loadedmetadata', ready);
         audio.addEventListener('error', failed);
+        if (signal?.aborted) { aborted(); return; }
+        signal?.addEventListener('abort', aborted, { once: true });
         audio.load();
     });
 }

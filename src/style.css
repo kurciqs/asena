@@ -433,6 +433,9 @@ body {
 .json-tools { margin-top: 8px; }
 .replay-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
 #user-message-send:disabled { opacity: 0.6; cursor: wait; }
+#turn-stop { margin-left: 8px; border: 0; border-radius: 6px; padding: 10px; cursor: pointer; }
+#turn-stop:disabled { opacity: 0.45; cursor: default; }
+#turn-status { margin: 0 20px 12px; font: 12px/1.4 system-ui, sans-serif; }
 
 @media (max-width: 700px) {
     .replay-mode #chat-panel { top: 230px; margin: 16px; width: calc(100vw - 32px); height: 50vh; min-width: 0; }
