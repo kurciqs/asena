@@ -295,6 +295,7 @@ const turnController = new TurnController(state => {
     document.getElementById('turn-status').textContent = state.error || labels[state.phase];
     document.getElementById('turn-status').dataset.phase = state.phase;
     document.getElementById('turn-stop').disabled = !['requesting', 'preparing-speech', 'speaking'].includes(state.phase);
+    if(state.phase!=='speaking')document.getElementById('turn-pause').hidden=true;
     inspectReplay({ turn: state, phase: state.phase });
 });
 
@@ -405,30 +406,16 @@ async function prepareAndPlay(parsedReply, turn) {
 
 async function playPerformance(data, turn) {
     turn.assertCurrent();
-    return new Promise((resolve, reject) => {
-        const audio = data.audio;
-        const cleanup = () => {
-            clearTimeout(timer);
-            audio.removeEventListener('ended', ended);
-            audio.removeEventListener('error', failed);
-            turn.signal.removeEventListener('abort', aborted);
-        };
-        const ended = () => { cleanup(); resolve(); };
-        const failed = error => {
-            cleanup();
-            reject(new Error(typeof error?.message === 'string' ? error.message : 'Audio playback failed or timed out.'));
-        };
-        const aborted = () => { cleanup(); reject(new DOMException('Turn stopped', 'AbortError')); };
-        const timer = setTimeout(failed, (Number.isFinite(audio.duration) ? audio.duration + 8 : 30) * 1000);
-        audio.addEventListener('ended', ended);
-        audio.addEventListener('error', failed);
-        turn.signal.addEventListener('abort', aborted, { once: true });
-        inspectReplay({ phase: 'playing', duration: audio.duration });
-        try { Promise.resolve(ANI.talk({...data, onWarning:speechWarning})).catch(failed); } catch (error) { failed(error); }
-    });
+    inspectReplay({phase:'playing',duration:data.audio.duration});
+    await ANI.talk({...data,signal:turn.signal,onWarning:speechWarning});
+    turn.assertCurrent();
 }
 
 // ------- UI FIDDLING -------
+document.getElementById('turn-pause').addEventListener('click',()=>{
+    if(ANI.getPlaybackState().scheduler?.paused)ANI.resumePerformance();
+    else ANI.pausePerformance();
+});
 document.getElementById('turn-retry').addEventListener('click', async () => {
     if (!lastRetry) return;
     const retry = lastRetry;
@@ -558,6 +545,11 @@ ANI.onPlaybackStateChange(state => {
     if (state.loading) turnController.stop();
     document.getElementById('avatar-status').textContent = state.loading ? 'Loading avatar…' :
         state.error || (state.missingClips.length ? `${state.missingClips.length} optional animations unavailable` : 'Avatar ready');
+    const clock=state.scheduler, pauseButton=document.getElementById('turn-pause');
+    pauseButton.hidden=turnController.state.phase!=='speaking' || !['starting','playing','paused','waiting','buffering'].includes(clock?.phase);
+    pauseButton.textContent=clock?.paused?'Resume':'Pause';
+    if(!pauseButton.hidden) document.getElementById('turn-status').textContent=
+        clock.paused?'Paused':clock.phase==='waiting'?'Waiting for audio':clock.phase==='buffering'?'Waiting for speech':'Speaking';
     inspectReplay({});
 });
 

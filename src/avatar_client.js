@@ -34,6 +34,11 @@ export class AvatarClient {
     stopPerformance() { this.module?.stopPerformance(); }
     preparePerformance(actions, signal) { return this.module?.preparePerformance(actions, signal) ?? Promise.resolve([]); }
     talk(data) { if (!this.module) throw new Error('Avatar unavailable'); return this.module.talk(data); }
+    pausePerformance() {this.module?.pausePerformance();}
+    resumePerformance() {this.module?.resumePerformance();}
+    beginPerformance(options) {if(!this.module)throw new Error('Avatar unavailable');return this.module.beginPerformance(options);}
+    enqueuePerformanceSegment(data) {if(!this.module)throw new Error('Avatar unavailable');this.module.enqueuePerformanceSegment(data);}
+    finishPerformance() {this.module?.finishPerformance();}
     setRenderPreferences(value) { this.module?.setRenderPreferences(value); }
 }
 export const avatar = new AvatarClient();

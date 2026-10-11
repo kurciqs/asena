@@ -1,6 +1,8 @@
 import { assets } from './runtime_config.js';
-import { prepareVrmExpressionTracks, MOUTH_EXPRESSIONS, resolveExpressionBinding } from './expression_tracks.js';
+import { MOUTH_EXPRESSIONS, resolveExpressionBinding } from './expression_tracks.js';
 import { BodyPlayback } from './body_blending.js';
+import { AudioPerformanceScheduler } from './performance_scheduler.js';
+import { ClockedAvatarPerformance } from './clocked_avatar_performance.js';
 import { LatestLoad, withAbort, withDeadline } from './asset_loading.js';
 import { LazyAnimations } from './lazy_animations.js';
 import { RENDER_PROFILES, RENDER_STORAGE_KEY, renderPreferences, pixelRatio, RenderLoop, BlinkClock } from './render_policy.js';
@@ -46,25 +48,26 @@ let currentAnimation = null;
 let bodyPlayback = null;
 let expressionPlayback = { trackCount: 0, peakMouthWeight: 0, peakMouthMorphWeight: 0 };
 let lastPlaybackNotification = 0;
-let activeAudio = null;
-let performanceAction = null;
-let performanceGeneration = 0;
 let gestureGeneration = 0;
-const gestureTimers = new Set();
-function scheduleGesture(callback, seconds) {
-    const timer = setTimeout(() => { gestureTimers.delete(timer); callback(); }, Math.max(0, seconds) * 1000);
-    gestureTimers.add(timer);
-}
-export function stopPerformance() {
-    performanceGeneration++;
-    gestureGeneration++;
-    for (const timer of gestureTimers) clearTimeout(timer);
-    gestureTimers.clear();
-    if (activeAudio) { activeAudio.pause(); try { activeAudio.currentTime = 0; } catch {} activeAudio = null; }
-    if (performanceAction && currentMixer) {
-        const clip = performanceAction.getClip();
-        performanceAction.stop(); currentMixer.uncacheClip(clip); performanceAction = null;
+let clockedPerformance = null;
+let previewRemaining = null;
+const performanceScheduler = new AudioPerformanceScheduler({
+    onSegment:data=>{
+        clockedPerformance=new ClockedAvatarPerformance({mixer:currentMixer,manager:currentVrm.expressionManager,
+            animations,bodyPlayback,data});
+        expressionPlayback=clockedPerformance.inspection;
+    },
+    onTime:(time,wallDelta)=>{if(clockedPerformance)currentAnimation=clockedPerformance.sample(time,wallDelta)??currentAnimation;},
+    onSegmentEnd:()=>{clockedPerformance?.stop();clockedPerformance=null;currentAnimation=animations.idle??null;},
+    onState:()=>{
+        animationSelect.disabled=performanceScheduler.running || !animationLibrary?.files.size;
+        notifyPlaybackState();
     }
+});
+export function stopPerformance() {
+    gestureGeneration++;
+    previewRemaining=null;
+    performanceScheduler.stop();
     if (currentVrm) {
         for (const name of new Set([...Object.values(rhubarbToVRM), ...expressionOptions])) {
             if (currentVrm.expressionManager.getExpression(name)) currentVrm.expressionManager.setValue(name, 0);
@@ -266,17 +269,10 @@ export async function preparePerformance(actions, signal) {
 export function playAnimationByName(name) {
     const animation = animations[name];
     if (!animation || !currentMixer) return false;
-    const generation = ++gestureGeneration;
-    const performance = performanceGeneration;
+    stopPerformance();
     transitionBody(animation);
+    previewRemaining=Math.max(0,animation.getClip().duration-ANIMATION_CROSSFADE);
     notifyPlaybackState();
-    scheduleGesture(() => {
-        if (generation !== gestureGeneration || performance !== performanceGeneration) return;
-        if (animation === currentAnimation && animations.idle) {
-            transitionBody(animations.idle);
-            notifyPlaybackState();
-        }
-    }, animation.getClip().duration - ANIMATION_CROSSFADE);
     return true;
 }
 
@@ -289,16 +285,19 @@ export function setExpression(name, value) {
     currentExpression = { name: name, value: value };
 }
 
-function scheduleAnimationByName(name, time) {
-    const generation = performanceGeneration;
-    scheduleGesture(() => { if (generation === performanceGeneration) playAnimationByName(name); }, time);
-}
-
 function animate(deltaTime) {
     elapsedTime += deltaTime;
 
-    const bodySettled = bodyPlayback?.update(deltaTime);
-    currentMixer?.update(deltaTime);
+    let bodySettled=false;
+    if(clockedPerformance) performanceScheduler.sample(deltaTime);
+    else {
+        if(previewRemaining!==null) {
+            previewRemaining-=deltaTime;
+            if(previewRemaining<=0) {previewRemaining=null;if(animations.idle)transitionBody(animations.idle);}
+        }
+        bodySettled=bodyPlayback?.update(deltaTime);
+        currentMixer?.update(deltaTime);
+    }
 
     if (currentVrm) {
         const blink = blinkClock.update(deltaTime,(currentVrm.expressionManager.getValue('happy') ?? 0)>0.5);
@@ -307,14 +306,14 @@ function animate(deltaTime) {
         currentVrm.update(Math.min(deltaTime,0.1)); // Bound spring physics after a busy frame.
     }
 
-    if (performanceAction && currentVrm) {
+    if (clockedPerformance && currentVrm) {
         // Measure both the animated expression and the morph applied by the VRM
         // manager. A valid cue list alone cannot establish visible mouth motion.
         const mouth = mouthPlaybackState();
         expressionPlayback.peakMouthWeight = Math.max(expressionPlayback.peakMouthWeight, ...Object.values(mouth.weights));
         expressionPlayback.peakMouthMorphWeight = Math.max(expressionPlayback.peakMouthMorphWeight, mouth.morphWeight);
     }
-    if (elapsedTime - lastPlaybackNotification > (performanceAction ? 0.25 : 1) &&
+    if (elapsedTime - lastPlaybackNotification > (clockedPerformance ? 0.25 : 1) &&
         !document.getElementById('utility-panels').hidden && !document.getElementById('replay-panel').hidden &&
         document.getElementById('replay-inspector')?.closest('details')?.open) {
         lastPlaybackNotification = elapsedTime;
@@ -333,7 +332,7 @@ const renderLoop = new RenderLoop({request:callback=>requestAnimationFrame(callb
 document.addEventListener('visibilitychange',()=>{
     if (document.hidden) renderLoop.stop();
     else if (rendererStarted && currentVrm) {
-        if (performanceAction && activeAudio) performanceAction.time = activeAudio.currentTime;
+        performanceScheduler.sample();
         resizeRenderer(); renderLoop.start();
     }
 });
@@ -344,10 +343,11 @@ export function setRenderPreferences(value) {
     renderer.shadowMap.needsUpdate = true;
     resizeRenderer(); notifyPlaybackState();
 }
-export function disposeRenderer() { renderLoop.stop(); controls.dispose(); renderer.dispose(); renderer.domElement.remove(); }
+export function disposeRenderer() { stopPerformance(); renderLoop.stop(); controls.dispose(); renderer.dispose(); renderer.domElement.remove(); }
 
 export function getPlaybackState() {
     return { ...assetState, ready: animationsLoaded, clips: [...(animationLibrary?.files.keys() ?? [])], loadedClips: Object.keys(animations),
+        scheduler:performanceScheduler.snapshot(),
         rendering: {...renderSettings, fpsLimit:renderLoop.fps, pixelRatio:renderer.getPixelRatio(),
             width:renderer.domElement.width,height:renderer.domElement.height,frames:renderLoop.frames,callbacks:renderLoop.callbacks,
             paused:!renderLoop.running,resizeCount,geometries:renderer.info.memory.geometries,textures:renderer.info.memory.textures,
@@ -355,7 +355,7 @@ export function getPlaybackState() {
         currentClip: Object.entries(animations).find(([, action]) => action === currentAnimation)?.[0] ?? null,
         bodyWeights: Object.fromEntries(Object.entries(animations).filter(([, action]) => action.isRunning()).map(
             ([name, action]) => [name, Number(action.getEffectiveWeight().toFixed(3))])),
-        expressions: { ...expressionPlayback, active: Boolean(performanceAction),
+        expressions: { ...expressionPlayback, active: Boolean(clockedPerformance),
             boundMouthChannels: MOUTH_EXPRESSIONS.filter(name => currentVrm && resolveExpressionBinding(currentVrm.expressionManager, name)),
             missingMouthChannels: MOUTH_EXPRESSIONS.filter(name => currentVrm && !resolveExpressionBinding(currentVrm.expressionManager, name)),
             ...mouthPlaybackState() } };
@@ -393,28 +393,18 @@ export function talk(data) {
     }
 
     stopPerformance();
-    const audio = data.audio;
-    activeAudio = audio;
-    audio.currentTime = 0;
-
-    const {tracks:descriptors, warning} = prepareVrmExpressionTracks({ duration: audio.duration, visemes: data.visemes, emotions: data.emotions }, currentVrm.expressionManager);
-    expressionPlayback = { trackCount: descriptors.length, peakMouthWeight: 0, peakMouthMorphWeight: 0, warning };
-    if (warning) data.onWarning?.(warning);
-    const tracks = descriptors.map(track => new THREE.NumberKeyframeTrack(track.name, track.times, track.values, THREE.InterpolateLinear));
-
-    data.actions.forEach((action) => {
-        scheduleAnimationByName(action.value, action.start)
-        // console.log(animations[action.value], currentMixer.time + action.start)
-    });
-
-    const mouthShapesTrack = new THREE.AnimationClip('MouthShapes', audio.duration, tracks);
-    const action = currentMixer.clipAction(mouthShapesTrack);
-    action.setLoop(THREE.LoopOnce, 0);
-    action.play();
-    performanceAction = action;
-    notifyPlaybackState();
-    return audio.play();
+    return performanceScheduler.play([data],{signal:data.signal});
 }
+
+export function pausePerformance() {performanceScheduler.pause();}
+export function resumePerformance() {performanceScheduler.resume();}
+// Streaming producers must prepare each complete segment before enqueueing it.
+export function beginPerformance(options) {
+    if(!animationsLoaded)throw new Error('Avatar animations are not ready.');
+    stopPerformance();return performanceScheduler.begin(options);
+}
+export function enqueuePerformanceSegment(data) {performanceScheduler.enqueue(data);}
+export function finishPerformance() {performanceScheduler.finish();}
 
 async function playAnimationFromSelect() {
     const generation = ++gestureGeneration;

@@ -43,7 +43,7 @@ This backlog combines existing foundations and implementation work. An unchecked
 
 ## P1 — Make speech responsive and synchronized
 
-- [ ] **11 — Build one audio-clock performance scheduler.** Origin: then H01/H02, now. Own a bounded segment queue; use played-audio time for mouth, emotion, and gesture events. **Done when:** pause, resume, stalls, and stop affect every channel together; chunks neither overlap nor drift due to independent timers.
+- [x] **11 — Build one audio-clock performance scheduler.** Origin: then H01/H02, now. Own a bounded segment queue; use played-audio time for mouth, emotion, and gesture events. **Done when:** pause, resume, stalls, and stop affect every channel together; chunks neither overlap nor drift due to independent timers. **Implemented 11 October 2026:** audio-time facial/body sampling, precomputed gesture fades, bounded sequential segments, Pause/Resume, progress-based stall deadlines, cancellation and inspector diagnostics. Ten scheduler regressions plus existing integration checks pass; saved-recording browser checks verify mouth movement, idle return, long pause/resume and paused cancellation. Live chunk delivery remains under 12–14. [Behavior, limits and verification](docs/audio-clock-11.md).
 
 - [ ] **12 — Validate and implement captioned speech streaming.** Origin: then H01. Check the installed Kokoro contract against a pinned version; forward framed audio/timestamps through the server and parse arbitrary network boundaries. **Done when:** captured/synthetic protocol fixtures stream correctly, partial errors are handled, and first audio does not require the entire response. See the report for current upstream capabilities.
 

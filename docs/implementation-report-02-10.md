@@ -8,6 +8,8 @@ The current companion loop has explicit turn ownership, bounded failures, correc
 
 The subsequent [TODO 10a UI cleanup](ui-cleanup-10a.md) documents the chosen draggable-chat/shared-tools layout, context breakdown, screenshots and Jakub's manual acceptance on 11 October 2026. Its additional context diagnostic regression brings the current suite to 58 passing checks; the 57-test counts below record the preceding review fixes.
 
+The later [TODO 11 audio-clock scheduler](audio-clock-11.md) replaces independent speech clocks, adds Pause/Resume and a bounded segment queue, and brings the current suite to 68 passing checks. Timing limitations below describe the earlier 02–10 implementation.
+
 Implementation and offline verification are complete for this slice. Jakub's visual acceptance remains pending. This report does **not** establish live Qwen dialogue quality, live memory-extraction quality, natural motion, exact speech synchronization, battery savings, or acceptable combined LLM/TTS memory pressure. Those require their own evaluation. The earlier lip-sync/T-pose regression is included below because it exposed a significant gap in the original verification.
 
 No LLM, Kokoro, Docker workload, or alignment process was started for TODOs 02–10 or their rendering fix. Verification used existing recordings, mock service responses, the real animation libraries, and the browser. Small pinned JavaScript test dependencies were installed; that is separate from downloading or running an AI model.

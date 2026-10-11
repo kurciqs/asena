@@ -17,6 +17,8 @@ ASENA_MODE=replay ASENA_PORT=3001 .venv/bin/python server.py
 
 Open [Asena](http://127.0.0.1:3001/). This starts only the website. The replay banner says **AI services blocked**. Five scripted scenes use saved Kokoro speech, existing gestures, and a test preference recalled after Save and reload. Stop cancels the turn; the collapsible inspector exposes its data. Test profile/memory stay separate from live data.
 
+During speech, **Pause / Resume** holds or continues the voice and its mouth, emotion and gesture timeline together. Stop also works while paused. The [audio-clock scheduler report](docs/audio-clock-11.md) explains the bounded segment queue and verification; live streaming remains future work.
+
 Drag the chat by its header, or hide it and use **Open chat** to restore it. Settings and Debug share a switchable tools panel; Debug is available in replay mode. **S** opens settings, **C** shows/hides chat, and **Esc** closes tools. Expand **Context estimate** to see instructions, memories, conversation and padding. See the [UI cleanup review](docs/ui-cleanup-10a.md) for screenshots and manual checks.
 
 Use **Settings → Display → Rendering quality** for Balanced, Low power or High detail. High detail is the default; saved choices take precedence. Low power caps the avatar at 30 fps and pixel ratio 1. Idle is the only startup gesture; others load/cache when needed. Hidden tabs stop drawing. Text input opens after avatar and data startup settle. Settings remain available during startup; avatar failure permits text-only use afterward.

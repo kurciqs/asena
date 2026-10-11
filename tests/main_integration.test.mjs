@@ -6,6 +6,8 @@ import * as THREE from 'three';
 import {VRMExpression, VRMExpressionManager} from '@pixiv/three-vrm-core';
 import {buildExpressionTracks, prepareVrmExpressionTracks} from '../src/expression_tracks.js';
 import * as EMO from '../src/emotion_classifier.js';
+import {AudioPerformanceScheduler} from '../src/performance_scheduler.js';
+import {ClockedAvatarPerformance} from '../src/clocked_avatar_performance.js';
 
 // Execute the production orchestration with controlled IO. This catches ordering
 // and fallback gaps that isolated loader/controller/track tests cannot exercise.
@@ -89,21 +91,25 @@ function speechHarness(manager) {
     const warnings=[];
     let starts=0;
     const audio=new EventTarget();audio.duration=1;audio.currentTime=0;
-    audio.play=()=>{starts++;queueMicrotask(()=>audio.dispatchEvent(new Event('ended')));return Promise.resolve();};
+    audio.pause=()=>{};
     const scene=new THREE.Group();manager.expressions.forEach(expression=>scene.add(expression));
     const animation=fs.readFileSync(new URL('../src/animation.js',import.meta.url),'utf8');
-    const renderer=vm.createContext({
-        THREE,prepareVrmExpressionTracks,animationsLoaded:true,stopPerformance(){},activeAudio:null,
-        currentVrm:{expressionManager:manager},currentMixer:new THREE.AnimationMixer(scene),
-        expressionPlayback:{},performanceAction:null,scheduleAnimationByName(){},notifyPlaybackState(){}
+    const renderer={currentMixer:new THREE.AnimationMixer(scene),expressionPlayback:{},peak:0};
+    let visual;
+    renderer.performanceScheduler=new AudioPerformanceScheduler({
+        onSegment:data=>{visual=new ClockedAvatarPerformance({mixer:renderer.currentMixer,manager,animations:{},data});renderer.expressionPlayback=visual.inspection;},
+        onTime:time=>{visual?.sample(time);manager.update();renderer.peak=Math.max(renderer.peak,manager.getValue('aa')??0);},
+        onSegmentEnd:()=>{visual?.stop();visual=null;}
     });
-    vm.runInContext(section(animation,'export function talk(data) {','\nasync function playAnimationFromSelect').replace('export ',''),renderer);
+    audio.play=()=>{starts++;setImmediate(()=>{audio.currentTime=.5;renderer.performanceScheduler.sample();audio.currentTime=1;audio.dispatchEvent(new Event('ended'));});return Promise.resolve();};
+    const rendererContext=vm.createContext({...renderer,animationsLoaded:true,stopPerformance:()=>renderer.performanceScheduler.stop()});
+    vm.runInContext(section(animation,'export function talk(data) {','\nexport function pausePerformance').replace('export ',''),rendererContext);
     const context=vm.createContext({
         setTimeout,clearTimeout,DOMException,buildExpressionTracks,EMO,replay:null,
         generateTTS:async()=>({audio,timestamps:[{word:'Hello',start_time:0,end_time:1}]}),
         getVisemes:async()=>[{value:'A',start:.1,end:.9}],
         speechWarning:message=>warnings.push(message),inspectReplay(){},
-        ANI:{getPlaybackState:()=>({ready:true,clips:[]}),preparePerformance:async a=>a,talk:data=>renderer.talk(data)}
+        ANI:{getPlaybackState:()=>({ready:true,clips:[]}),preparePerformance:async a=>a,talk:data=>rendererContext.talk(data)}
     });
     vm.runInContext(section(main,'async function prepareAndPlay(', '// ------- UI FIDDLING -------'),context);
     const turn={signal:new AbortController().signal,assertCurrent(){},phase(){}};
@@ -129,7 +135,8 @@ test('supported rigs retain speech movement and actual playback errors retain th
     const h=speechHarness(manager);
     await h.run();assert.equal(h.starts(),1);
     assert.equal(h.renderer.expressionPlayback.warning,null);
-    h.renderer.currentMixer.update(.5);assert.ok(manager.getValue('aa')>.99);
+    assert.ok(h.renderer.peak>.99,'mouth moves during actual scheduler playback');
+    assert.equal(manager.getValue('aa'),0,'mouth closes when the owned performance ends');
     h.context.ANI.talk=()=>Promise.reject(new Error('Fixture audio permission denied'));
     await assert.rejects(h.run(),/Fixture audio permission denied/);
     assert.throws(()=>prepareVrmExpressionTracks({duration:1,visemes:[{value:'A',start:0,end:2}]},manager),/Invalid expression cue timing/);
