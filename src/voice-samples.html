@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Asena · Voice listening room</title>
+  <link rel="stylesheet" href="/voice-audition/listening-room.css">
+  <script type="module" src="/voice-audition/listening-room.js"></script>
+</head>
+<body>
+  <main>
+    <header id="top">
+      <a class="back" href="/?replay-case=benchmark">← Back to Asena</a>
+      <p class="eyebrow">Asena / Voice audition</p>
+      <h1>A voice worth spending time with.</h1>
+      <p class="intro">Listen for warmth, rhythm and a little mischief. Start with the Asena lines, then try the published showcases.</p>
+      <div class="toolbar">
+        <span class="pill">Recorded audio · no live generation</span>
+        <button id="pause-all" type="button" disabled>Pause audio</button>
+      </div>
+      <p class="note">Audio loads when you press Play. Hosted samples demonstrate voice quality; they don’t measure speed or memory on your Mac. Published showcases use different scripts and recording levels.</p>
+    </header>
+    <p id="load-status" role="status">Loading the sample list…</p>
+    <div id="generators"></div>
+    <footer>Choosing a favourite here only saves a note in this browser. It doesn’t change Asena’s voice or settings. <a href="#top">Back to top ↑</a></footer>
+  </main>
+</body>
+</html>
