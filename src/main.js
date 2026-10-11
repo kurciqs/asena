@@ -1,5 +1,21 @@
 import * as ANI from './animation.js'
 import * as EMO from "./emotion_classifier.js"
+import { CLOSENESS, COMPANION_STORAGE_KEY, DEFAULT_COMPANION_PROFILE, buildCompanionPrompt, loadCompanionProfile, normalizeCompanionProfile, saveCompanionProfile } from './companion.js';
+import { REPLAY_MEMORY_KEY, ReplaySession, loadFixtureAudio, loadReplayMemories, readRuntimeMode, replayProfileStorage, saveReplayMemories } from './replay.js';
+import { createJsonViewer } from './json_viewer.js';
+
+// The server owns the mode. Invalid/missing configuration never defaults to live.
+const runtimeResponse = await fetch('/runtime', { cache: 'no-store' });
+if (!runtimeResponse.ok) throw new Error('Runtime configuration unavailable. Restart the website server.');
+const RUNTIME_MODE = readRuntimeMode(await runtimeResponse.json());
+let replay = null;
+let profileStorage;
+if (RUNTIME_MODE === 'replay') {
+    const fixtureResponse = await fetch('/replay/benchmark.json');
+    if (!fixtureResponse.ok) throw new Error('Replay fixture unavailable. No AI service was called.');
+    replay = new ReplaySession(await fixtureResponse.json(), new URLSearchParams(location.search).get('replay-case') ?? 'benchmark');
+    profileStorage = replayProfileStorage(localStorage);
+}
 
 // ------- CONFIGS AND GLOBALS -------
 const AUDIO_FOLDER = "/data/";
@@ -8,10 +24,15 @@ const MEMORY_PATH = "/data/memory.json"
 let KOKORO_VOICE = "af_heart";
 let CONTEXT_WINDOW_MAX = 4000;
 let CONTEXT_WINDOW_CURRENT = 0;
+let companionProfile = replay && !profileStorage.getItem(COMPANION_STORAGE_KEY) ?
+    normalizeCompanionProfile(replay.fixture.profile) : loadCompanionProfile(profileStorage);
 
 // ------- DICTIONARY -------
-let cmuResponse = await fetch('/dictionary/cmudict.json');
-let cmudict = await cmuResponse.json();
+let cmudict = {};
+if (!replay) {
+    const cmuResponse = await fetch('/dictionary/cmudict.json');
+    cmudict = await cmuResponse.json();
+}
 // gpt slop conversion i just don't care 
 const phonemeToViseme = {
     // A: Open mouth
@@ -43,6 +64,55 @@ const dragHandle = document.getElementById("chat-drag-handle");
 const contextWindowSize = document.getElementById("context-size");
 const saveButton = document.getElementById('saveMemoryBtn');
 const voiceSelect = document.getElementById("select-voice");
+const companionDialog = document.getElementById('companion-dialog');
+const companionForm = document.getElementById('companion-form');
+const companionStatus = document.getElementById('companion-status');
+const companionLabel = document.getElementById('companion-label');
+const replayStatus = document.getElementById('replay-status');
+const replayInspector = document.getElementById('replay-inspector');
+const replayJsonViewer = createJsonViewer(replayInspector);
+let replayInspection = {};
+
+function inspectReplay(update) {
+    if (!replay) return;
+    replayInspection = { ...replayInspection, ...update };
+    replayJsonViewer.update({
+        ...replayInspection,
+        animation: ANI.getPlaybackState(),
+        testMemories: memories,
+        activeMemoryPrompt: message_history[1].content
+    });
+}
+
+function replayMessage(message) {
+    if (replay) replayStatus.textContent = message;
+}
+
+function fillCompanionForm() {
+    for (const [key, value] of Object.entries(companionProfile)) {
+        companionForm.elements.namedItem(key).value = value;
+    }
+}
+
+function renderCompanionProfile() {
+    companionLabel.textContent = `${companionProfile.name} · ${CLOSENESS[companionProfile.closeness].label}`;
+    textInput.placeholder = `talk to ${companionProfile.name}...`;
+    document.title = companionProfile.name;
+}
+
+function applyCompanionProfile(value) {
+    companionProfile = normalizeCompanionProfile(value);
+    message_history[0].content = buildCompanionPrompt(systemPrompt, companionProfile);
+    try {
+        saveCompanionProfile(companionProfile, profileStorage);
+        companionStatus.textContent = replay ? 'Saved for replay. The scripted replies remain fixed.' :
+            'Saved. Your companion will use these settings in the next reply.';
+    } catch {
+        companionStatus.textContent = 'Applied for this visit. This browser could not save the settings for next time.';
+    }
+    fillCompanionForm();
+    renderCompanionProfile();
+}
 
 function changeVoice() {
     KOKORO_VOICE = voiceSelect.value;
@@ -54,6 +124,7 @@ function renderMessages() {
     chatContainer.innerHTML = ''
     for (let i = message_history.length - 1; i >= 0; i--) {
         let msg = message_history[i]
+        if (msg.role === 'system') continue;
         const msgDiv = document.createElement("div");
         switch (msg.role) {
             case "user":
@@ -80,8 +151,13 @@ function renderMessages() {
 let spRequest = await fetch("/system_prompt.txt");
 let systemPrompt = await spRequest.text();
 let memories = [];
-let memoryReponse = await fetch('/data/memory.json');
-let memoryData = await memoryReponse.json();
+let memoryData;
+if (replay) {
+    memoryData = loadReplayMemories(localStorage);
+} else {
+    const memoryResponse = await fetch('/data/memory.json');
+    memoryData = await memoryResponse.json();
+}
 let memoryPrompt = "";
 memoryData.forEach((mem) => {
     memoryPrompt += "- " + mem + "\n";
@@ -92,7 +168,7 @@ let handlingResponse = false;
 let message_history = [
     {
         role: "system",
-        content: systemPrompt,
+        content: buildCompanionPrompt(systemPrompt, companionProfile),
     },
     {
         role: "system",
@@ -101,7 +177,13 @@ let message_history = [
 ]
 
 // ------- HELPER FUNCTIONS -------
-async function chat(history) {
+async function chat(history, purpose = 'dialogue') {
+    if (replay) {
+        const reply = replay.reply(history, purpose);
+        inspectReplay(purpose === 'memory' ? { memoryExtraction: reply } :
+            { scene: replay.active.label, rawReply: reply, phase: 'text ready' });
+        return reply;
+    }
     const chatResponse = await fetch("/chat", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -126,11 +208,17 @@ async function chat(history) {
 
     console.log("LOG: Asena responded:", reply);
 
-    // let reply = "Oh, that's so sweet! EMOTION:happy Yes, I agree. ACTION:head_nod Who are you? EMOTION:surprised Oh, that's so sweet! EMOTION:sad Yes, I agree. ACTION:frowning Who are you? EMOTION:angry";
     return reply;
 }
 
 async function generateTTS(text) {
+    if (replay) {
+        const speech = replay.speech();
+        inspectReplay({ phase: 'loading fixture audio', audio: speech.audio, timestamps: speech.timestamps,
+            speech, alignment: replay.active.alignment });
+        const audio = await loadFixtureAudio(speech.audio);
+        return { audio, timestamps: speech.timestamps };
+    }
     const ttsResponse = await fetch("/tts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -218,6 +306,7 @@ function convertToVisemes(kokoroWords) {
 }
 
 async function getVisemes(timestamps) {
+    if (replay) return replay.visemes();
     if (LIP_SYNC === "rhubarb") {
         const audioPath = AUDIO_FOLDER + `tts.wav`;
         const response = await fetch('/get_visemes', {
@@ -248,6 +337,18 @@ async function handleTextResponse() {
     }
     handlingResponse = true;
 
+    if (replay && !ANI.getPlaybackState().ready) {
+        replayMessage('The avatar is still loading. Try again once it is visible.');
+        inspectReplay({ phase: 'waiting for avatar' });
+        handlingResponse = false;
+        return;
+    }
+    if (replay && replay.finished) {
+        replayMessage('This scene is finished. Restart it or choose another scene.');
+        handlingResponse = false;
+        return;
+    }
+
     // input handling
     let message = textInput.value.trim();
     if (!message) {
@@ -257,13 +358,6 @@ async function handleTextResponse() {
     console.log('LOG: User sent:', message);
     textInput.value = '';
 
-    // prompt bashing experiments
-    let spBASH = "";
-    if (ind % 3 === 2) {
-
-        spBASH = "Only use the following stage directions: smiles, giggles, sighs, frowns, blushes, relaxes, waves, nods, shakes head, crosses arms, shrugs, talks softly, hums, thanks, frowns deeply. Respond briefly.";
-        message_history.push({ role: "system", content: spBASH });
-    }
     ind++;
 
     message_history.push({ role: "user", content: message });
@@ -273,12 +367,19 @@ async function handleTextResponse() {
 
     // input processing
     try {
+        if (replay) {
+            sendButton.disabled = true;
+            replayMessage(`Playing scripted scene ${replay.cursor + 1} of ${replay.turns.length}. Using saved audio.`);
+            replayInspection = {};
+            inspectReplay({ phase: 'requesting fixture' });
+        }
         const start = performance.now();
         let now = start;
 
         // get llm response
         let rawReply = await chat(message_history);
         let parsedReply = EMO.decodeTaggedMessage(rawReply);
+        inspectReplay({ parsedReply });
 
         let asenaReply = parsedReply.text;
         message_history.push({ role: "assistant", content: rawReply });
@@ -290,9 +391,10 @@ async function handleTextResponse() {
             let prompt = "Summarize your recent dialogue (last 5 responses) with the user into 1–2 short bullet points that describe important facts, user preferences, or character behavior. Be concise, don't give an introduction.";
             newMessageHistory.push({ role: "user", content: prompt });
 
-            let extractedMemory = "\n" + (await chat(newMessageHistory));
+            let extractedMemory = "\n" + (await chat(newMessageHistory, 'memory'));
             let mems = extractedMemory.split(/\n\s*-\s+/).map(s => s.trim()).filter(s => s.length > 0);
             mems.forEach((mem) => { memories.push(mem) });
+            inspectReplay({ phase: 'memory extracted' });
         }
         renderMessages();
 
@@ -309,6 +411,7 @@ async function handleTextResponse() {
         let visemes = await getVisemes(timestamps);
         let emotions = EMO.getEmotions(timestamps, parsedReply.emotions, parsedReply.text);
         let actions = EMO.getActions(timestamps, parsedReply.actions, parsedReply.text);
+        inspectReplay({ phase: 'performance prepared', spokenText: asenaReply, visemes, emotions, actions });
 
         console.log(emotions)
         console.log(actions)
@@ -326,12 +429,51 @@ async function handleTextResponse() {
             console.log("Duration:", audio.duration);
         });
 
-        ANI.talk({ emotions: emotions, visemes: visemes, actions: actions, audio: audio });
+        const performanceData = { emotions, visemes, actions, audio };
+        if (replay) {
+            await playReplay(performanceData);
+            inspectReplay({ phase: 'playback ended' });
+            replayMessage(replay.finished ?
+                (replay.scenario.kind === 'benchmark' ? 'Showcase finished. Save test memory, then choose the recall scene.' : 'Scene finished. Restart to repeat it.') :
+                `Scene finished. Next: ${replay.turns[replay.cursor].label}.`);
+            textInput.value = replay.nextPrompt;
+        } else {
+            ANI.talk(performanceData);
+        }
     } catch (error) {
         console.error("ERROR:", error);
+        replayMessage(error.message);
+        inspectReplay({ phase: 'failed', error: error.message });
     }
 
     handlingResponse = false;
+    if (replay) sendButton.disabled = false;
+}
+
+async function playReplay(data) {
+    return new Promise((resolve, reject) => {
+        const audio = data.audio;
+        const cleanup = () => {
+            clearTimeout(timer);
+            audio.removeEventListener('ended', ended);
+            audio.removeEventListener('error', failed);
+        };
+        const ended = () => { cleanup(); resolve(); };
+        const failed = () => {
+            cleanup();
+            audio.pause();
+            reject(new Error('Replay playback failed or timed out. No speech service was called.'));
+        };
+        const timer = setTimeout(failed, (audio.duration + 8) * 1000);
+        audio.addEventListener('ended', ended);
+        audio.addEventListener('error', failed);
+        inspectReplay({ phase: 'playing', duration: audio.duration });
+        try {
+            Promise.resolve(ANI.talk(data)).catch(failed);
+        } catch {
+            failed();
+        }
+    });
 }
 
 // ------- UI FIDDLING -------
@@ -347,7 +489,7 @@ textInput.addEventListener('keydown', function (e) {
     }
 });
 saveButton.addEventListener('click', () => {
-    saveMemoryToFile(memories);
+    saveMemoryToFile().catch(error => replayMessage(error.message));
 });
 
 // because i take care to cite my sources: https://www.geeksforgeeks.org/html/draggable-element-using-javascript/
@@ -361,6 +503,7 @@ function onMouseDrag(event, element) {
 }
 
 dragHandle.addEventListener("mousedown", (e) => {
+    if (e.target.closest('button')) return;
     const onMove = (event) => onMouseDrag(event, dragHandle);
 
     document.addEventListener("mousemove", onMove);
@@ -370,17 +513,18 @@ dragHandle.addEventListener("mousedown", (e) => {
 });
 
 // hide containers with keyboard because based
+function toggleSettings() {
+    const settings = document.getElementById('selections');
+    settings.style.display = getComputedStyle(settings).display === 'none' ? 'flex' : 'none';
+}
+
 document.addEventListener('keydown', (event) => {
     if (event.key === 's' || event.key === 'S') {
-        const el = document.getElementById('selections');
-
         const tag = document.activeElement.tagName.toLowerCase();
         const isTyping = tag === "input" || tag === "textarea" || document.activeElement.isContentEditable;
         if (isTyping) return; // don't trigger shortcuts while typing
 
-        if (el) {
-            el.style.display = (el.style.display === 'none') ? 'flex' : 'none';
-        }
+        toggleSettings();
     }
 });
 
@@ -399,6 +543,12 @@ document.addEventListener('keydown', (event) => {
 });
 
 async function saveMemoryToFile() {
+    if (replay) {
+        saveReplayMemories(localStorage, memories);
+        replayMessage(`Saved ${memories.length} test ${memories.length === 1 ? 'memory' : 'memories'} in this browser. Your real memory file was not changed.`);
+        inspectReplay({ phase: 'test memory saved' });
+        return;
+    }
     await fetch('/save_json', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -410,6 +560,61 @@ async function saveMemoryToFile() {
 }
 
 // -------- ACTUALLY DOING SOMETHING 🔥 --------
+if (replay) {
+    document.body.classList.add('replay-mode');
+    document.getElementById('replay-panel').hidden = false;
+    document.getElementById('replay-settings').addEventListener('click', toggleSettings);
+    document.getElementById('replay-toggle').addEventListener('click', () => {
+        const body = document.getElementById('replay-body');
+        const toggle = document.getElementById('replay-toggle');
+        body.hidden = !body.hidden;
+        toggle.textContent = body.hidden ? 'Show debug' : 'Hide debug';
+        toggle.setAttribute('aria-expanded', String(!body.hidden));
+    });
+    document.getElementById('replay-collapse').addEventListener('click', () => replayJsonViewer.collapseAll());
+    const selector = document.getElementById('replay-case');
+    for (const scenario of replay.fixture.cases) {
+        const option = document.createElement('option');
+        option.value = scenario.id;
+        option.textContent = scenario.label;
+        selector.appendChild(option);
+    }
+    selector.value = replay.scenario.id;
+    document.getElementById('replay-description').textContent = replay.fixture.recording
+        ? 'Scripted dialogue with saved Kokoro audio and Rhubarb mouth cues. Your test profile and memories stay separate.'
+        : 'Scripted dialogue with silent audio and synthetic mouth timings. Your test profile and memories stay separate.';
+    selector.addEventListener('change', () => {
+        const url = new URL(location.href);
+        url.searchParams.set('replay-case', selector.value);
+        location.assign(url);
+    });
+    document.getElementById('replay-restart').addEventListener('click', () => location.reload());
+    document.getElementById('replay-save').addEventListener('click', () => {
+        saveMemoryToFile().catch(error => replayMessage(error.message));
+    });
+    document.getElementById('replay-clear').addEventListener('click', () => {
+        localStorage.removeItem(REPLAY_MEMORY_KEY);
+        location.reload();
+    });
+    textInput.value = replay.nextPrompt;
+    sendButton.textContent = 'play scene';
+    voiceSelect.disabled = true;
+    replayMessage('Ready for scripted replay. Wait for the avatar, then press play scene.');
+    inspectReplay({ phase: 'ready', fixture: replay.fixture.description });
+}
+renderCompanionProfile();
+document.getElementById('customize-companion').addEventListener('click', () => {
+    fillCompanionForm();
+    companionStatus.textContent = '';
+    companionDialog.showModal();
+});
+document.getElementById('close-companion').addEventListener('click', () => companionDialog.close());
+document.getElementById('reset-companion').addEventListener('click', () => applyCompanionProfile(DEFAULT_COMPANION_PROFILE));
+companionForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    applyCompanionProfile(Object.fromEntries(new FormData(companionForm)));
+});
 renderMessages();
+if (replay) ANI.onPlaybackStateChange(() => inspectReplay({}));
 ANI.loadThreeVRM();
 voiceSelect.addEventListener('change', changeVoice);

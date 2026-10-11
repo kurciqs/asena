@@ -1,6 +1,10 @@
 # install
 step by step okay
 
+## fixture-only testing
+
+For offline replay, use an existing Python environment with Flask, flask-cors, and requests. Run `ASENA_MODE=replay ASENA_PORT=3001 python3 server.py`, then open http://127.0.0.1:3001/. You do not need to start LM Studio, Kokoro, Docker, ffmpeg, or Rhubarb. Existing local avatar/FBX assets and the frontend's CDN dependencies are still used. See [replay instructions](docs/replay-mode.md). The backend setup below is for live operation.
+
 ## lm studio
 get [lm studio](https://lmstudio.ai/), download your preferred model, load it into memory and open the api on port 1234 (ask chatgpt for details this is trivial).
 

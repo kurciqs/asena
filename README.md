@@ -10,6 +10,14 @@ i think i'm pretty happy with how far i've come, there's not much else i want to
 
 read the installation.md file.
 
+# offline replay
+
+To test the companion without LM Studio, Kokoro, Docker, or Rhubarb running, start `ASENA_MODE=replay ASENA_PORT=3001 python3 server.py` and open [the replay website](http://127.0.0.1:3001/). It plays five scripted benchmark scenes with saved Kokoro speech and Rhubarb mouth cues, and offers service-failure fixtures and isolated test memory. This mode tests the current pipeline; live model behavior remains unevaluated. See [replay instructions](docs/replay-mode.md).
+
+# companion settings
+
+click **customize** in the chat header to choose your companion's name, personality, and how you want to relate. closeness can be friendly, affectionate, or intimate; you can also write your own relationship notes, preferences, and limits. settings are saved in your browser and included in the language model's instructions for the next reply. changing them keeps your current conversation, and reset restores the default profile. the model you run still determines how well the character follows these settings.
+
 # models and animations
 
 i have created the asena_sfw.vrm model myself with vroid studio so i permit all use i don't care what you do with it. it's also really easy to create models with vroid yourself. i just can't upload the mixamo animations because they are under the adobe license. in the animations.json file i have listed a few that you should get, they're entirely free and look really good: https://www.mixamo.com/. just type the name of the animation, download, put into src/animations/. if the model tries to call an animation that doesn't exist, the program will just ignore that so all you really need is an idle animation, because that one is force loaded and always running in the background.
@@ -21,6 +29,7 @@ i'm having trouble getting the llms to consistently output good action and emoti
 i also have to wait at least half a minute for longer responses, where most of the time is taken up by text-to-speech generation and it makes debugging and playtesting a pain.
 
 # todo
+
 - [ ] maybe get the mixamo links in the readme or in installation because i am so generous
 
 # img

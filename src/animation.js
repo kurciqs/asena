@@ -13,6 +13,7 @@ const ANIMATIONS_INDEX_PATH = '/animations/animations.json';
 // ------- ANIMATION AND RENDERING -------
 let animations = {};
 let animationsLoaded = false;
+const playbackStateListeners = new Set();
 const clock = new THREE.Clock();
 let rhubarbToVRM = {
     "A": "aa",    // “ah” sound → VRM A
@@ -88,8 +89,11 @@ const lookAtTarget = new THREE.Object3D();
 camera.add(lookAtTarget);
 
 function loadAllFBXAnimations(vrm, mixer, animationPath, indexPath) {
+    animationsLoaded = false;
     animations = {};
+    currentAnimation = null;
     animationSelect.innerHTML = '';
+    notifyPlaybackState();
     fetch(indexPath)
         .then(response => response.json())
         .then(animationFiles => {
@@ -104,6 +108,7 @@ function loadAllFBXAnimations(vrm, mixer, animationPath, indexPath) {
                 option.value = name;
                 option.textContent = name;
                 animationSelect.appendChild(option);
+                notifyPlaybackState();
                 console.log("LOG: Loaded animation:", name)
                 if (name === 'idle') idleFound = true;
             });
@@ -123,9 +128,10 @@ function loadAllFBXAnimations(vrm, mixer, animationPath, indexPath) {
                     currentAnimation = animations['idle'];
                     playAnimationFromSelect();
                 }
+                animationsLoaded = true;
+                notifyPlaybackState();
                 console.log("LOG: Starting idle...")
             });
-            animationsLoaded = true;
         })
 }
 
@@ -233,6 +239,7 @@ export async function playAnimationByName(name) {
     currentAnimation.fadeOut(ANIMATION_CROSSFADE);
     animation.reset().fadeIn(ANIMATION_CROSSFADE).play();
     currentAnimation = animation;
+    notifyPlaybackState();
 
     // IT'S A HOUSE OF CARDS BABAY BUT IT'S STABLE IT'S STABLE
     await sleep(animation.getClip().duration - ANIMATION_CROSSFADE)
@@ -242,6 +249,7 @@ export async function playAnimationByName(name) {
         animations["idle"].reset().fadeIn(ANIMATION_CROSSFADE).play()
         currentAnimation = animations["idle"];
         animation.fadeOut(ANIMATION_CROSSFADE)
+        notifyPlaybackState();
     }
 }
 
@@ -295,6 +303,23 @@ function animate() {
 
     blinkTimeout--;
     renderer.render(scene, camera);
+}
+
+export function getPlaybackState() {
+    return { ready: animationsLoaded, clips: Object.keys(animations),
+        currentClip: Object.entries(animations).find(([, action]) => action === currentAnimation)?.[0] ?? null };
+}
+
+export function onPlaybackStateChange(listener) {
+    playbackStateListeners.add(listener);
+    listener(getPlaybackState());
+    return () => playbackStateListeners.delete(listener);
+}
+
+function notifyPlaybackState() {
+    if (!playbackStateListeners.size) return;
+    const state = getPlaybackState();
+    for (const listener of playbackStateListeners) listener(state);
 }
 
 export function talk(data) {
@@ -396,7 +421,7 @@ export function talk(data) {
     const action = currentMixer.clipAction(mouthShapesTrack);
     action.setLoop(THREE.LoopOnce, 0);
     action.play();
-    audio.play();
+    return audio.play();
 }
 
 function playAnimationFromSelect() {
@@ -413,5 +438,6 @@ function playAnimationFromSelect() {
             animation.fadeOut(ANIMATION_CROSSFADE);
         }
     })
+    notifyPlaybackState();
 }
 

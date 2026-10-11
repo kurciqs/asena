@@ -14,7 +14,30 @@
 <body>
 	<!-- gradient haha -->
 	<div id="bg"></div>
-	<div id="main-container">
+	<div id="utility-panels">
+	<aside id="replay-panel" hidden aria-label="Offline replay">
+		<div class="replay-heading">
+			<strong>Offline replay · AI services blocked</strong>
+			<button id="replay-toggle" type="button" aria-expanded="true" aria-controls="replay-body">Hide debug</button>
+		</div>
+		<button id="replay-settings" type="button" aria-controls="selections">Settings</button>
+		<div id="replay-body">
+		<p id="replay-description">Scripted dialogue with saved audio and mouth timings. Your test profile and memories stay separate.</p>
+		<label for="replay-case">Scene</label>
+		<select id="replay-case"></select>
+		<p id="replay-status" role="status" aria-live="polite"></p>
+		<div class="replay-buttons">
+			<button id="replay-restart" type="button">Restart scene</button>
+			<button id="replay-save" type="button">Save test memory</button>
+			<button id="replay-clear" type="button">Clear test memory</button>
+		</div>
+		<details>
+			<summary>Inspect this turn</summary>
+			<div class="json-tools"><button id="replay-collapse" type="button">Collapse all</button></div>
+			<div id="replay-inspector" aria-label="Turn data"></div>
+		</details>
+		</div>
+	</aside>
 		<div id="selections">
 			<div id="animation-selector">
 				animation:
@@ -35,9 +58,14 @@
 			</div>
 			<button id="saveMemoryBtn">save memory</button>
 		</div>
+	</div>
+	<div id="main-container">
 		<!-- CANVAS, inserted in js -->
 		<div id="chat-panel">
-			<div id="chat-drag-handle">chat</div>
+			<div id="chat-drag-handle">
+				<span id="companion-label">Asena · Friendly</span>
+				<button id="customize-companion" type="button">customize</button>
+			</div>
 			<div id="chat-display"></div>
 			<div id="user-input-container">
 				<input type="text" id="user-input-message" placeholder='talk to asena...'>
@@ -45,6 +73,33 @@
 			</div>
 		</div>
 	</div>
+	<dialog id="companion-dialog" aria-labelledby="companion-dialog-title">
+		<form id="companion-form">
+			<div class="companion-heading">
+				<h2 id="companion-dialog-title">Your companion</h2>
+				<button id="close-companion" type="button" aria-label="Close companion settings">×</button>
+			</div>
+			<p class="companion-hint">Shape their character and how you connect. Changes apply to the next reply.</p>
+			<div class="companion-names">
+				<label>Companion name<input name="name" maxlength="80" required></label>
+				<label>Your name (optional)<input name="userName" maxlength="80" autocomplete="given-name"></label>
+			</div>
+			<label>Personality<textarea name="personality" rows="3" maxlength="2000" placeholder="Their temperament, humor, interests, voice, and quirks..."></textarea></label>
+			<label>Closeness<select name="closeness">
+				<option value="friendly">Friendly</option>
+				<option value="affectionate">Affectionate</option>
+				<option value="intimate">Intimate</option>
+			</select></label>
+			<label>How you relate (optional)<textarea name="relationship" rows="2" maxlength="2000" placeholder="What companionship means to you; the kind of connection you want..."></textarea></label>
+			<label>Preferences and limits (optional)<textarea name="preferences" rows="2" maxlength="2000" placeholder="Things you enjoy, preferred ways of showing affection, topics or behaviors to avoid..."></textarea></label>
+			<p class="companion-hint">Settings are saved in this browser and shared with your configured language model when you chat.</p>
+			<p id="companion-status" role="status" aria-live="polite"></p>
+			<div class="companion-actions">
+				<button id="reset-companion" type="button">Reset to defaults</button>
+				<button type="submit">Save companion</button>
+			</div>
+		</form>
+	</dialog>
 	<div id="debug-div">
 		<p id="context-size">0%</p>
 	</div>

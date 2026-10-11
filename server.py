@@ -10,6 +10,7 @@ import os
 import json
 import base64 
 import subprocess
+import posixpath
 
 SAVE_DIR = "src"
 RHUBARB = "../rhubarb/rhubarb"
@@ -18,8 +19,26 @@ LMS_API = "http://localhost:1234/v1/chat/completions"
 #KOKORO_API = "http://192.168.1.110:8880/dev/captioned_speech"
 KOKORO_API = "http://localhost:8880/dev/captioned_speech"
 
+RUNTIME_MODE = os.environ.get("ASENA_MODE", "live")
+if RUNTIME_MODE not in ("live", "replay"):
+    raise RuntimeError("ASENA_MODE must be live or replay; refusing an ambiguous launch")
+
 app = Flask(__name__, static_folder="./src/")
 CORS(app)
+
+@app.before_request
+def enforce_replay_boundary():
+    if RUNTIME_MODE == "replay" and request.method not in ("GET", "HEAD", "OPTIONS"):
+        return jsonify({"error": "Offline replay blocks backend calls and server writes."}), 403
+    replay_path = posixpath.normpath(request.path).lower()
+    if RUNTIME_MODE == "replay" and (replay_path in (
+        "/chat", "/tts", "/get_visemes", "/save_audio", "/save_json"
+    ) or replay_path.startswith(("/data/", "/src/data/"))):
+        return jsonify({"error": "This resource is unavailable in offline replay."}), 403
+
+@app.route("/runtime")
+def runtime():
+    return jsonify({"mode": RUNTIME_MODE})
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -129,4 +148,5 @@ def get_visemes():
     return jsonify({'visemes': output.get("mouthCues", [])})
 
 if __name__ == "__main__":    
-    app.run(port=3000, debug=True)
+    app.run(host="127.0.0.1", port=int(os.environ.get("ASENA_PORT", "3000")),
+            debug=RUNTIME_MODE == "live", use_reloader=RUNTIME_MODE == "live")
