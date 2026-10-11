@@ -17,7 +17,9 @@ ASENA_MODE=replay ASENA_PORT=3001 .venv/bin/python server.py
 
 Open [Asena](http://127.0.0.1:3001/). This starts only the website. The replay banner says **AI services blocked**. Five scripted scenes use saved Kokoro speech, existing gestures, and a test preference recalled after Save and reload. Stop cancels the turn; the collapsible inspector exposes its data. Test profile/memory stay separate from live data.
 
-Three.js, VRM libraries and the font currently use CDN resources, so internet or previously cached resources are needed. “Offline replay” means no AI-service calls, not a fully disconnected browser. Frontend package URLs are exactly pinned; full vendoring has not been selected.
+Use **settings → Rendering** for Balanced, Low power or High detail. Low power caps the avatar at 30 fps and pixel ratio 1. Idle is the only startup gesture; others load/cache when needed. Hidden tabs stop drawing. Text/settings remain usable if the optional avatar module fails.
+
+Three.js, VRM libraries and the font currently use CDN resources, so the avatar needs internet or previously cached resources. “Offline replay” means no AI-service calls, not a fully disconnected browser. Frontend package URLs are exactly pinned; full vendoring has not been selected. The [full TODO 02–10 report](docs/implementation-report-02-10.md) records changes, regression fixes, verification and review steps.
 
 ## Setup and development
 

@@ -8,6 +8,14 @@ Run `python scripts/check_setup.py --mode replay` with that environment. It read
 
 Start with `ASENA_MODE=replay ASENA_PORT=3001 python server.py`. Replay is also the safe default. The website listens only on `127.0.0.1`; Flask debug and automatic reloading are disabled in both modes. Restart it after backend changes. Browser imports use Three.js 0.176.0, fflate 0.7.4, and three-vrm 3.5.5, with exact URLs in `src/index.html`. The Google font remains external. A fully disconnected browser needs a separate vendoring pass.
 
+## Startup and rendering
+
+The text/settings UI starts independently of the avatar's CDN/WebGL module. Prompt and memory reads have an eight-second limit; missing prompt uses a visible basic fallback, unreadable memory disables Save, and renderer failure leaves text chat usable. Invalid runtime/replay configuration still disables chat rather than falling through to live services.
+
+Use **settings → Rendering** to choose Balanced (60 fps, pixel ratio at most 1.5), Low power (30 fps, ratio at most 1), or High detail (60 fps, ratio at most 2). Shadows are off by default and separately selectable. Hidden tabs stop drawing; canvas sizing runs on changes. Startup loads the avatar and idle only; other gestures load/cache before first use. Dictionary data loads only for a dictionary-mode speech turn. First-use gestures can add preparation time; compare saved scenes before choosing quality permanently.
+
+The [full TODO 02–10 report](docs/implementation-report-02-10.md) contains the commit trail, regression diagnosis, measured work reductions, limitations and walkthrough.
+
 ## Configuration
 
 All runtime options are in `config.py`; `.env.example` documents them. Export values in your shell: the server does **not** automatically load `.env`. Relative filesystem defaults resolve against the checkout, so the server can be launched from another directory. `/runtime` shares only the mode, model key, voice, lip-sync choice, budgets and public asset URLs with the browser; upstream endpoints and private paths stay server-side.

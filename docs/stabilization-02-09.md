@@ -1,5 +1,7 @@
 # Stabilization review: TODOs 02–09
 
+Historical per-item review. The [full TODO 02–10 report](implementation-report-02-10.md) describes the current final flow, including lazy asset loading and independent renderer startup introduced by TODO 10. Earlier test counts below record their respective implementation stages.
+
 Work is on `codex/stabilize-todos-02-09`. The baseline commit preserves the previous customizer, replay recordings, inspector, and backlog. Each completed TODO has its own subsequent commit. No LLM, Kokoro, or Docker workloads are started by this work. Tests use saved media and mocked services.
 
 ## Follow-up: lip sync and T-pose regression
