@@ -3,6 +3,7 @@ export const MOUTH_CHANNELS = { A: 'aa', B: null, C: 'oh', D: 'ee', E: 'ee', F: 
 const EMOTIONS = ['happy', 'sad', 'angry', 'surprised', 'relaxed'];
 
 export const MOUTH_EXPRESSIONS = [...new Set(Object.values(MOUTH_CHANNELS).filter(Boolean))];
+class MissingMouthBindingsError extends Error {}
 
 export function resolveExpressionBinding(manager, name) {
     // Object3D.name is e.g. "VRMExpression_aa"; the manager is keyed by "aa".
@@ -16,9 +17,21 @@ export function buildVrmExpressionTracks(data, manager) {
     const tracks = buildExpressionTracks(data, resolve);
     const requestedMouth = (data.visemes ?? []).filter(cue => cue.end > cue.start).map(cue => MOUTH_CHANNELS[cue.value]).filter(Boolean);
     if (requestedMouth.length && !requestedMouth.some(resolve)) {
-        throw new Error('Lip sync unavailable: this avatar has no supported mouth expression bindings.');
+        throw new MissingMouthBindingsError('Lip sync unavailable: this avatar has no supported mouth expression bindings.');
     }
     return tracks;
+}
+
+export function prepareVrmExpressionTracks(data, manager) {
+    try {
+        return {tracks:buildVrmExpressionTracks(data, manager), warning:null};
+    } catch (error) {
+        if (!(error instanceof MissingMouthBindingsError)) throw error;
+        // Clear any supported expression channels, including mouth-opening emotions.
+        // A rig limitation must not discard an otherwise playable recording.
+        const tracks = buildExpressionTracks({...data, visemes:[], emotions:[]}, name=>resolveExpressionBinding(manager,name));
+        return {tracks, warning:`${error.message} Playing audio without facial animation.`};
+    }
 }
 
 function range(cue, duration) {

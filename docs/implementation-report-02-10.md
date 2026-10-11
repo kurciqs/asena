@@ -28,7 +28,7 @@ Each original TODO has its own commit. The rendering repair has an additional co
 | Rendering follow-up | `7ee1bf4` | Correct VRM keys, continuous idle and real animation tests |
 | 10 | `804e22d` | Independent startup, lazy gestures and rendering profiles |
 
-Nothing has been pushed. Ignored personal memories, generated audio and local FBX files are outside the commit trail; they need their own backup. Existing Git history was retained.
+The original slice was subsequently pushed to GitHub on this branch. Ignored personal memories, generated audio and local FBX files are outside the commit trail; they need their own backup. Existing Git history was retained.
 
 ## Current flow
 
@@ -39,7 +39,8 @@ flowchart TD
     C --> D[Bounded prompt and memory reads]
     C --> E[Optional avatar module]
     E --> F[Load avatar and idle only]
-    D --> G[Dialogue ready]
+    D --> G[Startup settled; dialogue ready]
+    F --> G
     G --> H[Pack profile, memories and recent dialogue]
     H --> I[Scripted replay or configured chat service]
     I --> J[Keep reply visible and parse directions]
@@ -153,9 +154,9 @@ Python dependencies were pinned and checked in a clean Python 3.12 environment. 
 
 ### Startup and failure behavior
 
-`main.js` and the local UI-side `AvatarClient` no longer statically import Three.js or VRM. Controls attach before network work. Runtime configuration is loaded explicitly and checked before any dialogue service can be used. Avatar startup runs separately from the bounded, concurrent prompt/memory reads. Text becomes available after those reads succeed or settle to their explicit fallback; it does not wait for the renderer, its CDN imports, the model, the dictionary or optional gestures. The optional prompt/memory reads can each take up to eight seconds on a stall.
+`main.js` and the local UI-side `AvatarClient` no longer statically import Three.js or VRM. Controls attach before network work. Runtime configuration is loaded explicitly and checked before any dialogue service can be used. Avatar startup runs separately from the bounded, concurrent prompt/memory reads. Following the review, text input and Send remain disabled until both those reads and avatar startup settle. Settings remain available during loading. Startup includes renderer/CDN loading, the model and idle; the dictionary and optional gestures still load only when needed. The optional prompt/memory reads can each take up to eight seconds on a stall.
 
-If the prompt is missing, a small basic companion prompt is used with a notice. If memory is missing/unreadable, text works with no loaded memory and Save remains disabled to preserve the archive. If the renderer/WebGL/model is unavailable or still loading, replies remain usable as text and speech generation is skipped for that turn. Settings and customizer still work. A failed runtime/replay fixture stops chat rather than guessing live mode. Retry avatar retries existing asset setup or reloads a failed module graph.
+If the prompt is missing, a small basic companion prompt is used with a notice. If memory is missing/unreadable, text works with no loaded memory and Save remains disabled to preserve the archive. If the renderer/WebGL/model fails, text becomes available after startup settles, with an explicit avatar warning; speech generation is skipped while the avatar is unavailable. Settings and customizer still work. A failed runtime/replay fixture stops chat rather than guessing live mode. Retry avatar retries existing asset setup or reloads a failed module graph.
 
 Dictionary data is loaded only when a dictionary-mode speech turn actually needs it, never during ordinary startup. A failed dictionary read is cached for the visit and produces the existing closed-mouth audio fallback; reload after repairing it. Replay never requests the dictionary.
 
@@ -163,9 +164,9 @@ Dictionary data is loaded only when a dictionary-mode speech turn actually needs
 
 | Choice | Frame cap | Pixel-ratio cap | Default shadows |
 | --- | ---: | ---: | --- |
-| Balanced (default) | 60 fps | 1.5 | Off |
+| Balanced | 60 fps | 1.5 | Off |
 | Low power | 30 fps | 1 | Off |
-| High detail | 60 fps | 2 | Off |
+| High detail (default) | 60 fps | 2 | Off |
 
 Actual pixel ratio is the smaller of the screen ratio and the profile cap. Settings persist in this browser under `asena.render.v1`; shadows are separately selectable. The existing scene has no light configured to cast shadows, so enabling the checkbox alone does not create a new visible shadow treatment.
 
@@ -206,7 +207,7 @@ The word “speech” in those counts is a response assembled from an existing W
 
 ## Verification and what the inspector establishes
 
-The automated suite contains **50 passing tests: 31 JavaScript and 19 Python**. New TODO 10 tests cover frame caps, stopped/hidden scheduling and resume delta, pixel-ratio limits, blink timing across frame rates, lazy/shared/serial/bounded gesture loading, aborted waits, renderer import isolation/retry, runtime imports with no network side effects and invalid-mode rejection, and adding an action during a real mixer blend. Earlier tests cover service/storage/budget/replay behavior; the rendering follow-up tests actual morph and bone changes. Replay setup and source syntax/diff checks pass.
+The automated suite now contains **57 passing tests: 38 JavaScript and 19 Python**, including seven regressions added after the review below. New TODO 10 tests cover frame caps, stopped/hidden scheduling and resume delta, pixel-ratio limits, blink timing across frame rates, lazy/shared/serial/bounded gesture loading, aborted waits, renderer import isolation/retry, runtime imports with no network side effects and invalid-mode rejection, and adding an action during a real mixer blend. Earlier tests cover service/storage/budget/replay behavior; the rendering follow-up tests actual morph and bone changes. Replay setup and source syntax/diff checks pass.
 
 The original 41 tests did **not** establish visual correctness. After Jakub found the mouth/T-pose failures, the test boundary was extended to the real animation libraries and browser geometry measurements. More tests do not replace watching the character. A loaded clip and `error: null` are still insufficient evidence of natural timing or animation quality.
 
@@ -227,6 +228,16 @@ Useful inspector fields:
 | `context` | Packed input bound, omitted messages and separate actual dialogue/extraction usage when supplied |
 
 The inspector updates at four times per second during inspected speech and once per second during inspected idle. When closed, it does not continuously rebuild the JSON view for idle frames. Counters are diagnostic snapshots; FPS caps are not a promise that a busy laptop sustains that rate. Texture/geometry counts are Three.js object counts, not process memory usage.
+
+## Review follow-up — startup gating and speech fallback
+
+The independent review reproduced three integration failures despite the original 50 passing tests. All three were repaired at Jakub's request:
+
+- **Startup gate (`88e76c1`):** text input and Send open only after avatar startup and prompt/memory loading settle. Previously a delayed avatar-loading notification could stop an already submitted text turn. Failed avatar startup still permits explicit text-only use afterward; invalid runtime configuration keeps chat disabled.
+- **Dictionary timing (`cc760d3`):** generated phoneme cues stay inside the recording. The converter no longer adds an artificial rest interval after every word; expression tracks already close each cue. Previously a valid “Hi” ending at 0.9 seconds in one-second audio generated a rest ending at 1.3 seconds, causing all mouth cues to be discarded.
+- **Missing mouth bindings:** the actual VRM track preparation now falls back to zero facial-expression tracks when the requested mouth bindings are unavailable. Audio and gestures can still play. The visible warning and inspector retain the missing-binding diagnostic; genuine playback rejections retain their original message. Malformed cue timing is still validated.
+
+Seven new automated regressions cover both startup completion orders, failed avatar/invalid runtime behavior, short final words through a real Three.js mixer, adjacent words and timestamp overshoot, all seven saved Kokoro clips through the dictionary converter, missing/partial mouth rigs through the production speech functions, and supported rigs plus audio rejection. Startup/speech orchestration runs with controlled IO; these are not new live browser or inference measurements. The complete 57-test suite passes. No LLM, Kokoro, Docker or alignment process was started for these fixes.
 
 ## Where the changes live
 

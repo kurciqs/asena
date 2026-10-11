@@ -1,5 +1,5 @@
 import { assets } from './runtime_config.js';
-import { buildVrmExpressionTracks, MOUTH_EXPRESSIONS, resolveExpressionBinding } from './expression_tracks.js';
+import { prepareVrmExpressionTracks, MOUTH_EXPRESSIONS, resolveExpressionBinding } from './expression_tracks.js';
 import { BodyPlayback } from './body_blending.js';
 import { LatestLoad, withAbort, withDeadline } from './asset_loading.js';
 import { LazyAnimations } from './lazy_animations.js';
@@ -394,8 +394,9 @@ export function talk(data) {
     activeAudio = audio;
     audio.currentTime = 0;
 
-    const descriptors = buildVrmExpressionTracks({ duration: audio.duration, visemes: data.visemes, emotions: data.emotions }, currentVrm.expressionManager);
-    expressionPlayback = { trackCount: descriptors.length, peakMouthWeight: 0, peakMouthMorphWeight: 0 };
+    const {tracks:descriptors, warning} = prepareVrmExpressionTracks({ duration: audio.duration, visemes: data.visemes, emotions: data.emotions }, currentVrm.expressionManager);
+    expressionPlayback = { trackCount: descriptors.length, peakMouthWeight: 0, peakMouthMorphWeight: 0, warning };
+    if (warning) data.onWarning?.(warning);
     const tracks = descriptors.map(track => new THREE.NumberKeyframeTrack(track.name, track.times, track.values, THREE.InterpolateLinear));
 
     data.actions.forEach((action) => {

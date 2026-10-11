@@ -10,7 +10,7 @@ Start with `ASENA_MODE=replay ASENA_PORT=3001 python server.py`. Replay is also 
 
 ## Startup and rendering
 
-The text/settings UI starts independently of the avatar's CDN/WebGL module. Prompt and memory reads have an eight-second limit; missing prompt uses a visible basic fallback, unreadable memory disables Save, and renderer failure leaves text chat usable. Invalid runtime/replay configuration still disables chat rather than falling through to live services.
+Settings are available immediately. Text input and Send stay disabled until avatar startup and initial prompt/memory loading settle. Prompt and memory reads have an eight-second limit; missing prompt uses a visible basic fallback, unreadable memory disables Save, and renderer failure leaves text chat usable. Invalid runtime/replay configuration still disables chat rather than falling through to live services.
 
 Use **settings → Rendering** to choose Balanced (60 fps, pixel ratio at most 1.5), Low power (30 fps, ratio at most 1), or High detail (60 fps, ratio at most 2). High detail is the default; saved choices take precedence. Shadows are off by default and separately selectable. Hidden tabs stop drawing; canvas sizing runs on changes. Startup loads the avatar and idle only; other gestures load/cache before first use. Dictionary data loads only for a dictionary-mode speech turn. First-use gestures can add preparation time; compare saved scenes before choosing quality permanently.
 

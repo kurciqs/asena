@@ -390,14 +390,17 @@ async function playPerformance(data, turn) {
             turn.signal.removeEventListener('abort', aborted);
         };
         const ended = () => { cleanup(); resolve(); };
-        const failed = () => { cleanup(); reject(new Error('Audio playback failed or timed out.')); };
+        const failed = error => {
+            cleanup();
+            reject(new Error(typeof error?.message === 'string' ? error.message : 'Audio playback failed or timed out.'));
+        };
         const aborted = () => { cleanup(); reject(new DOMException('Turn stopped', 'AbortError')); };
         const timer = setTimeout(failed, (Number.isFinite(audio.duration) ? audio.duration + 8 : 30) * 1000);
         audio.addEventListener('ended', ended);
         audio.addEventListener('error', failed);
         turn.signal.addEventListener('abort', aborted, { once: true });
         inspectReplay({ phase: 'playing', duration: audio.duration });
-        try { Promise.resolve(ANI.talk(data)).catch(failed); } catch { failed(); }
+        try { Promise.resolve(ANI.talk({...data, onWarning:speechWarning})).catch(failed); } catch (error) { failed(error); }
     });
 }
 
