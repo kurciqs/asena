@@ -1,0 +1,10 @@
+{
+  "name": "asena-animation-checks",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "node --test tests/*.test.mjs" },
+  "devDependencies": {
+    "@pixiv/three-vrm-core": "3.5.5",
+    "three": "0.176.0"
+  }
+}

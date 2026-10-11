@@ -1,5 +1,6 @@
 import { assets } from './runtime_config.js';
-import { buildExpressionTracks } from './expression_tracks.js';
+import { buildVrmExpressionTracks, MOUTH_EXPRESSIONS, resolveExpressionBinding } from './expression_tracks.js';
+import { BodyPlayback } from './body_blending.js';
 import { LatestLoad, loadAnimationSet, withDeadline } from './asset_loading.js';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -39,6 +40,9 @@ const ANIMATION_CROSSFADE = 0.5;
 let currentExpression = { name: "Neutral", value: 1 }
 let expressionOptions = ["angry", "happy", "relaxed", "sad", "surprised"]
 let currentAnimation = null;
+let bodyPlayback = null;
+let expressionPlayback = { trackCount: 0, peakMouthWeight: 0, peakMouthMorphWeight: 0 };
+let lastPlaybackNotification = 0;
 let activeAudio = null;
 let performanceAction = null;
 let performanceGeneration = 0;
@@ -62,11 +66,10 @@ export function stopPerformance() {
         for (const name of new Set([...Object.values(rhubarbToVRM), ...expressionOptions])) {
             if (currentVrm.expressionManager.getExpression(name)) currentVrm.expressionManager.setValue(name, 0);
         }
+        currentVrm.expressionManager.update(); // Apply the reset before publishing the stopped snapshot.
     }
     if (animations.idle) {
-        if (currentAnimation && currentAnimation !== animations.idle) currentAnimation.fadeOut(ANIMATION_CROSSFADE);
-        animations.idle.reset().fadeIn(ANIMATION_CROSSFADE).play();
-        currentAnimation = animations.idle;
+        transitionBody(animations.idle);
     }
     notifyPlaybackState();
 }
@@ -170,6 +173,8 @@ export async function loadModel(url, name = modelSelect.value) {
             currentAnimation = animations.idle;
             currentAnimation.play();
         } else animationSelect.selectedIndex = -1; // Rest pose is safer than looping an arbitrary gesture.
+        bodyPlayback = new BodyPlayback(animations, ANIMATION_CROSSFADE);
+        expressionPlayback = { trackCount: 0, peakMouthWeight: 0, peakMouthMorphWeight: 0 };
         candidate.lookAt && (candidate.lookAt.target = lookAtTarget);
         candidate.scene.traverse(object => { object.frustumCulled = false; if (object.isMesh) object.castShadow = object.receiveShadow = true; });
         scene.add(candidate.scene);
@@ -232,20 +237,21 @@ export function playAnimationByName(name) {
     if (!animation || !currentMixer) return false;
     const generation = ++gestureGeneration;
     const performance = performanceGeneration;
-    currentAnimation?.fadeOut(ANIMATION_CROSSFADE);
-    animation.reset().fadeIn(ANIMATION_CROSSFADE).play();
-    currentAnimation = animation;
+    transitionBody(animation);
     notifyPlaybackState();
     scheduleGesture(() => {
         if (generation !== gestureGeneration || performance !== performanceGeneration) return;
         if (animation === currentAnimation && animations.idle) {
-            animations.idle.reset().fadeIn(ANIMATION_CROSSFADE).play();
-            currentAnimation = animations.idle;
-            animation.fadeOut(ANIMATION_CROSSFADE);
+            transitionBody(animations.idle);
             notifyPlaybackState();
         }
     }, animation.getClip().duration - ANIMATION_CROSSFADE);
     return true;
+}
+
+function transitionBody(action) {
+    bodyPlayback?.transition(action);
+    currentAnimation = action;
 }
 
 export function setExpression(name, value) {
@@ -267,12 +273,15 @@ function animate() {
 
     const deltaTime = clock.getDelta();
 
+    const bodySettled = bodyPlayback?.update(deltaTime);
+    currentMixer?.update(deltaTime);
+
     if (currentVrm) {
         // blinking TODO: some emotions have closed eyes and blinking looks bad on them, go case by case 
         if (blinkTimeout <= 0) {
             let eyesClosed = false;
             currentVrm.expressionManager.expressions.forEach((expr) => {
-                if (expr.name === "happy" && expr.weight > 0.5) eyesClosed = true;
+                if (expr.expressionName === "happy" && expr.weight > 0.5) eyesClosed = true;
             });
             if (!eyesClosed) {
                 currentVrm.expressionManager.setValue('blinkLeft', 1);
@@ -287,11 +296,18 @@ function animate() {
         currentVrm.update(deltaTime);
     }
 
-    if (currentMixer) {
-
-        currentMixer.update(deltaTime);
-
+    if (performanceAction && currentVrm) {
+        // Measure both the animated expression and the morph applied by the VRM
+        // manager. A valid cue list alone cannot establish visible mouth motion.
+        const mouth = mouthPlaybackState();
+        expressionPlayback.peakMouthWeight = Math.max(expressionPlayback.peakMouthWeight, ...Object.values(mouth.weights));
+        expressionPlayback.peakMouthMorphWeight = Math.max(expressionPlayback.peakMouthMorphWeight, mouth.morphWeight);
+        if (clock.elapsedTime - lastPlaybackNotification > 0.25 && document.getElementById('replay-inspector')?.closest('details')?.open) {
+            lastPlaybackNotification = clock.elapsedTime;
+            notifyPlaybackState();
+        }
     }
+    if (bodySettled) notifyPlaybackState();
 
     // subtle circular eye movement i think aha it follows the camera now that's also cool ig
     lookAtTarget.position.y = Math.sin(Math.PI * clock.elapsedTime) * 0.2;
@@ -302,7 +318,27 @@ function animate() {
 
 export function getPlaybackState() {
     return { ...assetState, ready: animationsLoaded, clips: Object.keys(animations),
-        currentClip: Object.entries(animations).find(([, action]) => action === currentAnimation)?.[0] ?? null };
+        currentClip: Object.entries(animations).find(([, action]) => action === currentAnimation)?.[0] ?? null,
+        bodyWeights: Object.fromEntries(Object.entries(animations).filter(([, action]) => action.isRunning()).map(
+            ([name, action]) => [name, Number(action.getEffectiveWeight().toFixed(3))])),
+        expressions: { ...expressionPlayback, active: Boolean(performanceAction),
+            boundMouthChannels: MOUTH_EXPRESSIONS.filter(name => currentVrm && resolveExpressionBinding(currentVrm.expressionManager, name)),
+            missingMouthChannels: MOUTH_EXPRESSIONS.filter(name => currentVrm && !resolveExpressionBinding(currentVrm.expressionManager, name)),
+            ...mouthPlaybackState() } };
+}
+
+function mouthPlaybackState() {
+    const weights = {};
+    let morphWeight = 0;
+    for (const name of MOUTH_EXPRESSIONS) {
+        const expression = currentVrm?.expressionManager.getExpression(name);
+        if (!expression) continue;
+        weights[name] = Number(expression.weight.toFixed(3));
+        for (const bind of expression.binds) {
+            for (const mesh of bind.primitives ?? []) morphWeight = Math.max(morphWeight, mesh.morphTargetInfluences?.[bind.index] ?? 0);
+        }
+    }
+    return { weights, morphWeight: Number(morphWeight.toFixed(3)) };
 }
 
 export function onPlaybackStateChange(listener) {
@@ -327,10 +363,8 @@ export function talk(data) {
     activeAudio = audio;
     audio.currentTime = 0;
 
-    const descriptors = buildExpressionTracks({ duration: audio.duration, visemes: data.visemes, emotions: data.emotions }, name => {
-        const expression = currentVrm.expressionManager.expressions.find(expression => expression.name.toLowerCase() === name.toLowerCase());
-        return expression ? currentVrm.expressionManager.getExpressionTrackName(expression.name) : null;
-    });
+    const descriptors = buildVrmExpressionTracks({ duration: audio.duration, visemes: data.visemes, emotions: data.emotions }, currentVrm.expressionManager);
+    expressionPlayback = { trackCount: descriptors.length, peakMouthWeight: 0, peakMouthMorphWeight: 0 };
     const tracks = descriptors.map(track => new THREE.NumberKeyframeTrack(track.name, track.times, track.values, THREE.InterpolateLinear));
 
     data.actions.forEach((action) => {
@@ -343,24 +377,14 @@ export function talk(data) {
     action.setLoop(THREE.LoopOnce, 0);
     action.play();
     performanceAction = action;
+    notifyPlaybackState();
     return audio.play();
 }
 
 function playAnimationFromSelect() {
     gestureGeneration++;
-    const selectedOption = animationSelect.value;
-
-    Object.keys(animations).forEach((animationName) => {
-        if (selectedOption === animationName) {
-            let animation = animations[animationName];
-            animation.reset().fadeIn(ANIMATION_CROSSFADE).play();
-            currentAnimation = animation;
-        }
-        else if (!animations[animationName].paused) {
-            let animation = animations[animationName];
-            animation.fadeOut(ANIMATION_CROSSFADE);
-        }
-    })
+    const animation = animations[animationSelect.value];
+    if (animation) transitionBody(animation);
     notifyPlaybackState();
 }
 

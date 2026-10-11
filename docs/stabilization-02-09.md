@@ -2,6 +2,20 @@
 
 Work is on `codex/stabilize-todos-02-09`. The baseline commit preserves the previous customizer, replay recordings, inspector, and backlog. Each completed TODO has its own subsequent commit. No LLM, Kokoro, or Docker workloads are started by this work. Tests use saved media and mocked services.
 
+## Follow-up: lip sync and T-pose regression
+
+Jakub's browser review found two rendering failures that the original 41 checks missed. A successful cue parse, a loaded avatar, and `error: null` did not establish correct playback. The original expression test supplied fake binding names; the original cancellation tests did not run an actual animation mixer.
+
+Lip sync: VRM 3.5.5 expressions have scene names such as `VRMExpression_aa`, whereas `expressionName` and the manager key are `aa`. The resolver incorrectly compared the scene name with `aa`, creating zero tracks without throwing. It now resolves through the manager's expression keys and produces nine tracks for this avatar (four mouth channels, five emotions). A clip whose requested mouth cues cannot bind now fails visibly. Mixer updates precede VRM updates, so animated weights and normalized bones reach geometry in the same frame.
+
+T-pose: cleanup restarted idle with a fade from zero even when idle was already playing. With no other body action supplying weight, the rest pose contributed during that fade. Idle now keeps running through turn boundaries. Body transitions interpolate from the current mix with total weight one, including interrupted fades and manual animation selection, then stop outgoing actions once the blend settles. Stop clears expression weights and applies them to morphs before publishing its snapshot.
+
+The inspector now includes actual bound/missing mouth channels, track count, expression/morph peak weights, and body action weights. It refreshes when a body transition settles as well as during inspected playback, so a stopped blend is not permanently displayed as its initial mix. These are playback measurements; the existing asset error field still describes asset loading.
+
+Three new integration tests use the exact pinned Three.js 0.176.0 and VRM core 3.5.5 libraries from the test lockfile. They assert movement of actual mesh morph targets, closure at completion, visible rejection of unsupported mouth cues, continuous bone pose at turn boundaries, and weight/pose preservation through complete and interrupted transitions. **44 tests pass** (25 JavaScript, 19 Python), along with replay setup and syntax/diff checks. Install test dependencies with `npm ci --ignore-scripts`, then run `npm test`; no inference is involved.
+
+Browser checks with the real avatar and saved speech showed changing mouth shapes in consecutive captures, no missing mouth channels, applied mouth morph peaks above 0.98, and closed mouth/full-weight idle after completed introduction, teasing, and disagreement. Stop was exercised during the nod showcase; its gesture blended back to idle without dropping body weight. New measurements do not establish naturalness of every motion or exact audio-clock timing. The happy-mouth distortion remains deferred under TODO 20a. No AI service was started or called for this fix.
+
 ## TODO 02 — Turn ownership and cancellation
 
 A turn controller invalidates prior turn IDs before aborting requests and releasing resources. Stop cancels fetch/audio loading, current playback, and queued gestures. A delayed response cannot update chat, memory, or playback after replacement. The chat displays requesting/preparing/speaking/stopped/failed states; the replay inspector contains the owning turn ID and state. Gesture timers and mouth actions are explicitly owned and released.

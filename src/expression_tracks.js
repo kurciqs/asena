@@ -2,6 +2,25 @@
 export const MOUTH_CHANNELS = { A: 'aa', B: null, C: 'oh', D: 'ee', E: 'ee', F: 'ou', G: 'aa', H: 'aa', X: null };
 const EMOTIONS = ['happy', 'sad', 'angry', 'surprised', 'relaxed'];
 
+export const MOUTH_EXPRESSIONS = [...new Set(Object.values(MOUTH_CHANNELS).filter(Boolean))];
+
+export function resolveExpressionBinding(manager, name) {
+    // Object3D.name is e.g. "VRMExpression_aa"; the manager is keyed by "aa".
+    const expression = manager.getExpression(name) ?? manager.expressions.find(
+        expression => expression.expressionName.toLowerCase() === name.toLowerCase());
+    return expression ? manager.getExpressionTrackName(expression.expressionName) : null;
+}
+
+export function buildVrmExpressionTracks(data, manager) {
+    const resolve = name => resolveExpressionBinding(manager, name);
+    const tracks = buildExpressionTracks(data, resolve);
+    const requestedMouth = (data.visemes ?? []).filter(cue => cue.end > cue.start).map(cue => MOUTH_CHANNELS[cue.value]).filter(Boolean);
+    if (requestedMouth.length && !requestedMouth.some(resolve)) {
+        throw new Error('Lip sync unavailable: this avatar has no supported mouth expression bindings.');
+    }
+    return tracks;
+}
+
 function range(cue, duration) {
     if (!Number.isFinite(cue.start) || !Number.isFinite(cue.end) || cue.start < 0 || cue.end < cue.start || cue.end > duration + 0.05) {
         throw new Error('Invalid expression cue timing');

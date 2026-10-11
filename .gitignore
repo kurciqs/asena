@@ -13,3 +13,4 @@ src/data/*
 .runtime/
 .venv/
 .env
+node_modules/

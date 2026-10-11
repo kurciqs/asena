@@ -55,8 +55,9 @@ Run lightweight regressions from the checkout (Node 23.9.0 was used; Node 22.7+ 
 
 ```sh
 python -m unittest discover -s tests -p 'test_*.py' -v
-node --test tests/*.test.mjs
+npm ci --ignore-scripts
+npm test
 python scripts/check_setup.py --mode replay
 ```
 
-These tests mock service calls/processes and use recorded media. They never start models or Docker. `scripts/record_replay_audio.py capture --confirm-generation` is a separate explicit speech-generation action and is not part of setup or testing. Avoid invoking it until the computer is prepared and generation is intended.
+The npm dependencies are small, pinned animation libraries used only by tests; the website still uses its pinned browser imports. Tests exercise real VRM morph bindings and Three.js bone blending, mock service calls/processes, and use recorded media. They never start models or Docker. `scripts/record_replay_audio.py capture --confirm-generation` is a separate explicit speech-generation action and is not part of setup or testing. Avoid invoking it until the computer is prepared and generation is intended.
