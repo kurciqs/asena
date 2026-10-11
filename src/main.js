@@ -334,7 +334,7 @@ const turnController = new TurnController(state => {
 });
 
 async function handleTextResponse({ reuseUser = false } = {}) {
-    if (!startupReady) return;
+    if (!startupReady || ANI.getPlaybackState().loading) return;
     if (replay?.finished) {
         replayMessage('This scene is finished. Restart it or choose another scene.');
         return;
@@ -609,7 +609,7 @@ function setupReplayUI() {
     textInput.value = replay.nextPrompt;
     sendButton.textContent = 'play scene';
     voiceSelect.disabled = true;
-    replayMessage('Ready for scripted replay. Avatar loads separately; text works while it loads.');
+    replayMessage('Starting scripted replay. Text will be available when startup finishes.');
     inspectReplay({ phase: 'ready', fixture: replay.fixture.description });
 }
 renderCompanionProfile();
@@ -626,6 +626,7 @@ companionForm.addEventListener('submit', (event) => {
 });
 renderMessages();
 ANI.onPlaybackStateChange(state => {
+    textInput.disabled = sendButton.disabled = !startupReady || state.loading;
     if (state.loading) turnController.stop();
     document.getElementById('avatar-status').textContent = state.loading ? 'Loading avatar…' :
         state.error || (state.missingClips.length ? `${state.missingClips.length} optional animations unavailable` : 'Avatar ready');
@@ -641,6 +642,7 @@ voiceSelect.addEventListener('change', changeVoice);
 
 // Wire all controls before any optional data, CDN library, or WebGL is requested.
 sendButton.disabled = true;
+textInput.disabled = true;
 saveButton.disabled = true;
 const startupStatus = document.getElementById('startup-status');
 let renderSettings = renderPreferences();
@@ -683,8 +685,7 @@ async function bootstrap() {
         if (replay) setupReplayUI();
         if (![...voiceSelect.options].some(option=>option.value===KOKORO_VOICE)) voiceSelect.add(new Option(KOKORO_VOICE,KOKORO_VOICE));
         voiceSelect.value = KOKORO_VOICE;
-        // Renderer startup runs separately from bounded optional prompt/memory loads.
-        ANI.loadThreeVRM().then(()=>ANI.setRenderPreferences(renderSettings));
+        // Load concurrently, but open text input only after all startup work settles.
         const results = await Promise.allSettled([
             (async()=>{
                 const response = await fetch(assets.systemPrompt,{signal:AbortSignal.timeout(8000)});
@@ -693,8 +694,11 @@ async function bootstrap() {
                 if (!text.trim()) throw new Error('Companion prompt is empty; using a basic prompt for this visit.');
                 return text;
             })(),
-            replay ? Promise.resolve().then(()=>loadReplayMemories(localStorage)) : requestJSON('/api/memories',{timeoutMs:8000}).then(data=>data.memories)
+            replay ? Promise.resolve().then(()=>loadReplayMemories(localStorage)) : requestJSON('/api/memories',{timeoutMs:8000}).then(data=>data.memories),
+            ANI.loadThreeVRM().then(()=>ANI.setRenderPreferences(renderSettings))
         ]);
+        if (results[2].status === 'rejected') warnings.push(`Avatar startup failed: ${results[2].reason.message}`);
+        if (!ANI.getPlaybackState().ready) warnings.push('Avatar unavailable. Text chat is ready; retry the avatar in settings.');
         if (results[0].status==='fulfilled') systemPrompt = results[0].value;
         else warnings.push(results[0].reason.message);
         if (results[1].status==='fulfilled' && Array.isArray(results[1].value) && results[1].value.every(value=>typeof value==='string')) {
@@ -706,12 +710,14 @@ async function bootstrap() {
         }
         message_history[0].content = buildCompanionPrompt(systemPrompt,companionProfile);
         message_history[1].content = 'Previously remembered information:\n'+memories.map(memory=>'- '+memory+'\n').join('');
-        startupReady = true; sendButton.disabled = false;
+        startupReady = true; textInput.disabled = sendButton.disabled = ANI.getPlaybackState().loading;
         renderMessages(); inspectReplay({});
         startupStatus.textContent = warnings.join(' ');
+        replayMessage('Ready for scripted replay.');
     } catch (error) {
         startupStatus.textContent = `${error.message} Settings remain available; reload after repairing setup.`;
         sendButton.disabled = true; // Never infer a live mode after a replay/config failure.
+        textInput.disabled = true;
     }
 }
 bootstrap();
