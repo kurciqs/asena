@@ -20,6 +20,16 @@ export class LatestLoad {
     begin() { const revision = ++this.revision; return () => revision === this.revision; }
 }
 
+export function withAbort(promise, signal) {
+    if (!signal) return promise;
+    if (signal.aborted) return Promise.reject(new DOMException('Turn stopped','AbortError'));
+    return new Promise((resolve,reject)=>{
+        const abort = () => reject(new DOMException('Turn stopped','AbortError'));
+        signal.addEventListener('abort',abort,{once:true});
+        Promise.resolve(promise).then(resolve,reject).finally(()=>signal.removeEventListener('abort',abort));
+    });
+}
+
 export async function loadAnimationSet(files, load, timeoutMs = 15000) {
     if (!Array.isArray(files) || !files.every(file => typeof file === 'string' && /^[\w .-]+\.fbx$/i.test(file))) {
         throw new Error('Invalid animation index');

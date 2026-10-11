@@ -1,38 +1,35 @@
-import { runtimeConfig, RUNTIME_MODE, contextBudget, assets } from './runtime_config.js';
+import { loadRuntimeConfig, runtimeConfig, RUNTIME_MODE, contextBudget, assets } from './runtime_config.js';
 import { packConversation } from './context_budget.js';
 import { buildExpressionTracks } from './expression_tracks.js';
 import { requestJSON } from './service_client.js';
 import { loadAudioMetadata, repairWavHeader } from './audio.js';
 import { TurnController } from './turn_controller.js';
-import * as ANI from './animation.js'
+import { avatar as ANI } from './avatar_client.js';
+import { RENDER_STORAGE_KEY, renderPreferences } from './render_policy.js';
 import * as EMO from "./emotion_classifier.js"
 import { CLOSENESS, COMPANION_STORAGE_KEY, DEFAULT_COMPANION_PROFILE, buildCompanionPrompt, loadCompanionProfile, normalizeCompanionProfile, saveCompanionProfile } from './companion.js';
 import { REPLAY_MEMORY_KEY, ReplaySession, loadFixtureAudio, loadReplayMemories, replayProfileStorage, saveReplayMemories } from './replay.js';
 import { createJsonViewer } from './json_viewer.js';
 
 let replay = null;
-let profileStorage;
-if (RUNTIME_MODE === 'replay') {
-    const fixtureResponse = await fetch('/replay/benchmark.json');
-    if (!fixtureResponse.ok) throw new Error('Replay fixture unavailable. No AI service was called.');
-    replay = new ReplaySession(await fixtureResponse.json(), new URLSearchParams(location.search).get('replay-case') ?? 'benchmark');
-    profileStorage = replayProfileStorage(localStorage);
-}
-
+let startupReady = false;
+let profileEditedDuringStartup = false;
+let profileStorage = {getItem:()=>null, setItem:()=>{throw new Error('Configuration still loading');}};
 // ------- CONFIGS AND GLOBALS -------
-const LIP_SYNC = runtimeConfig.lipSync;
-let KOKORO_VOICE = runtimeConfig.voice;
+let LIP_SYNC = null;
+let KOKORO_VOICE = 'af_heart';
 let dialogueBudgetStats = null;
 let lastDialogueUsage = null;
 let lastExtractionUsage = null;
-let companionProfile = replay && !profileStorage.getItem(COMPANION_STORAGE_KEY) ?
-    normalizeCompanionProfile(replay.fixture.profile) : loadCompanionProfile(profileStorage);
+let companionProfile = normalizeCompanionProfile(null);
 
-// ------- DICTIONARY -------
+// Dictionary is optional and only fetched when a dictionary speech turn needs it.
 let cmudict = {};
-if (!replay && LIP_SYNC === 'dictionary') {
-    try { cmudict = await requestJSON(assets.dictionary, { timeoutMs:8000 }); }
-    catch { /* Missing optional dictionary leaves closed-mouth audio fallback. */ }
+let dictionaryRequest = null;
+async function getDictionary() {
+    dictionaryRequest ??= requestJSON(assets.dictionary, { timeoutMs:8000 });
+    cmudict = await dictionaryRequest;
+    return cmudict;
 }
 // gpt slop conversion i just don't care 
 const phonemeToViseme = {
@@ -103,6 +100,7 @@ function renderCompanionProfile() {
 }
 
 function applyCompanionProfile(value) {
+    if (!startupReady) profileEditedDuringStartup = true;
     companionProfile = normalizeCompanionProfile(value);
     message_history[0].content = buildCompanionPrompt(systemPrompt, companionProfile);
     try {
@@ -162,39 +160,13 @@ function renderContextBudget() {
 }
 
 // ------- CHATBOT LOGIC -------
-let spRequest = await fetch(assets.systemPrompt);
-if (!spRequest.ok) throw new Error('Companion prompt is missing. Run the setup check.');
-let systemPrompt = await spRequest.text();
+let systemPrompt = 'You are a warm, playful digital companion. Respond naturally and concisely. Respect the active companion profile and the user\'s preferences. Treat memories as context; do not invent a shared past.';
 let memories = [];
-let memoryData;
 let memoryLoadError = null;
-if (replay) {
-    memoryData = loadReplayMemories(localStorage);
-} else {
-    try {
-        memoryData = (await requestJSON('/api/memories', { timeoutMs: 8000 })).memories;
-        if (!Array.isArray(memoryData) || !memoryData.every(memory => typeof memory === 'string')) throw new Error('Memory response is invalid. Existing data has been preserved.');
-    } catch (error) {
-        memoryData = []; memoryLoadError = error.message; saveButton.disabled = true;
-        document.getElementById('turn-status').textContent = `${error.message} Save is disabled until memory loads correctly.`;
-    }
-}
-let memoryPrompt = "";
-memoryData.forEach((mem) => {
-    memoryPrompt += "- " + mem + "\n";
-    memories.push(mem);
-});
-
 let message_history = [
-    {
-        role: "system",
-        content: buildCompanionPrompt(systemPrompt, companionProfile),
-    },
-    {
-        role: "system",
-        content: "Previously remembered information:\n" + memoryPrompt,
-    }
-]
+    {role:'system', content:buildCompanionPrompt(systemPrompt,companionProfile)},
+    {role:'system', content:'Previously remembered information:\n'}
+];
 
 // ------- HELPER FUNCTIONS -------
 async function chat(history, purpose = 'dialogue', turn = null) {
@@ -347,6 +319,7 @@ async function getVisemes(timestamps, turn, audioId) {
         return data.visemes;
     }
     else {
+        await getDictionary();
         return convertToVisemes(timestamps)
     }
 }
@@ -361,10 +334,7 @@ const turnController = new TurnController(state => {
 });
 
 async function handleTextResponse({ reuseUser = false } = {}) {
-    if (replay && !ANI.getPlaybackState().ready) {
-        replayMessage('The avatar is still loading. Try again once it is visible.');
-        return;
-    }
+    if (!startupReady) return;
     if (replay?.finished) {
         replayMessage('This scene is finished. Restart it or choose another scene.');
         return;
@@ -434,6 +404,10 @@ function speechWarning(message) {
 }
 
 async function prepareAndPlay(parsedReply, turn) {
+    if (!ANI.getPlaybackState().ready) {
+        speechWarning('Avatar unavailable or still loading. Showing this reply as text only.');
+        return;
+    }
     turn.phase('preparing-speech');
     speechWarning('');
     const { audio, timestamps, audioId } = await generateTTS(parsedReply.text, turn);
@@ -457,6 +431,8 @@ async function prepareAndPlay(parsedReply, turn) {
         if (turn.signal.aborted || replay) throw error;
         speechWarning(`Emotion and gesture timing unavailable. Playing audio without those cues. ${error.message}`);
     }
+    actions = await ANI.preparePerformance(actions, turn.signal);
+    turn.assertCurrent();
     inspectReplay({ phase: 'performance prepared', spokenText: parsedReply.text, visemes, emotions, actions });
     turn.phase('speaking');
     await playPerformance({ audio, visemes, emotions, actions }, turn);
@@ -594,7 +570,7 @@ async function saveMemoryToFile() {
 }
 
 // -------- ACTUALLY DOING SOMETHING 🔥 --------
-if (replay) {
+function setupReplayUI() {
     document.body.classList.add('replay-mode');
     document.getElementById('replay-panel').hidden = false;
     document.getElementById('replay-settings').addEventListener('click', toggleSettings);
@@ -633,7 +609,7 @@ if (replay) {
     textInput.value = replay.nextPrompt;
     sendButton.textContent = 'play scene';
     voiceSelect.disabled = true;
-    replayMessage('Ready for scripted replay. Wait for the avatar, then press play scene.');
+    replayMessage('Ready for scripted replay. Avatar loads separately; text works while it loads.');
     inspectReplay({ phase: 'ready', fixture: replay.fixture.description });
 }
 renderCompanionProfile();
@@ -655,9 +631,87 @@ ANI.onPlaybackStateChange(state => {
         state.error || (state.missingClips.length ? `${state.missingClips.length} optional animations unavailable` : 'Avatar ready');
     inspectReplay({});
 });
-ANI.loadThreeVRM();
+
 if (![...voiceSelect.options].some(option => option.value === KOKORO_VOICE)) {
     voiceSelect.add(new Option(KOKORO_VOICE,KOKORO_VOICE));
 }
 voiceSelect.value = KOKORO_VOICE;
 voiceSelect.addEventListener('change', changeVoice);
+
+
+// Wire all controls before any optional data, CDN library, or WebGL is requested.
+sendButton.disabled = true;
+saveButton.disabled = true;
+const startupStatus = document.getElementById('startup-status');
+let renderSettings = renderPreferences();
+try { renderSettings = renderPreferences(JSON.parse(localStorage.getItem(RENDER_STORAGE_KEY) ?? '{}')); } catch {}
+const qualitySelect = document.getElementById('render-quality');
+const shadowsCheck = document.getElementById('render-shadows');
+qualitySelect.value = renderSettings.quality; shadowsCheck.checked = renderSettings.shadows;
+function changeRenderSettings() {
+    renderSettings = renderPreferences({quality:qualitySelect.value,shadows:shadowsCheck.checked});
+    try { localStorage.setItem(RENDER_STORAGE_KEY,JSON.stringify(renderSettings)); } catch {}
+    ANI.setRenderPreferences(renderSettings);
+}
+qualitySelect.addEventListener('change',changeRenderSettings);
+shadowsCheck.addEventListener('change',changeRenderSettings);
+document.getElementById('settings-toggle').addEventListener('click',toggleSettings);
+document.getElementById('avatar-retry').addEventListener('click',()=>{
+    if (ANI.module) ANI.loadThreeVRM();
+    else location.reload(); // Browsers cache failed module evaluation; reload retries that graph.
+});
+
+async function bootstrap() {
+    const warnings = [];
+    try {
+        await loadRuntimeConfig();
+        LIP_SYNC = runtimeConfig.lipSync; KOKORO_VOICE = runtimeConfig.voice;
+        if (RUNTIME_MODE === 'replay') {
+            const fixture = await requestJSON('/replay/benchmark.json',{timeoutMs:8000});
+            replay = new ReplaySession(fixture,new URLSearchParams(location.search).get('replay-case') ?? 'benchmark');
+            profileStorage = replayProfileStorage(localStorage);
+        } else profileStorage = localStorage;
+        if (!profileEditedDuringStartup) {
+            companionProfile = loadCompanionProfile(profileStorage);
+            if (replay) {
+                try { if (!profileStorage.getItem(COMPANION_STORAGE_KEY)) companionProfile = normalizeCompanionProfile(replay.fixture.profile); } catch {}
+            }
+        } else {
+            try { saveCompanionProfile(companionProfile,profileStorage); } catch { warnings.push('Profile applies for this visit; browser storage is unavailable.'); }
+        }
+        renderCompanionProfile();
+        if (replay) setupReplayUI();
+        if (![...voiceSelect.options].some(option=>option.value===KOKORO_VOICE)) voiceSelect.add(new Option(KOKORO_VOICE,KOKORO_VOICE));
+        voiceSelect.value = KOKORO_VOICE;
+        // Renderer startup runs separately from bounded optional prompt/memory loads.
+        ANI.loadThreeVRM().then(()=>ANI.setRenderPreferences(renderSettings));
+        const results = await Promise.allSettled([
+            (async()=>{
+                const response = await fetch(assets.systemPrompt,{signal:AbortSignal.timeout(8000)});
+                if (!response.ok) throw new Error('Companion prompt unavailable; using a basic prompt for this visit.');
+                const text = await response.text();
+                if (!text.trim()) throw new Error('Companion prompt is empty; using a basic prompt for this visit.');
+                return text;
+            })(),
+            replay ? Promise.resolve().then(()=>loadReplayMemories(localStorage)) : requestJSON('/api/memories',{timeoutMs:8000}).then(data=>data.memories)
+        ]);
+        if (results[0].status==='fulfilled') systemPrompt = results[0].value;
+        else warnings.push(results[0].reason.message);
+        if (results[1].status==='fulfilled' && Array.isArray(results[1].value) && results[1].value.every(value=>typeof value==='string')) {
+            memories = results[1].value; saveButton.disabled = false;
+        } else {
+            memoryLoadError = results[1].reason?.message ?? 'Invalid memory response.';
+            warnings.push(`${memoryLoadError} Memory saving is disabled to preserve existing data.`);
+            document.getElementById('replay-save').disabled = true;
+        }
+        message_history[0].content = buildCompanionPrompt(systemPrompt,companionProfile);
+        message_history[1].content = 'Previously remembered information:\n'+memories.map(memory=>'- '+memory+'\n').join('');
+        startupReady = true; sendButton.disabled = false;
+        renderMessages(); inspectReplay({});
+        startupStatus.textContent = warnings.join(' ');
+    } catch (error) {
+        startupStatus.textContent = `${error.message} Settings remain available; reload after repairing setup.`;
+        sendButton.disabled = true; // Never infer a live mode after a replay/config failure.
+    }
+}
+bootstrap();

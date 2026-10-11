@@ -10,6 +10,7 @@ export class BodyPlayback {
 
     transition(target) {
         if (!target || (target === this.current && target.isRunning())) return;
+        this.add(target);
         const starts = this.actions.map(action => action.isRunning() ? action.getEffectiveWeight() : 0);
         const total = starts.reduce((sum, weight) => sum + weight, 0);
         if (!target.isRunning()) target.reset().play();
@@ -19,6 +20,12 @@ export class BodyPlayback {
         });
         this.current = target;
         this.transitionState = total ? { target, starts: starts.map(weight => weight / total), elapsed: 0 } : null;
+    }
+
+    add(action) {
+        if (this.actions.includes(action)) return;
+        this.actions.push(action);
+        this.transitionState?.starts.push(0);
     }
 
     update(delta) {

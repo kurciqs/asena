@@ -113,6 +113,11 @@ body {
     font-size: 11px;
 }
 
+#settings-toggle { flex-shrink:0; border:0; border-radius:5px; padding:3px 7px; cursor:pointer; font-size:11px; }
+#startup-status { margin:8px 15px; font:12px/1.4 system-ui,sans-serif; }
+#startup-status:empty { display:none; }
+#selections label { color:var(--soft-color); font:13px/1.5 system-ui,sans-serif; }
+
 #companion-dialog {
     box-sizing: border-box;
     width: min(560px, calc(100vw - 32px));

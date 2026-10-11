@@ -56,7 +56,10 @@
 					<option>am_adam</option>
 				</select>
 			</div>
-			<button id="saveMemoryBtn">save memory</button>
+			<button id="saveMemoryBtn" disabled>save memory</button>
+			<div><label for="render-quality">Rendering</label><select id="render-quality"><option value="balanced">Balanced</option><option value="low">Low power</option><option value="high">High detail</option></select></div>
+			<label><input id="render-shadows" type="checkbox"> Shadows</label>
+			<button id="avatar-retry" type="button">Retry avatar</button>
 			<p id="avatar-status" role="status">Loading avatar…</p>
 		</div>
 	</div>
@@ -66,16 +69,18 @@
 			<div id="chat-drag-handle">
 				<span id="companion-label">Asena · Friendly</span>
 				<button id="customize-companion" type="button">customize</button>
+				<button id="settings-toggle" type="button">settings</button>
 			</div>
 			<div id="chat-display"></div>
 			<div id="user-input-container">
 				<input type="text" id="user-input-message" placeholder='talk to asena...'>
-				<button id="user-message-send">send</button>
+				<button id="user-message-send" disabled>send</button>
 				<button id="turn-retry" hidden type="button">Retry</button>
                     <button id="turn-stop" type="button" disabled>Stop</button>
 			</div>
 			<p id="speech-warning" role="status"></p>
             <p id="turn-status" role="status" aria-live="polite">Ready</p>
+			<p id="startup-status" role="status">Starting companion…</p>
 		</div>
 	</div>
 	<dialog id="companion-dialog" aria-labelledby="companion-dialog-title">
