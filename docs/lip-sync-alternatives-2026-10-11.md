@@ -2,9 +2,9 @@
 
 ## Recommendation
 
-First correct the existing mouth-shape mapping. Then evaluate **Kokoro's own predicted phoneme durations** as the main generated-speech path, with **HeadAudio** as an inexpensive audio-only fallback and Rhubarb retained for recordings and comparison. This is a recommendation from source inspection, not a measured replacement or a visual-quality verdict. No inference, audio analysis, Docker startup, installation or runtime changes were performed for this research.
+**Updated after Jakub's feedback:** the initial proposal was Kokoro phoneme durations plus shape mapping, with HeadAudio as a fallback. Jakub previously tried sound-to-mouth dictionaries and found them substantially weaker than Rhubarb. Both remain unselected candidates. Choose and visually validate mouth quality before changing TTS for streaming; the [expanded research and decision plan](speech-and-lip-sync-plan-2026-10-11.md) now guides TODOs 11a–14. No inference, audio analysis, Docker startup, installation or runtime changes were performed for this research.
 
-Our TTS already knows the sounds it is producing. Recovering those sounds afterward through speech recognition adds avoidable work. The strongest opportunity is to return that synthesis information with each audio segment and feed it to TODO 11's shared playback clock.
+Synthesis-derived timing can avoid a second recognition pass, but it does not establish convincing articulation. Continuous audio-to-face prediction is a separate candidate class. The technical findings below preserve the original timing/mapping investigation; they do not select the dictionary approach over those alternatives.
 
 ## What the existing measurements establish
 
@@ -20,13 +20,13 @@ Across the six clips with both timings, Kokoro took **10.126 s**, Rhubarb **22.7
 
 These were warm sequential requests, Docker CPU synthesis limited to two cores, and single-worker Rhubarb with matching dialogue after Docker stopped. They are not simultaneous live-pipeline measurements. The current live server does not supply the dialogue file or an explicit Rhubarb thread limit, so its behavior differs from that benchmark. Read-only inspection also confirms the installed executable is x86_64 on the recorded Apple M3 machine; the contribution of translation overhead has not been measured.
 
-## Ranked alternatives
+## Original timing/mapping candidates (not a quality ranking)
 
 | Approach | Extra wait before speech | Quality expectation / limitation | Fit for Asena |
 |---|---|---|---|
-| Kokoro phoneme durations | No separate recognition pass; small metadata/mapping work | Strong timing information; still needs natural blending and correct rig mapping | First candidate; extend existing TTS service |
+| Kokoro phoneme durations | No separate recognition pass; small metadata/mapping work | Useful timing information; user previously found dictionary articulation weaker than Rhubarb | Retained candidate; requires existing-service extension |
 | HeadTTS | Generates audio and viseme times together | Ready-made example of synthesis-driven alignment; local voice/pronunciation parity untested | Good reference or optional replacement TTS backend |
-| HeadAudio | Analysis during playback; author documents 50–100 ms processing latency | Approximate sound classification; consonants can be mistaken | First audio-only fallback candidate |
+| HeadAudio | Analysis during playback; author documents 50–100 ms processing latency | Approximate sound classification; consonants can be mistaken | Low-resource comparison; fallback choice unselected |
 | Existing dictionary path, improved | Mapping after word timestamps arrive; no audio recognition | Phone timings are guessed within each word | Cheapest prototype using current saved fixtures |
 | Wawa / lipsync-engine | Browser analysis during playback | Lightweight approximate articulation; assess on our actual face | Secondary fallback candidates |
 | Audio2Face via community MLX port | Unknown on this M3 | Rich facial coefficients, requiring substantial retargeting | Later realism experiment |
@@ -55,13 +55,13 @@ I would use this as a reference before replacing our Docker service. A replaceme
 
 [HeadAudio](https://github.com/met4citizen/HeadAudio) runs an MFCC/Gaussian classifier in a browser audio worklet, emitting 15 Oculus viseme weights. It has no external runtime dependencies and is MIT licensed. Its documentation describes roughly **50–100 ms** processing latency and an approximately **14 kB prototype model**, not a 14 kB total installation or RAM footprint. The training examples include `af_heart`, our recorded voice. The author explicitly acknowledges imperfect detection, particularly with noise.
 
-It is a useful fallback when synthesis metadata is absent. That voice overlap makes it worth comparing with our recordings, but does not prove accuracy on Asena. If we delay audio to compensate for classification latency, emotions and gestures must follow the audible clock too. It must share our audio owner and stop/pause behavior rather than run a second independent playback loop.
+It is a possible comparison when synthesis metadata is absent. That voice overlap makes it worth testing with our recordings, but does not prove accuracy on Asena or justify selecting it as the fallback. If we delay audio to compensate for classification latency, emotions and gestures must follow the audible clock too. It must share our audio owner and stop/pause behavior rather than run a second independent playback loop.
 
 ### 4. The dictionary path and simpler browser analysers
 
 Our [dictionary implementation](../src/dictionary_visemes.js) currently divides each known word's duration evenly among its CMU phonemes and skips unknown words. It needs no second inference pass, but a long vowel and a short stop receive equal time. Normalization, pronunciation fallback, weighted durations and smoother transitions could make it a useful inexpensive comparison. They would remain approximations.
 
-[Wawa Lipsync](https://github.com/wass08/wawa-lipsync) connects to an HTML audio element through Web Audio and returns a live viseme for a custom renderer. It is MIT licensed. [lipsync-engine](https://github.com/Amoner/lipsync-engine) documents frequency-band analysis, smoothing, PCM/audio-element inputs and an approximately 15 kB minified package with no dependencies. Its A–F labels differ from Rhubarb's; do not reuse our existing letter mapping. Neither project's documentation establishes superior visual quality on our avatar. Keep these below synthesis-derived timing in the shortlist.
+[Wawa Lipsync](https://github.com/wass08/wawa-lipsync) connects to an HTML audio element through Web Audio and returns a live viseme for a custom renderer. It is MIT licensed. [lipsync-engine](https://github.com/Amoner/lipsync-engine) documents frequency-band analysis, smoothing, PCM/audio-element inputs and an approximately 15 kB minified package with no dependencies. Its A–F labels differ from Rhubarb's; do not reuse our existing letter mapping. Neither project's documentation establishes superior visual quality on our avatar. Keep these as inexpensive baselines rather than proven realistic replacements.
 
 ### 5. Rich neural facial animation on Apple Silicon
 
@@ -85,9 +85,9 @@ Current tracks pulse from zero to full strength and back for every cue and use o
 
 1. **Offline first:** correct source-specific mapping, preserving recorded cues. Compare the existing Rhubarb and dictionary data on the same seven saved WAVs with neutral expressions. Verify recognizable closures and rounding, then assess happy blending separately.
 2. Build a selectable HeadAudio experiment using only saved audio, retaining the existing owner/clock. Measure incremental browser work, visible lag, silence behavior, pause/resume and stopped-turn cleanup. No TTS or LLM is needed for this comparison.
-3. Prepare the Kokoro metadata adapter and tests using synthetic duration arrays, speed changes, punctuation, token filtering, silence trimming and phrase offsets. Verify the pinned image's code before finalizing the patch.
-4. In a separately authorized short Kokoro run, capture phone-duration fixtures once. Compare timing and appearance against the saved Rhubarb reference; use new audio's own timings, not durations borrowed from a different synthesis.
-5. Combine the selected mode with TODOs 12/13's bounded sentence delivery. Initially each complete phrase can carry audio and ready mouth cues. True PCM streaming can follow without making Rhubarb a prerequisite for first audio.
+3. Follow the [expanded comparison plan](speech-and-lip-sync-plan-2026-10-11.md#evaluation-gates-and-implementation-order), including neural audio-to-face alternatives and local TTS candidates. Keep mouth and voice quality evaluations separate and record required buffering/resource limits.
+4. If Kokoro durations remain competitive, verify the pinned image's code, then prepare metadata adapter fixtures for speed, punctuation, filtering, silence trimming and offsets. A separately authorized short run can capture real durations from the same synthesis as its audio. This is conditional candidate work, not a prerequisite for all alternatives.
+5. After visual selection under TODO 11a, combine the chosen mode with TODOs 12/13's agreed transport and bounded text delivery. Preserve the single audio owner and clock. No streaming rewrite before this decision.
 
 For each option record first playable audio, extra lip-sync preparation time, processing/playback ratio, browser/backend memory and CPU, and queue underruns. Rate mouth/audio agreement, closures, rounded vowels, smoothness and neutral/happy appearance at the same framing. A test that only verifies nonzero morph weights cannot establish convincing articulation.
 

@@ -2,7 +2,7 @@
 
 Asena is a customizable local companion: LM Studio dialogue → Kokoro speech → Rhubarb mouth cues → a Three.js/VRM avatar. Choose a name, personality, relationship notes, preferences and friendly / affectionate / intimate closeness in **customize**. Those settings become model instructions; the selected model determines their quality.
 
-The current milestone stabilizes the existing companion loop. Recorded replay works without loading AI models. Live Qwen dialogue and the combined workload still need a separately prepared test on the laptop. Streaming, an audio-clock scheduler, natural motion and long-term memory improvements remain in [TODO.md](TODO.md). See the [stabilization review](docs/stabilization-02-09.md) for changes and limitations.
+The current milestone stabilizes the existing companion loop. Recorded replay works without loading AI models. Live Qwen dialogue and the combined workload still need a separately prepared test on the laptop. Streaming, natural motion and long-term memory improvements remain in [TODO.md](TODO.md); the audio-clock scheduler is implemented. See the [stabilization review](docs/stabilization-02-09.md) for changes and limitations.
 
 ## Start safely
 
@@ -31,6 +31,7 @@ Three.js and VRM libraries currently use CDN resources, so the avatar needs inte
 - [Avatar and animation assets](docs/assets.md): included avatar, Mixamo export/retargeting, missing-asset fallback.
 - [Replay guide](docs/replay-mode.md): scenes, inspection, failures, synthetic memory and recordings.
 - [Backlog](TODO.md), [architecture review](docs/architecture-health-check-2026-10-11.md), [benchmark](docs/companion-benchmark.md).
+- [Speech and lip-sync decision plan](docs/speech-and-lip-sync-plan-2026-10-11.md): realistic live mouth-motion alternatives, local TTS shortlist, optional cloud comparisons and evaluation required before streaming changes.
 - [Runtime lock](runtime-lock.json): dependency/backend versions and model file provenance. Runtime inspection records are snapshots, not live performance guarantees.
 
 Memory remains a list of strings with manual Save. Live memory and temporary audio now live under ignored `.runtime/`, outside public assets. Existing local data has been preserved. Back up that directory yourself. Replay fixtures are public synthetic examples; do not add personal recordings there. Earlier Git history may contain the formerly tracked memory file.
