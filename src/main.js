@@ -1,5 +1,6 @@
 import { loadRuntimeConfig, runtimeConfig, RUNTIME_MODE, contextBudget, assets } from './runtime_config.js';
 import { packConversation } from './context_budget.js';
+import { dictionaryVisemes } from './dictionary_visemes.js';
 import { buildExpressionTracks } from './expression_tracks.js';
 import { requestJSON } from './service_client.js';
 import { loadAudioMetadata, repairWavHeader } from './audio.js';
@@ -31,28 +32,6 @@ async function getDictionary() {
     cmudict = await dictionaryRequest;
     return cmudict;
 }
-// gpt slop conversion i just don't care 
-const phonemeToViseme = {
-    // A: Open mouth
-    "AA": "A", "AE": "A", "AH": "A", "AO": "A", "AW": "A", "AY": "A",
-    // B: Closed lips
-    "B": "B", "P": "B", "M": "B",
-    // C: Rounded mouth
-    "OW": "C", "UH": "C", "UW": "C", "OY": "C",
-    // D: Sibilants and affricates
-    "CH": "D", "JH": "D", "SH": "D", "ZH": "D",
-    // E: Smile vowels
-    "IY": "E", "IH": "E", "EY": "E", "ER": "E",
-    // F: Teeth on lip
-    "F": "F", "V": "F",
-    // G: Back consonants
-    "K": "G", "G": "G", "NG": "G",
-    // H: Front consonants and tongue
-    "S": "H", "Z": "H", "TH": "H", "DH": "H",
-    "T": "H", "D": "H", "L": "H", "R": "H", "N": "H"
-};
-// https://housemd-quotes.com/
-
 // ------- HTML ELEMENTS -------
 const textInput = document.getElementById('user-input-message');
 const chatContainer = document.getElementById("chat-display");
@@ -267,45 +246,7 @@ async function generateTTS(text, turn) {
     return { audio, timestamps, audioId };
 }
 
-function convertToVisemes(kokoroWords) {
-    // get visemes based on dictionary, can save about ten seconds, the time that rhubarb might need extra but sucks more
-    const visemes = [];
-
-    for (const { word, start_time, end_time } of kokoroWords) {
-        const upperWord = word.toUpperCase();
-        const phonemes = cmudict[upperWord];
-
-        if (!phonemes) continue;
-
-        // Remove stress markers: "AH0" → "AH"
-        const cleaned = phonemes.map(p => p.replace(/\d/g, ""));
-
-        // Time per phoneme
-        const duration = end_time - start_time;
-        const phonemeDuration = duration / cleaned.length;
-
-        for (let i = 0; i < cleaned.length; i++) {
-            const p = cleaned[i];
-            const viseme = phonemeToViseme[p];
-            if (!viseme) continue;
-
-            visemes.push({
-                value: viseme,
-                start: start_time + i * phonemeDuration,
-                end: start_time + (i + 1) * phonemeDuration
-            });
-        }
-        visemes.push({
-            value: "X",
-            start: start_time + cleaned.length * phonemeDuration,
-            end: start_time + (cleaned.length + 1) * phonemeDuration
-        });
-    }
-
-    return visemes;
-}
-
-async function getVisemes(timestamps, turn, audioId) {
+async function getVisemes(timestamps, turn, audioId, audioDuration) {
     turn.assertCurrent();
     if (replay) return replay.visemes();
     if (LIP_SYNC === "rhubarb") {
@@ -320,7 +261,7 @@ async function getVisemes(timestamps, turn, audioId) {
     }
     else {
         await getDictionary();
-        return convertToVisemes(timestamps)
+        return dictionaryVisemes(timestamps, cmudict, audioDuration);
     }
 }
 
@@ -414,7 +355,7 @@ async function prepareAndPlay(parsedReply, turn) {
     turn.assertCurrent();
     let visemes = [], emotions = [], actions = [];
     try {
-        visemes = await getVisemes(timestamps, turn, audioId);
+        visemes = await getVisemes(timestamps, turn, audioId, audio.duration);
         if (!Array.isArray(visemes)) throw new Error('Missing mouth cues.');
         buildExpressionTracks({ duration: audio.duration, visemes }, name => name);
     } catch (error) {
