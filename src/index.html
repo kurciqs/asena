@@ -71,9 +71,11 @@
 			<div id="user-input-container">
 				<input type="text" id="user-input-message" placeholder='talk to asena...'>
 				<button id="user-message-send">send</button>
-				<button id="turn-stop" type="button" disabled>Stop</button>
+				<button id="turn-retry" hidden type="button">Retry</button>
+                    <button id="turn-stop" type="button" disabled>Stop</button>
 			</div>
-			<p id="turn-status" role="status" aria-live="polite">Ready</p>
+			<p id="speech-warning" role="status"></p>
+            <p id="turn-status" role="status" aria-live="polite">Ready</p>
 		</div>
 	</div>
 	<dialog id="companion-dialog" aria-labelledby="companion-dialog-title">

@@ -43,12 +43,13 @@ class ReplayBoundaryTests(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         response.close()
 
-    def test_live_mode_keeps_the_existing_proxy(self):
-        with patch.object(server, "RUNTIME_MODE", "live"), patch.object(server.requests, "post") as proxy:
-            proxy.return_value.json.return_value = {"choices": []}
-            response = self.client.post("/chat", json={"model": "test-model"})
+    def test_live_mode_validates_and_proxies_without_loading_models(self):
+        payload = {"model": "test-model", "messages": [{"role": "user", "content": "Hello"}]}
+        result = {"choices": [{"message": {"content": "A mocked reply"}}]}
+        with patch.object(server, "RUNTIME_MODE", "live"), patch.object(server, "proxy_json", return_value=result) as proxy:
+            response = self.client.post("/chat", json=payload)
             self.assertEqual(response.status_code, 200)
-            proxy.assert_called_once_with(server.LMS_API, json={"model": "test-model"})
+            proxy.assert_called_once_with(server.LMS_API, payload, "LM Studio")
 
 
 if __name__ == "__main__":

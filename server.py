@@ -3,7 +3,6 @@ mimetypes.add_type("application/javascript", ".js")
 mimetypes.add_type("text/css", ".css")
 
 from flask import Flask, request, jsonify, send_from_directory, Response, render_template
-import asyncio
 from flask_cors import CORS
 import requests
 import os
@@ -11,6 +10,7 @@ import json
 import base64 
 import subprocess
 import posixpath
+from service_contracts import ServiceError, require_payload, proxy_json, validate_chat_response, validate_tts_response, validate_visemes
 
 SAVE_DIR = "src"
 RHUBARB = "../rhubarb/rhubarb"
@@ -25,6 +25,23 @@ if RUNTIME_MODE not in ("live", "replay"):
 
 app = Flask(__name__, static_folder="./src/")
 CORS(app)
+app.config["MAX_CONTENT_LENGTH"] = 24 * 1024 * 1024
+
+@app.errorhandler(ServiceError)
+def service_error(error):
+    return jsonify({"error": str(error), "retryable": error.status >= 500}), error.status
+
+@app.errorhandler(subprocess.TimeoutExpired)
+def process_timeout(error):
+    return jsonify({"error": "Audio alignment timed out; retry or use audio without lip sync.", "retryable": True}), 504
+
+@app.errorhandler(FileNotFoundError)
+def process_missing(error):
+    return jsonify({"error": "A required local file or speech tool is unavailable.", "retryable": True}), 503
+
+@app.errorhandler(413)
+def oversized_request(error):
+    return jsonify({"error": "Request is too large.", "retryable": False}), 413
 
 @app.before_request
 def enforce_replay_boundary():
@@ -46,17 +63,13 @@ def page_not_found(e):
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    res = requests.post(LMS_API, json=request.json)
-    return jsonify(res.json())
+    payload = require_payload(request.get_json(silent=True), 'chat')
+    return jsonify(validate_chat_response(proxy_json(LMS_API, payload, 'LM Studio')))
 
 @app.route("/tts", methods=["POST"])
 def tts():
-    res = requests.post(KOKORO_API, json=request.json, headers={
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST",
-        "Access-Control-Allow-Headers": "Content-Type",
-    })
-    return jsonify(res.json())
+    payload = require_payload(request.get_json(silent=True), 'tts')
+    return jsonify(validate_tts_response(proxy_json(KOKORO_API, payload, 'Kokoro')))
 
 @app.route("/")
 def serve_index():
@@ -113,7 +126,9 @@ def save_json():
 
 @app.route('/get_visemes', methods=['POST'])
 def get_visemes():
-    data = request.json
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict) or not isinstance(data.get('filepath'), str):
+        raise ServiceError('Missing audio file path.', 400)
     filepath = SAVE_DIR + data['filepath']
     if not filepath or not os.path.exists(filepath):
         return jsonify({'error': 'Invalid or missing file path'}), 400
@@ -123,29 +138,32 @@ def get_visemes():
     
     # dawg if this subprocess fails, you don't even deserve to know it's so obscure
     result = subprocess.run([
-        "ffmpeg", "-y", "-i", filepath,
+        "ffmpeg", "-threads", "1", "-y", "-i", filepath,
         "-ac", "1", "-ar", "44100", "-sample_fmt", "s16",
         conv_path
-    ], capture_output=True, text=True)
+    ], capture_output=True, text=True, timeout=30)
     if result.returncode != 0:
-        return jsonify({'error': 'FFMPEG failed', 'stderr': result.stderr}), 500
+        return jsonify({'error': 'Audio conversion failed. Check the WAV and ffmpeg, then retry.', 'retryable': True}), 500
 
     result = subprocess.run(
         [RHUBARB, conv_path, "-f", "json"],
         capture_output=True,
-        text=True
+        text=True, timeout=30
     )
     if result.returncode != 0:
-        return jsonify({'error': 'Rhubarb failed', 'stderr': result.stderr}), 500
+        return jsonify({'error': 'Rhubarb alignment failed. Check the tool, then retry.', 'retryable': True}), 500
 
-    output = json.loads(result.stdout)
+    try:
+        output = json.loads(result.stdout)
+    except ValueError as error:
+        raise ServiceError("Rhubarb returned invalid JSON.") from error
     out_data = {
         "visemes": output.get("mouthCues", []),
         "soundFile" : data['filepath'] # this one without the dot i guess
     }
     
     # return, not sure what to do with it though since it's already saved
-    return jsonify({'visemes': output.get("mouthCues", [])})
+    return jsonify({'visemes': validate_visemes(output.get("mouthCues", []))})
 
 if __name__ == "__main__":    
     app.run(host="127.0.0.1", port=int(os.environ.get("ASENA_PORT", "3000")),

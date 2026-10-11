@@ -1,3 +1,5 @@
+import { buildExpressionTracks } from './expression_tracks.js';
+import { requestJSON } from './service_client.js';
 import { loadAudioMetadata, repairWavHeader } from './audio.js';
 import { TurnController } from './turn_controller.js';
 import * as ANI from './animation.js'
@@ -186,7 +188,7 @@ async function chat(history, purpose = 'dialogue', turn = null) {
             { scene: replay.active.label, rawReply: reply, phase: 'text ready' });
         return reply;
     }
-    const chatResponse = await fetch("/chat", {
+    const chatData = await requestJSON("/chat", {
         signal: turn?.signal,
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -199,13 +201,9 @@ async function chat(history, purpose = 'dialogue', turn = null) {
         })
     });
 
-    if (!chatResponse.ok) {
-        throw new Error(`LMS API error: ${chatResponse.status}`);
-    }
-
-    const chatData = await chatResponse.json();
     turn?.assertCurrent();
-    const reply = chatData.choices[0].message.content;
+    const reply = chatData.choices?.[0]?.message?.content;
+    if (typeof reply !== 'string' || !reply.trim()) throw new Error('No usable reply was returned. Retry when ready.');
     CONTEXT_WINDOW_CURRENT = chatData.usage.total_tokens;
 
     renderMessages();
@@ -226,7 +224,7 @@ async function generateTTS(text, turn) {
         turn.own(() => audio.pause());
         return { audio, timestamps: speech.timestamps };
     }
-    const ttsResponse = await fetch("/tts", {
+    const ttsData = await requestJSON("/tts", {
         signal: turn.signal,
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -239,13 +237,6 @@ async function generateTTS(text, turn) {
             stream: false
         })
     })
-    if (!ttsResponse.ok) {
-        console.log(ttsResponse)
-        const errorText = await ttsResponse.text();
-        throw new Error(`ERROR: TTS error: ${errorText}`);
-    }
-
-    const ttsData = await ttsResponse.json();
     turn.assertCurrent();
     const audioBase64 = ttsData.audio;
     const timestamps = ttsData.timestamps;
@@ -264,7 +255,7 @@ async function generateTTS(text, turn) {
     // if using rhubarb, we have to write the sound to a file
     if (LIP_SYNC === "rhubarb") {
         const audioPath = AUDIO_FOLDER + `tts.wav`;
-        await fetch('/save_audio', {
+        await requestJSON('/save_audio', {
             signal: turn.signal,
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -323,18 +314,12 @@ async function getVisemes(timestamps, turn) {
     if (replay) return replay.visemes();
     if (LIP_SYNC === "rhubarb") {
         const audioPath = AUDIO_FOLDER + `tts.wav`;
-        const response = await fetch('/get_visemes', {
+        const data = await requestJSON('/get_visemes', {
             signal: turn.signal,
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ filepath: audioPath })
         });
-        if (!response.ok) {
-            const error = await response.text();
-            throw new Error("Failed to fetch visemes: " + error);
-        }
-        const data = await response.json();
-
         return data.visemes;
     }
     else {
@@ -348,10 +333,10 @@ const turnController = new TurnController(state => {
         speaking: 'Speaking', completed: 'Finished', stopped: 'Stopped', failed: 'Failed' };
     document.getElementById('turn-status').textContent = state.error || labels[state.phase];
     document.getElementById('turn-stop').disabled = !['requesting', 'preparing-speech', 'speaking'].includes(state.phase);
-    inspectReplay({ turn: state });
+    inspectReplay({ turn: state, phase: state.phase });
 });
 
-async function handleTextResponse() {
+async function handleTextResponse({ reuseUser = false } = {}) {
     if (replay && !ANI.getPlaybackState().ready) {
         replayMessage('The avatar is still loading. Try again once it is visible.');
         return;
@@ -363,9 +348,13 @@ async function handleTextResponse() {
     const message = textInput.value.trim();
     if (!message) return;
     textInput.value = '';
+    lastRetry = { message };
+    document.getElementById('turn-retry').hidden = true;
     await turnController.run(async turn => {
         turn.own(() => ANI.stopPerformance());
-        message_history.push({ role: 'user', content: message });
+        if (!reuseUser || message_history.at(-1)?.role !== 'user' || message_history.at(-1)?.content !== message) {
+            message_history.push({ role: 'user', content: message });
+        }
         if (replay) {
             replayInspection = {};
             inspectReplay({ phase: 'requesting fixture' });
@@ -381,22 +370,21 @@ async function handleTextResponse() {
             if (ind % 5 === 0) {
                 const extractionHistory = [...message_history, { role: 'user', content:
                     'Summarize the recent dialogue into 1–2 short bullet points of explicitly stated user facts and preferences.' }];
-                const extracted = await chat(extractionHistory, 'memory', turn);
-                turn.assertCurrent();
-                memories.push(...('\n' + extracted).split(/\n\s*-\s+/).map(item => item.trim()).filter(Boolean));
-                inspectReplay({ phase: 'memory extracted' });
+                try {
+                    const extracted = await chat(extractionHistory, 'memory', turn);
+                    turn.assertCurrent();
+                    memories.push(...('\n' + extracted).split(/\n\s*-\s+/).map(item => item.trim()).filter(Boolean));
+                    inspectReplay({ phase: 'memory extracted' });
+                } catch (error) {
+                    if (turn.signal.aborted) throw error;
+                    speechWarning(`Memory extraction skipped: ${error.message}`);
+                }
             }
             renderMessages();
-            turn.phase('preparing-speech');
-            const { audio, timestamps } = await generateTTS(parsedReply.text, turn);
-            turn.assertCurrent();
-            const visemes = await getVisemes(timestamps, turn);
-            turn.assertCurrent();
-            const emotions = EMO.getEmotions(timestamps, parsedReply.emotions, parsedReply.text, audio.duration);
-            const actions = EMO.getActions(timestamps, parsedReply.actions, parsedReply.text, new Set(ANI.getPlaybackState().clips));
-            inspectReplay({ phase: 'performance prepared', spokenText: parsedReply.text, visemes, emotions, actions });
-            turn.phase('speaking');
-            await playPerformance({ audio, visemes, emotions, actions }, turn);
+            lastRetry = { parsedReply, message };
+            await prepareAndPlay(parsedReply, turn);
+            document.getElementById('turn-retry').hidden = true;
+            lastRetry = null;
             turn.assertCurrent();
             inspectReplay({ phase: 'playback ended' });
             if (replay) {
@@ -406,12 +394,48 @@ async function handleTextResponse() {
             }
         } catch (error) {
             if (!turn.signal.aborted) {
+                document.getElementById('turn-retry').hidden = false;
                 replayMessage(error.message);
                 inspectReplay({ phase: 'failed', error: error.message });
             }
             throw error;
         }
     });
+}
+
+let lastRetry = null;
+function speechWarning(message) {
+    document.getElementById('speech-warning').textContent = message;
+    inspectReplay({ warning: message });
+}
+
+async function prepareAndPlay(parsedReply, turn) {
+    turn.phase('preparing-speech');
+    speechWarning('');
+    const { audio, timestamps } = await generateTTS(parsedReply.text, turn);
+    turn.assertCurrent();
+    let visemes = [], emotions = [], actions = [];
+    try {
+        visemes = await getVisemes(timestamps, turn);
+        if (!Array.isArray(visemes)) throw new Error('Missing mouth cues.');
+        buildExpressionTracks({ duration: audio.duration, visemes }, name => name);
+    } catch (error) {
+        if (turn.signal.aborted || replay) throw error;
+        visemes = [];
+        speechWarning(`Lip sync unavailable. Playing audio with a closed mouth. ${error.message}`);
+    }
+    turn.assertCurrent();
+    try {
+        if (!timestamps?.length) throw new Error('No word timing was returned.');
+        emotions = EMO.getEmotions(timestamps, parsedReply.emotions, parsedReply.text, audio.duration);
+        actions = EMO.getActions(timestamps, parsedReply.actions, parsedReply.text, new Set(ANI.getPlaybackState().clips));
+    } catch (error) {
+        if (turn.signal.aborted || replay) throw error;
+        speechWarning(`Emotion and gesture timing unavailable. Playing audio without those cues. ${error.message}`);
+    }
+    inspectReplay({ phase: 'performance prepared', spokenText: parsedReply.text, visemes, emotions, actions });
+    turn.phase('speaking');
+    await playPerformance({ audio, visemes, emotions, actions }, turn);
 }
 
 async function playPerformance(data, turn) {
@@ -437,6 +461,28 @@ async function playPerformance(data, turn) {
 }
 
 // ------- UI FIDDLING -------
+document.getElementById('turn-retry').addEventListener('click', async () => {
+    if (!lastRetry) return;
+    const retry = lastRetry;
+    document.getElementById('turn-retry').hidden = true;
+    if (!retry.parsedReply) {
+        textInput.value = retry.message;
+        await handleTextResponse({ reuseUser: true });
+        return;
+    }
+    await turnController.run(async turn => {
+        turn.own(() => ANI.stopPerformance());
+        try {
+            await prepareAndPlay(retry.parsedReply, turn);
+            turn.assertCurrent();
+            lastRetry = null;
+            if (replay) { textInput.value = replay.nextPrompt; replayMessage('Scene finished.'); }
+        } catch (error) {
+            if (!turn.signal.aborted) document.getElementById('turn-retry').hidden = false;
+            throw error;
+        }
+    });
+});
 document.getElementById('turn-stop').addEventListener('click', () => {
     turnController.stop();
     replayMessage('Stopped. Choose the next scene or restart this one.');
@@ -454,7 +500,7 @@ textInput.addEventListener('keydown', function (e) {
     }
 });
 saveButton.addEventListener('click', () => {
-    saveMemoryToFile().catch(error => replayMessage(error.message));
+    saveMemoryToFile().catch(error => { document.getElementById('turn-status').textContent = error.message; replayMessage(error.message); });
 });
 
 // because i take care to cite my sources: https://www.geeksforgeeks.org/html/draggable-element-using-javascript/
@@ -514,7 +560,7 @@ async function saveMemoryToFile() {
         inspectReplay({ phase: 'test memory saved' });
         return;
     }
-    await fetch('/save_json', {
+    await requestJSON('/save_json', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -555,7 +601,7 @@ if (replay) {
     });
     document.getElementById('replay-restart').addEventListener('click', () => location.reload());
     document.getElementById('replay-save').addEventListener('click', () => {
-        saveMemoryToFile().catch(error => replayMessage(error.message));
+        saveMemoryToFile().catch(error => { document.getElementById('turn-status').textContent = error.message; replayMessage(error.message); });
     });
     document.getElementById('replay-clear').addEventListener('click', () => {
         localStorage.removeItem(REPLAY_MEMORY_KEY);
