@@ -54,6 +54,44 @@ class KokoroStreamTests(unittest.TestCase):
         self.assertFalse(instance.worker.is_alive())
         return events
 
+    def test_captured_trimmed_caption_tails_survive_every_buffer_setting(self):
+        capture=json.loads((Path(__file__).parent/'fixtures/kokoro-trimmed-captions.json').read_text())
+        for case in capture['cases']:
+            raw=case['packets'][0]
+            self.assertGreater(raw['timestamps'][-1]['end_time']-raw['frames']/stream.RATE, .1)
+            captured={'audio_format':'audio/pcm','audio':base64.b64encode(b'\0\0'*raw['frames']).decode(),
+                      'timestamps':raw['timestamps']}
+            for opening in (.5,1,2):
+                for policy in ('1s','2s','3s'):
+                    for startup in (.5,1,2,4):
+                        with self.subTest(case=case['case'],opening=opening,policy=policy,startup=startup):
+                            responses=iter([Response([captured]),Response([packet(.7)])])
+                            instance=stream.SpeechStream({'input':stream.TRIAL_TEXTS['short'],'voice':'af_heart',
+                                'strategy':'phrases','openingSeconds':opening,'policy':policy,'startupSeconds':startup},
+                                post=lambda *a,**k:next(responses),recognizer=recognize)
+                            events=self.consume(instance)
+                            self.assertEqual(events[-1]['type'],'result')
+                            self.assertEqual(instance.frames,raw['frames']+16800)
+                            self.assertEqual(len(events[-1]['report']['timingWarnings']),1)
+                            samples=b''.join(base64.b64decode(e['pcm']) for e in events if e['type']=='segment')
+                            self.assertEqual(len(samples)//2,instance.frames)
+                            for e in events:
+                                if e['type']=='words':
+                                    self.assertTrue(all(0<=w['start_time']<w['end_time']<=instance.frames/stream.RATE for w in e['timestamps']))
+
+    def test_bad_optional_captions_do_not_silence_valid_pcm(self):
+        for timestamps in (None,[{'word':'bad','start_time':float('nan'),'end_time':1}],
+                           [{'word':'bad','start_time':0,'end_time':-1}]):
+            events=self.consume(self.make(Response([{**packet(.7),'timestamps':timestamps}])))
+            self.assertTrue(events[-1]['report']['complete'])
+            self.assertEqual(events[-1]['report']['timingWarnings'][0]['code'],'caption-unavailable')
+        words,warning=stream.packet_words({'timestamps':[
+            {'word':'earlier','start_time':0,'end_time':.5},
+            {'word':'valid','start_time':1.1,'end_time':1.8},
+            {'word':'later','start_time':2.5,'end_time':3}]},1,2)
+        self.assertEqual([w['word'] for w in words],['valid'])
+        self.assertEqual(warning['droppedWords'],2)
+
     def test_framing_handles_all_utf8_splits_and_rejects_truncation(self):
         payload='{"word":"héllo"}\n{"n":2}\n'.encode()
         for n in range(len(payload)+1):

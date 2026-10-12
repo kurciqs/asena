@@ -119,7 +119,7 @@ def phrase_requests(text):
     return chunks
 
 
-def decode_packet(value, previous_start=0):
+def decode_pcm(value):
     if value.get('audio_format') != 'audio/pcm' or not isinstance(value.get('audio'), str):
         raise ValueError('Expected Kokoro mono PCM16 at 24 kHz (audio/pcm)')
     try:
@@ -128,11 +128,43 @@ def decode_packet(value, previous_start=0):
         raise ValueError('Invalid Kokoro PCM encoding') from error
     if not pcm or len(pcm) % 2 or len(pcm) > 30 * RATE * 2:
         raise ValueError('Empty, partial-sample or oversized Kokoro PCM frame')
+    return pcm
+
+
+def decode_packet(value, previous_start=0):
+    pcm = decode_pcm(value)
     words = normalize_timestamps(value.get('timestamps', []))
     if any(len(w['word'])>256 for w in words):raise ValueError('Oversized Kokoro timestamp token')
     if words and words[0]['start_time'] < previous_start:
         raise ValueError('Kokoro word timestamps moved backwards')
     return pcm, words
+
+
+def packet_words(value, start, end):
+    """PCM is authoritative; optional captions may include trimmed punctuation.
+
+    Clip only to this packet's actual sample interval, never stretch speech or
+    shift later packets. Invalid optional timing is omitted, with a warning;
+    Rhubarb still analyzes the original audio rather than using caption visemes.
+    """
+    try:
+        words = normalize_timestamps(value.get('timestamps', []))
+        if any(len(w['word']) > 256 for w in words):
+            raise ValueError('Oversized Kokoro timestamp token')
+    except ValueError:
+        return [], {'code':'caption-unavailable', 'message':'Invalid word timing omitted; audio and Rhubarb continue.'}
+    output=[];corrected=dropped=0
+    overrun=max([0]+[w['end_time']-end for w in words])
+    for word in words:
+        a, b = max(start, min(end, word['start_time'])), max(start, min(end, word['end_time']))
+        if b <= a:
+            dropped += 1
+            continue
+        if a != word['start_time'] or b != word['end_time']:corrected += 1
+        output.append({**word, 'start_time':a, 'end_time':b})
+    warning = {'code':'caption-bounded', 'message':'Word timing bounded to received PCM; audio and Rhubarb continue.',
+               'correctedWords':corrected, 'droppedWords':dropped, 'maxTailOverrunSeconds':overrun} if corrected or dropped else None
+    return output, warning
 
 
 class SpeechStream:
@@ -153,7 +185,7 @@ class SpeechStream:
         self.incoming_peak = self.prepared_peak = 0; self.provider_finished = None
         self.first_packet = None; self.producer = None; self.worker = None
         self.transport = None
-        self.last_word_start = 0; self.word_count = 0
+        self.last_word_start = 0; self.word_count = 0; self.timing_warnings = []
 
     def cancel(self):
         self.cancelled.set()
@@ -188,7 +220,13 @@ class SpeechStream:
             except queue.Full: pass
 
     def ingest(self, value, offset=0, request_index=0):
-        pcm, words = decode_packet(value)
+        pcm = decode_pcm(value)
+        packet_end = (self.frames + len(pcm)//2)/RATE
+        words, warning = packet_words(value, self.frames/RATE-offset, packet_end-offset)
+        if warning:
+            warning = {**warning, 'requestIndex':request_index, 'packetIndex':len(self.arrivals)}
+            self.timing_warnings.append(warning)
+            self.event({'type':'warning', **warning})
         words=[{**w,'start_time':w['start_time']+offset,'end_time':w['end_time']+offset} for w in words]
         if words and words[0]['start_time']<self.last_word_start:
             raise ValueError('Kokoro word timestamps moved backwards')
@@ -198,9 +236,6 @@ class SpeechStream:
         if words: self.last_word_start = words[-1]['start_time']
         if self.frames + len(pcm)//2 > MAX_AUDIO_SECONDS*RATE:
             raise ValueError('Speech exceeds the three-minute audio limit')
-        end_seconds = (self.frames + len(pcm)//2)/RATE
-        if any(w['end_time'] > end_seconds+.1 for w in words):
-            raise ValueError('Kokoro timestamps exceed the received audio timeline')
         arrival = {'index': len(self.arrivals), 'wallSeconds': time.monotonic()-self.started,
                    'startFrame': self.frames, 'frames': len(pcm)//2, 'wordCount': len(words), 'requestIndex':request_index}
         self.first_packet = self.first_packet if self.first_packet is not None else arrival['wallSeconds']
@@ -266,7 +301,7 @@ class SpeechStream:
                 'incomingPeakSeconds': self.incoming_peak/RATE, 'preparedPeakSeconds': self.prepared_peak/RATE,
                 'limits': {'incomingSeconds':16, 'preparedSeconds':12, 'decodedPacketSeconds':30,
                            'audioSeconds':MAX_AUDIO_SECONDS, 'deadlineSeconds':DEADLINE, 'providerReadTimeoutSeconds':15},
-                'events': self.events[:]}
+                'timingWarnings':self.timing_warnings[:], 'events': self.events[:]}
 
     def work(self):
         self.started = time.monotonic(); complete = False
@@ -332,7 +367,7 @@ class SpeechStream:
             # Do not expose provider response bodies or paths to the browser.
             try:
                 message = str(error) if isinstance(error,(ValueError,RuntimeError)) else 'Kokoro stream unavailable or interrupted. Retry when ready.'
-                self.failure = None; self.event({'type':'error', 'error':message})
+                self.failure = None; self.event({'type':'error', 'error':message, 'report':self.report(False)})
             except Cancelled: pass
         finally:
             self.cancel()

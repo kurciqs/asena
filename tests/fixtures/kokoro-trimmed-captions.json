@@ -1,0 +1,145 @@
+{
+  "provenance": "Captured from pinned Kokoro CPU image on 2026-10-12; PCM omitted, original sample counts retained.",
+  "cases": [
+    {
+      "case": "mixed-phrase",
+      "packets": [
+        {
+          "frames": 34247,
+          "timestamps": [
+            {
+              "word": "mentioned",
+              "start_time": 0.047958333333333325,
+              "end_time": 0.4979583333333334
+            },
+            {
+              "word": "yesterday",
+              "start_time": 0.4979583333333334,
+              "end_time": 1.3479583333333331
+            },
+            {
+              "word": ",",
+              "start_time": 1.3479583333333331,
+              "end_time": 1.5479583333333333
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case": "numbers-tail-phrase",
+      "packets": [
+        {
+          "frames": 121021,
+          "timestamps": [
+            {
+              "word": "thirteen",
+              "start_time": 0.024708333333333332,
+              "end_time": 0.5997083333333333
+            },
+            {
+              "word": "?",
+              "start_time": 0.5997083333333333,
+              "end_time": 0.6747083333333334
+            },
+            {
+              "word": "Let's",
+              "start_time": 0.6747083333333334,
+              "end_time": 0.9497083333333333
+            },
+            {
+              "word": "check",
+              "start_time": 0.9497083333333333,
+              "end_time": 1.1997083333333332
+            },
+            {
+              "word": "before",
+              "start_time": 1.1997083333333332,
+              "end_time": 1.5122083333333332
+            },
+            {
+              "word": "we",
+              "start_time": 1.5122083333333332,
+              "end_time": 1.5872083333333333
+            },
+            {
+              "word": "make",
+              "start_time": 1.5872083333333333,
+              "end_time": 1.7372083333333332
+            },
+            {
+              "word": "another",
+              "start_time": 1.7372083333333332,
+              "end_time": 2.0497083333333332
+            },
+            {
+              "word": "plan",
+              "start_time": 2.0497083333333332,
+              "end_time": 2.7747083333333333
+            },
+            {
+              "word": ".",
+              "start_time": 2.7747083333333333,
+              "end_time": 2.8997083333333333
+            },
+            {
+              "word": "If",
+              "start_time": 2.8997083333333333,
+              "end_time": 3.0622083333333334
+            },
+            {
+              "word": "we're",
+              "start_time": 3.0622083333333334,
+              "end_time": 3.1997083333333336
+            },
+            {
+              "word": "late",
+              "start_time": 3.1997083333333336,
+              "end_time": 3.4747083333333335
+            },
+            {
+              "word": ",",
+              "start_time": 3.4747083333333335,
+              "end_time": 3.5247083333333333
+            },
+            {
+              "word": "call",
+              "start_time": 3.5247083333333333,
+              "end_time": 3.7622083333333336
+            },
+            {
+              "word": "me",
+              "start_time": 3.7622083333333336,
+              "end_time": 3.974708333333333
+            },
+            {
+              "word": ";",
+              "start_time": 3.974708333333333,
+              "end_time": 4.049708333333333
+            },
+            {
+              "word": "if",
+              "start_time": 4.049708333333333,
+              "end_time": 4.187208333333333
+            },
+            {
+              "word": "we're",
+              "start_time": 4.187208333333333,
+              "end_time": 4.349708333333333
+            },
+            {
+              "word": "early",
+              "start_time": 4.349708333333333,
+              "end_time": 5.024708333333334
+            },
+            {
+              "word": ",",
+              "start_time": 5.024708333333334,
+              "end_time": 5.174708333333333
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
