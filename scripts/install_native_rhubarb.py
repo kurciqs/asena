@@ -8,10 +8,12 @@ from rhubarb_benchmark import ROOT, WORK, save
 
 def main():
     metadata = json.loads((WORK/'native-build.json').read_text())
-    source = WORK/'native-baseline'
-    binary = source/'rhubarb'
-    if hashlib.sha256(binary.read_bytes()).hexdigest() != metadata['binarySha256']:
+    candidates=[WORK/'native-baseline',WORK/'build-arm64/rhubarb']
+    source=next((p for p in candidates if (p/'rhubarb').is_file()
+                 and hashlib.sha256((p/'rhubarb').read_bytes()).hexdigest()==metadata['binarySha256']),None)
+    if source is None:
         raise RuntimeError('Original native binary checksum mismatch; refusing experimental binary')
+    binary=source/'rhubarb'
     if 'arm64' not in subprocess.run(['file',str(binary)],capture_output=True,text=True,check=True).stdout:
         raise RuntimeError('Expected a native Apple Silicon executable')
     target = ROOT/'.runtime/tools/rhubarb-1.14.0-arm64'

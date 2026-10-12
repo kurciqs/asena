@@ -18,12 +18,19 @@ async function json(url) {
 }
 
 function method() {return manifest.methods.find(m=>m.id===$('method-'+selected).value);}
+function showTiming() {
+  const timing=currentCase?.timings?.[method().id];
+  $('method-timing').textContent=timing ?
+    `Measured preparation: ${timing.seconds.toFixed(2)}s for ${currentCase.duration.toFixed(2)}s of audio. ${timing.platform}. ${timing.basis}. TTS excluded.` :
+    'This method has no separate processing-time benchmark. Playback uses saved motion; it does not measure generation speed.';
+}
 function showMethod(side) {
   selected=side;calibration=null;
   $('view-a').setAttribute('aria-pressed',String(side==='a'));
   $('view-b').setAttribute('aria-pressed',String(side==='b'));
   $('active-method').textContent=method().label;
   $('method-notes').textContent=method().notes;
+  showTiming();
   peak=0;
   requestDraw();
 }
@@ -48,6 +55,7 @@ async function loadScene() {
       values.forEach(boundedWeights);
     }
     loaded.set(candidate.id,result);data=result;currentCase=candidate;
+    showTiming();
     // No live audio transport; this source is an existing local Kokoro fixture.
     audio.src=candidate.audio;audio.load();
     $('seek').max=candidate.duration;
@@ -185,7 +193,7 @@ try {
   camera.position.set(target.x,target.y,target.z+.72);camera.lookAt(target);
   resize();
   for(const id of ['scene','method-a','method-b','view-a','view-b','play','restart','stop','seek'])$(id).disabled=false;
-  $('status').textContent='Ready. Nine methods, three recordings. No live generation.';
+  $('status').textContent=`Ready. ${manifest.methods.length} methods, ${manifest.cases.length} recordings. No live generation.`;
   lastTime=performance.now();requestDraw();
 } catch(error) {
   audio.pause();$('status').textContent=`Comparison unavailable: ${error.message}`;

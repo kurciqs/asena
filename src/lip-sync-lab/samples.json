@@ -11,7 +11,60 @@
       "sampleRate": 44100,
       "text": "I'm Asena. Nice to meet you, Alex—excellent choice of company.",
       "audioSha256": "61cc73d4e6fa265bdc3a51a89016a5fdbe41198274066adb10bb5d91e0607a7a",
-      "data": "/lip-sync-lab/intro.json"
+      "data": "/lip-sync-lab/intro.json",
+      "timings": {
+        "rhubarb": {
+          "seconds": 1.368154312542174,
+          "platform": "Native ARM64",
+          "basis": "Whole-recording alignment; mean of two runs"
+        },
+        "legacy": {
+          "seconds": 1.368154312542174,
+          "platform": "Native ARM64",
+          "basis": "Same detector as whole-recording Rhubarb; renderer cost is not timed separately"
+        },
+        "rhubarb-batches": {
+          "seconds": 13.174033458984923,
+          "platform": "Original Intel executable",
+          "basis": "Recorded one-second window preparation"
+        },
+        "rh-native-1s": {
+          "seconds": 2.773483583063353,
+          "platform": "Native ARM64",
+          "basis": "Total processing for all windows; excludes audio arrival time",
+          "agreement": 0.9119170984455959
+        },
+        "rh-native-2s": {
+          "seconds": 1.7521756660426036,
+          "platform": "Native ARM64",
+          "basis": "Total processing for all windows; excludes audio arrival time",
+          "agreement": 0.9507772020725389
+        },
+        "rh-native-3s": {
+          "seconds": 1.8679591660038568,
+          "platform": "Native ARM64",
+          "basis": "Total processing for all windows; excludes audio arrival time",
+          "agreement": 0.9326424870466321
+        },
+        "rh-native-sentences": {
+          "seconds": 1.8710337909287773,
+          "platform": "Native ARM64",
+          "basis": "Total processing for all windows; excludes audio arrival time",
+          "agreement": 0.9896373056994818
+        },
+        "rh-known-text": {
+          "seconds": 0.33269066666666663,
+          "platform": "Native ARM64",
+          "basis": "Fresh decoder per worker request; mean of three runs; process/export overhead excluded",
+          "agreement": 0.8005181347150259
+        },
+        "rh-phonetic": {
+          "seconds": 0.3962246250011958,
+          "platform": "Native ARM64",
+          "basis": "Whole recording; one run",
+          "agreement": null
+        }
+      }
     },
     {
       "id": "teasing",
@@ -21,7 +74,60 @@
       "sampleRate": 44100,
       "text": "I was aiming for charming. You'll have to tell me how close I got.",
       "audioSha256": "83c3d8df3acb6f70428d8d026a607e938404b30c035c0d14b89805e153c853a9",
-      "data": "/lip-sync-lab/teasing.json"
+      "data": "/lip-sync-lab/teasing.json",
+      "timings": {
+        "rhubarb": {
+          "seconds": 1.4658187289896887,
+          "platform": "Native ARM64",
+          "basis": "Whole-recording alignment; mean of two runs"
+        },
+        "legacy": {
+          "seconds": 1.4658187289896887,
+          "platform": "Native ARM64",
+          "basis": "Same detector as whole-recording Rhubarb; renderer cost is not timed separately"
+        },
+        "rhubarb-batches": {
+          "seconds": 8.884274707990699,
+          "platform": "Original Intel executable",
+          "basis": "Recorded one-second window preparation"
+        },
+        "rh-native-1s": {
+          "seconds": 2.9896365419845097,
+          "platform": "Native ARM64",
+          "basis": "Total processing for all windows; excludes audio arrival time",
+          "agreement": 0.8636363636363636
+        },
+        "rh-native-2s": {
+          "seconds": 2.0353132499731146,
+          "platform": "Native ARM64",
+          "basis": "Total processing for all windows; excludes audio arrival time",
+          "agreement": 0.946524064171123
+        },
+        "rh-native-3s": {
+          "seconds": 1.972755833005067,
+          "platform": "Native ARM64",
+          "basis": "Total processing for all windows; excludes audio arrival time",
+          "agreement": 0.9786096256684492
+        },
+        "rh-native-sentences": {
+          "seconds": 1.942383749934379,
+          "platform": "Native ARM64",
+          "basis": "Total processing for all windows; excludes audio arrival time",
+          "agreement": 0.9572192513368984
+        },
+        "rh-known-text": {
+          "seconds": 0.3160963333333333,
+          "platform": "Native ARM64",
+          "basis": "Fresh decoder per worker request; mean of three runs; process/export overhead excluded",
+          "agreement": 0.9144385026737968
+        },
+        "rh-phonetic": {
+          "seconds": 0.3035133749945089,
+          "platform": "Native ARM64",
+          "basis": "Whole recording; one run",
+          "agreement": null
+        }
+      }
     },
     {
       "id": "disagreement",
@@ -31,7 +137,60 @@
       "sampleRate": 44100,
       "text": "Oh, Alex, you'd get bored. I'll help you out, but you'll still have to earn agreement.",
       "audioSha256": "f8de49f8c7df2c0b9589ede28042530c6326250dd108ea687c0bf2526cb97252",
-      "data": "/lip-sync-lab/disagreement.json"
+      "data": "/lip-sync-lab/disagreement.json",
+      "timings": {
+        "rhubarb": {
+          "seconds": 1.6153858545294497,
+          "platform": "Native ARM64",
+          "basis": "Whole-recording alignment; mean of two runs"
+        },
+        "legacy": {
+          "seconds": 1.6153858545294497,
+          "platform": "Native ARM64",
+          "basis": "Same detector as whole-recording Rhubarb; renderer cost is not timed separately"
+        },
+        "rhubarb-batches": {
+          "seconds": 11.885743708990049,
+          "platform": "Original Intel executable",
+          "basis": "Recorded one-second window preparation"
+        },
+        "rh-native-1s": {
+          "seconds": 3.8533048750832677,
+          "platform": "Native ARM64",
+          "basis": "Total processing for all windows; excludes audio arrival time",
+          "agreement": 0.9035087719298246
+        },
+        "rh-native-2s": {
+          "seconds": 2.7416280400939286,
+          "platform": "Native ARM64",
+          "basis": "Total processing for all windows; excludes audio arrival time",
+          "agreement": 0.9495614035087719
+        },
+        "rh-native-3s": {
+          "seconds": 2.1393480409751646,
+          "platform": "Native ARM64",
+          "basis": "Total processing for all windows; excludes audio arrival time",
+          "agreement": 0.9956140350877193
+        },
+        "rh-native-sentences": {
+          "seconds": 2.185783958004322,
+          "platform": "Native ARM64",
+          "basis": "Total processing for all windows; excludes audio arrival time",
+          "agreement": 0.9473684210526315
+        },
+        "rh-known-text": {
+          "seconds": 0.34046966666666667,
+          "platform": "Native ARM64",
+          "basis": "Fresh decoder per worker request; mean of three runs; process/export overhead excluded",
+          "agreement": 0.8377192982456141
+        },
+        "rh-phonetic": {
+          "seconds": 0.3364933750126511,
+          "platform": "Native ARM64",
+          "basis": "Whole recording; one run",
+          "agreement": null
+        }
+      }
     }
   ],
   "methods": [
@@ -79,6 +238,36 @@
       "id": "lam",
       "label": "LAM · neural continuous weights",
       "notes": "One-second fixed ONNX windows, 500ms hop, overlapped predictions. Provisional 52-channel-to-VRoid adapter; eye and brow coefficients are excluded."
+    },
+    {
+      "id": "rh-native-1s",
+      "label": "Rhubarb · native 1s windows",
+      "notes": "1-second retained regions with ±250ms context; measured native ARM64 execution. Overlap is analysed but never played twice."
+    },
+    {
+      "id": "rh-native-2s",
+      "label": "Rhubarb · native 2s windows",
+      "notes": "2-second retained regions with ±250ms context; measured native ARM64 execution. Overlap is analysed but never played twice."
+    },
+    {
+      "id": "rh-native-3s",
+      "label": "Rhubarb · native 3s windows",
+      "notes": "3-second retained regions with ±250ms context; measured native ARM64 execution. Overlap is analysed but never played twice."
+    },
+    {
+      "id": "rh-native-sentences",
+      "label": "Rhubarb · native sentence boundaries",
+      "notes": "Cuts at punctuation-derived boundaries between captioned words; ±250ms context. Saved audio is unchanged; no separate TTS requests were made."
+    },
+    {
+      "id": "rh-known-text",
+      "label": "Rhubarb · known-text alignment prototype",
+      "notes": "Experimental acoustic alignment of the exact transcript, bypassing word search. Fast, but silence/pronunciation differences change the cues. Not enabled in production."
+    },
+    {
+      "id": "rh-phonetic",
+      "label": "Rhubarb · phonetic recognizer",
+      "notes": "Upstream language-independent recognizer. Separate quality/speed tradeoff; the live English path remains PocketSphinx."
     }
   ],
   "measurements": {
@@ -937,5 +1126,10 @@
       "name": "Audio2Face Swift/MLX",
       "reason": "Identity-specific geometry coefficients require a separate geometry retargeting implementation; treating them as VRM/ARKit weights would be invalid."
     }
-  ]
+  ],
+  "rhubarbOptimization": {
+    "prepared": "2026-10-12",
+    "report": "docs/rhubarb-optimization-2026-10-12.md",
+    "note": "Timings exclude TTS. All motion remains precomputed. Original methods retained."
+  }
 }

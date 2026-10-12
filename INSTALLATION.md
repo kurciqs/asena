@@ -31,7 +31,9 @@ All runtime options are in `config.py`; `.env.example` documents them. Export va
 | `ASENA_VOICE` | `af_heart` | Initial live voice; the existing picker can change it |
 | `ASENA_LIP_SYNC` | `rhubarb` | `rhubarb` or approximate `dictionary` fallback |
 | `ASENA_DATA_DIR` | `<checkout>/.runtime` | Private data directory outside `src/` |
-| `ASENA_RHUBARB` | `<checkout-parent>/rhubarb/rhubarb` | Executable path |
+| `ASENA_RHUBARB` | Verified project-local ARM64 tool when available; otherwise `<checkout-parent>/rhubarb/rhubarb` | Explicit executable override |
+| `ASENA_RHUBARB_THREADS` | `2` | Maximum requested recognition workers, bounded to 1–4 |
+| `ASENA_ALIGNMENT_CACHE_ENTRIES` | `64` | Private exact-input cue cache, 0–64 entries; zero disables it |
 | `ASENA_FFMPEG` | `ffmpeg` | Executable name on PATH or absolute path |
 | `ASENA_CONTEXT_CAPACITY` | `8192` | Must be at or below the context configured in the loaded model |
 | `ASENA_OUTPUT_RESERVE` | `512` | Maximum output tokens per request |
@@ -39,7 +41,7 @@ All runtime options are in `config.py`; `.env.example` documents them. Export va
 | `ASENA_MEMORY_BUDGET` | `1024` | Bound for selected complete memory strings |
 | `ASENA_CONNECT_TIMEOUT` / `ASENA_READ_TIMEOUT` | `3` / `30` | Upstream socket timeout seconds |
 | `ASENA_SERVICE_DEADLINE` | `90` | Total response deadline checked between chunks |
-| `ASENA_ALIGNMENT_TIMEOUT` | `30` | Deadline for each ffmpeg/Rhubarb process |
+| `ASENA_ALIGNMENT_TIMEOUT` | `30` | Shared total deadline for conversion and Rhubarb |
 
 The context meter reports a conservative NFC UTF-8 byte bound, plus template/message overhead, with output capacity reserved. It does not present those bytes as measured model tokens. It keeps complete recent turns and selects recent complete memories; old displayed messages and stored memories are not deleted. Oversized profiles/newest turns are rejected visibly. A different tokenizer/template requires verification. Separate extraction usage cannot overwrite dialogue usage. Live/model-specific tuning remains pending.
 
@@ -49,9 +51,25 @@ The website does not start, load, or install these services. Prepare RAM and lau
 
 1. **LM Studio:** the downloaded model is [unsloth/Qwen3.5-2B-GGUF](https://huggingface.co/unsloth/Qwen3.5-2B-GGUF), `Qwen3.5-2B-Q4_K_M.gguf`, verified revision/hash in `runtime-lock.json`. Set its served identifier to `qwen3.5-2b`, or override `ASENA_CHAT_MODEL` with the exact served ID. Configure text-only use and context capacity explicitly. Prepare reasoning mode in LM Studio; hiding reasoning after generation does not eliminate its cost. The recorded app/runtime versions are in the lock; this model has not been live-tested by stabilization. Avoid just-in-time auto-loading if you want explicit control over RAM. [LM Studio local server documentation](https://lmstudio.ai/docs/developer/core/server).
 2. **Kokoro:** pinned CPU image `ghcr.io/remsky/kokoro-fastapi-cpu:v0.9.0`, Linux ARM64 on this Mac, with registry/platform digests in the lock. It produced the saved `af_heart` fixtures. Configure one worker on the constrained laptop. Its captioned complete response must contain WAV `audio` and word `timestamps`. Missing timing allows neutral playback; invalid audio keeps the text and offers Retry. This path does not stream yet. Docker GPU images target NVIDIA CUDA; Apple GPU acceleration needs a separately tested native MPS setup. [Pinned upstream release](https://github.com/remsky/Kokoro-FastAPI/releases/tag/v0.9.0), [earlier resource findings](docs/runtime-downloads-and-streaming-2026-10-11.md).
-3. **Rhubarb/ffmpeg:** observed Rhubarb 1.14.0 (x86_64/Rosetta on this Mac) and ffmpeg 7.1.1. Download Rhubarb from its [official release](https://github.com/DanielSWolf/rhubarb-lip-sync/releases/tag/v1.14.0), extract it, and set `ASENA_RHUBARB`; put ffmpeg on PATH or set its absolute path. `check_setup.py --mode live` checks executable presence without running them. Dictionary mode uses the existing CMU file if available and is an approximate fallback, not equivalent timing quality.
+3. **Rhubarb/ffmpeg:** Rhubarb 1.14.0 and ffmpeg 7.1.1. A native ARM64 Release build is now installed privately on this Mac and preferred when its executable matches the unmodified-build manifest; the original x86_64 executable remains available as fallback. [Optimization measurements and streaming strategies](docs/rhubarb-optimization-2026-10-12.md). Download Rhubarb from its [official release](https://github.com/DanielSWolf/rhubarb-lip-sync/releases/tag/v1.14.0), extract it, and set `ASENA_RHUBARB`; put ffmpeg on PATH or set its absolute path. `check_setup.py --mode live` checks executable presence without running them. Dictionary mode uses the existing CMU file if available and is an approximate fallback, not equivalent timing quality.
 
 When services are already prepared, start the website explicitly with `ASENA_MODE=live python server.py`. It uses the same model for dialogue and existing memory extraction. Combined live memory/latency/quality are still unmeasured. First test each prepared service separately before attempting simultaneous workloads.
+
+## Optional native Rhubarb build on Apple Silicon
+
+The website never compiles or downloads tools automatically. Existing CMake, Ninja, Clang and Python are required. This sequence obtains official pinned source and Boost headers in the ignored removable experiment directory, builds with one job and a process-tree memory guard, and installs only the verified standard binary/resources under `.runtime/tools/`:
+
+```sh
+mkdir -p .runtime/rhubarb-optimization
+git -c filter.lfs.process= -c filter.lfs.required=false -c filter.lfs.smudge=cat clone --depth 1 --branch v1.14.0 https://github.com/DanielSWolf/rhubarb-lip-sync.git .runtime/rhubarb-optimization/upstream
+curl --fail --location https://archives.boost.io/release/1.85.0/source/boost_1_85_0.tar.bz2 --output .runtime/rhubarb-optimization/boost_1_85_0.tar.bz2
+python scripts/rhubarb_benchmark.py guard --name native-build-supervisor --timeout 1100 -- python scripts/build_native_rhubarb.py
+python scripts/install_native_rhubarb.py
+```
+
+The LFS override leaves unrelated upstream test recordings as pointers; the executable's speech-recognition resources are ordinary source files. The builder verifies the Boost archive hash and omits unrelated plugin extras. It does not start speech generation. Permission to inspect its child processes is required for the memory guard. Restart the website after installing or changing backend configuration. Set `ASENA_RHUBARB` to the original executable to compare or revert. Removing experiment/build caches later does not remove the separately installed runtime tool.
+
+Alignment cache entries live privately under `<ASENA_DATA_DIR>/alignment-cache/`, contain mouth cues only, and are capped at 512 KiB each. They are distinct from companion memories. Repeated audio can reuse cues only with matching transcript, tool/resources, thread setting and conversion configuration. Streaming and resident decoder reuse remain separately evaluated work.
 
 ## Assets, data and verification
 

@@ -280,6 +280,7 @@ async function getVisemes(timestamps, turn, audioId, audioDuration, spokenText) 
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ audio_id: audioId, spoken_text: spokenText })
         });
+        inspectReplay({ phase: 'mouth aligned', alignment: data.alignment });
         return data.visemes;
     }
     else {

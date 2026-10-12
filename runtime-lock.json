@@ -8,7 +8,8 @@
     "chat_model": {"key": "qwen3.5-2b", "repository": "unsloth/Qwen3.5-2B-GGUF", "revision": "f6d5376be1edb4d416d56da11e5397a961aca8ae", "file": "Qwen3.5-2B-Q4_K_M.gguf", "bytes": 1280835840, "sha256": "aaf42c8b7c3cab2bf3d69c355048d4a0ee9973d48f16c731c0520ee914699223", "inference_validated": false},
     "kokoro": {"image": "ghcr.io/remsky/kokoro-fastapi-cpu:v0.9.0", "platform": "linux/arm64", "manifest_digest": "sha256:ee3111d6a2c903ed62f3b4fa19543c6901205ed39fce3c177e895b34a8386b9c", "arm64_digest": "sha256:73940a712af75ff5f2558e5aafe71624b03bbd64c9dc60061794ae468969cc20", "recorded_fixture_voice": "af_heart", "combined_live_pipeline_validated": false},
     "rhubarb": "1.14.0",
-    "ffmpeg": "7.1.1"
+    "ffmpeg": "7.1.1",
+    "rhubarb_native": {"version": "1.14.0", "architecture": "arm64", "revision": "9b9573cd21b253c9ba58739bbd1aa0b50b991bff", "binary_sha256": "8801954b0c462d76fbbe8a0baceb0352f9753902798110679589668a4af4f8f6", "project_path": ".runtime/tools/rhubarb-1.14.0-arm64/rhubarb", "algorithm_changes": false, "fixture_benchmarked": true, "combined_live_pipeline_validated": false, "recorded": "2026-10-12"}
   },
   "note": "Live version records come from the documented inventory/download/recording runs. This lock starts nothing; fixture tests do not establish live model compatibility or speed. Frontend CDN imports are pinned but not vendored."
 }

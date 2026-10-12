@@ -2,7 +2,7 @@
 
 Kokoro is the user's selected voice generator after listening to the TTS samples. The alternative voice recordings and listening-room files were removed on 12 October 2026 after that decision; their preparation remains recoverable in Git commit `8be81fd`. The next decision is mouth motion, before changing speech delivery to streaming.
 
-Open [the lip-sync studio](http://localhost:3001/lip-sync-samples.html), also linked from Debug & replay. It provides **27 combinations: three original Kokoro af_heart recordings × nine methods**, on the actual Asena avatar. No new speech was synthesized.
+Open [the lip-sync studio](http://localhost:3001/lip-sync-samples.html), also linked from Debug & replay. The original audition provided **27 combinations: three original Kokoro af_heart recordings × nine methods**, on the actual Asena avatar. The later [Rhubarb optimization work](rhubarb-optimization-2026-10-12.md) adds six measured Rhubarb strategies and visible timing labels, bringing the retained studio to **45 combinations**. No new speech was synthesized.
 
 ## How to compare
 
