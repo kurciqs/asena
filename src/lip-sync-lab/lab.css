@@ -20,9 +20,10 @@ select { width: 100%; padding: 11px 30px 11px 11px; border-radius: 10px; border:
 .pair { display: grid; gap: 0; grid-template-columns: 1fr; }
 .switches,.playback,#calibration { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
 button { border: 1px solid #ab9ac855; background: #ffffff70; color: inherit; font: inherit; font-size: .82rem; border-radius: 9px; padding: 9px 13px; cursor: pointer; }
-button:hover { background: #fffb; }
+button:hover:not(:disabled) { background: #fffb; }
 button:disabled { opacity: .5; cursor: default; }
 .primary,button[aria-pressed="true"] { background: #3b345b; color: white; border-color: transparent; }
+.primary:hover:not(:disabled),button[aria-pressed="true"]:hover:not(:disabled) { background: #51476f; color: white; border-color: transparent; }
 .note { font-size: .77rem; color: #6b617e; }
 #method-notes { min-height: 3em; }
 .check { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; font-weight: 450; }

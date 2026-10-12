@@ -145,6 +145,7 @@ summary { cursor: pointer; font-size: 12px; font-weight: 600; }
 #companion-form button { font-size: 12px; }
 #close-companion { padding: 0; width: 32px; height: 32px; font-size: 22px; background: transparent; border: 0; }
 #companion-form button[type="submit"] { color: white; background: var(--ink); }
+#companion-form button[type="submit"]:hover:not(:disabled) { background: #44436c; color: white; }
 @media (max-width: 999px) {
     #utility-panels { top: 16px; right: 16px; bottom: 16px; max-height: none; }
     #chat-panel { width: min(350px,calc(100vw - 32px)); left: 16px; top: 16px; }
