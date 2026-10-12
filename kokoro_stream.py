@@ -425,9 +425,9 @@ class SpeechStream:
 
 
 class StreamRegistry:
-    def __init__(self): self.lock = threading.Lock(); self.active = None
+    def __init__(self, factory=SpeechStream): self.lock = threading.Lock(); self.active = None;self.factory=factory
     def reserve(self, data, **options):
-        stream = SpeechStream(data, **options)
+        stream = self.factory(data, **options)
         with self.lock:
             if self.active is not None: raise ServiceError('Streaming speech is busy. Wait for it to finish.', 409)
             self.active = stream

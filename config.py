@@ -24,7 +24,7 @@ def endpoint(name,default):
     return value
 
 RUNTIME_MODE = os.environ.get('ASENA_MODE','replay')
-if RUNTIME_MODE not in ('live','replay'): raise RuntimeError('ASENA_MODE must be live or replay')
+if RUNTIME_MODE not in ('live','replay','preview'): raise RuntimeError('ASENA_MODE must be live, replay or preview')
 HOST = os.environ.get('ASENA_HOST','127.0.0.1')
 if HOST != '127.0.0.1': raise RuntimeError('Remote website binding is unsupported; ASENA_HOST must be 127.0.0.1')
 PORT = integer('ASENA_PORT',3001,1024,65535)
@@ -51,7 +51,10 @@ KOKORO_API = endpoint('ASENA_KOKORO_API','http://127.0.0.1:8880/dev/captioned_sp
 CHAT_MODEL = os.environ.get('ASENA_CHAT_MODEL','qwen3.5-2b')
 VOICE = os.environ.get('ASENA_VOICE','af_heart')
 LIP_SYNC = os.environ.get('ASENA_LIP_SYNC','rhubarb')
-SPEECH_STREAMING = os.environ.get('ASENA_SPEECH_STREAMING','0') == '1'
+SPEECH_STREAMING = os.environ.get('ASENA_SPEECH_STREAMING','1' if RUNTIME_MODE=='preview' else '0') == '1'
+SPEECH_SOURCE = os.environ.get('ASENA_SPEECH_SOURCE','recorded' if RUNTIME_MODE=='preview' else 'kokoro')
+if SPEECH_SOURCE not in ('recorded','kokoro') or (RUNTIME_MODE=='live' and SPEECH_SOURCE!='kokoro'):
+    raise RuntimeError('Recorded speech is only supported with scripted preview; choose kokoro for live dialogue')
 SPEECH_PROFILE = load_speech_profile(ROOT/'speech_profiles.json',os.environ.get('ASENA_SPEECH_PROFILE'))
 if not CHAT_MODEL or len(CHAT_MODEL)>200: raise RuntimeError('Invalid ASENA_CHAT_MODEL')
 if not VOICE or not all(c.isalnum() or c in '_-+' for c in VOICE): raise RuntimeError('Invalid ASENA_VOICE')

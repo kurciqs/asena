@@ -59,22 +59,25 @@
             <p class="shortcut-hint">S opens settings · C shows or hides chat · Esc closes tools</p>
         </section>
         <section id="replay-panel" hidden role="tabpanel" aria-labelledby="debug-tab">
-            <div class="replay-heading"><span class="mode-badge">Offline replay</span><span class="field-hint">AI services are off</span></div>
+            <div class="replay-heading"><span id="debug-mode" class="mode-badge">Offline replay</span><span id="debug-source" class="field-hint">AI services are off</span></div>
             <div id="replay-body">
                 <p id="replay-description" class="field-hint">Saved dialogue and audio. Test memories stay separate.</p>
+                <p id="speech-policy-note" class="field-hint"></p>
                 <p class="field-hint"><a href="/lip-sync-samples.html">Compare lip-sync methods</a></p>
+                <div id="replay-controls">
                 <label for="replay-case">Replay scene</label><select id="replay-case"></select>
                 <p id="replay-status" class="field-status" role="status" aria-live="polite"></p>
                 <div class="replay-buttons">
                     <button id="replay-restart" type="button">Restart scene</button>
                     <button id="replay-save" type="button">Save test memories</button>
                 </div>
+                </div>
                 <details id="turn-inspection">
                     <summary>Inspect this turn</summary>
                     <div class="json-tools"><button id="replay-collapse" type="button">Collapse all JSON</button></div>
                     <div id="replay-inspector" aria-label="Turn data"></div>
                 </details>
-                <details class="reset-section"><summary>Reset test memories</summary>
+                <details id="replay-reset" class="reset-section"><summary>Reset test memories</summary>
                     <p class="field-hint">Clears the saved replay facts in this browser. Your live memory file is separate.</p>
                     <button id="replay-clear" type="button" class="danger-button">Clear test memories</button>
                 </details>

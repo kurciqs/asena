@@ -33,7 +33,7 @@ function startupHarness() {
         AbortSignal, Promise, startupReady:false, profileEditedDuringStartup:false,
         loadRuntimeConfig:async()=>{}, runtimeConfig:{lipSync:'dictionary',voice:'af_heart'}, RUNTIME_MODE:'live',
         LIP_SYNC:null, KOKORO_VOICE:null, replay:null, profileStorage:null, companionProfile:{},
-        localStorage:{}, loadCompanionProfile:()=>({}), renderCompanionProfile(){},
+        localStorage:{}, loadCompanionProfile:()=>({}), renderCompanionProfile(){},setupDebugUI(){},
         voiceSelect:{options:[{value:'af_heart'}]}, renderSettings:{},
         ANI:{loadThreeVRM:()=>avatar.promise, setRenderPreferences(){}, getPlaybackState:()=>state},
         assets:{systemPrompt:'/system_prompt.txt'}, fetch:async()=>({ok:true,text:async()=>'Fixture prompt'}),

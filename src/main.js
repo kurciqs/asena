@@ -54,7 +54,6 @@ const replayJsonViewer = createJsonViewer(replayInspector);
 let replayInspection = {};
 
 function inspectReplay(update) {
-    if (!replay) return;
     replayInspection = { ...replayInspection, ...update };
     replayJsonViewer.update({
         ...replayInspection,
@@ -346,10 +345,8 @@ async function handleTextResponse({ reuseUser = false } = {}) {
         if (!reuseUser || message_history.at(-1)?.role !== 'user' || message_history.at(-1)?.content !== message) {
             message_history.push({ role: 'user', content: message });
         }
-        if (replay) {
-            replayInspection = {};
-            inspectReplay({ phase: 'requesting fixture' });
-        }
+        replayInspection = {};
+        inspectReplay({ phase: replay?'requesting fixture':'requesting model' });
         renderMessages();
         try {
             const rawReply = await chat(message_history, 'dialogue', turn);
@@ -398,13 +395,14 @@ async function prepareAndPlay(parsedReply, turn) {
     }
     turn.phase('preparing-speech');
     speechWarning('');
-    if(!replay&&runtimeConfig?.speechStreaming&&LIP_SYNC==='rhubarb'){
+    if((!replay||RUNTIME_MODE==='preview')&&runtimeConfig?.speechStreaming&&LIP_SYNC==='rhubarb'){
         let player=null,words=[],cues={actions:[],emotions:[]},speaking=false;
         await ANI.preparePerformance(parsedReply.actions.map(cue=>({value:cue.value})),turn.signal);
         const available=new Set(ANI.getPlaybackState().loadedClips??ANI.getPlaybackState().clips);
         try{
             await playSpeechStream({text:parsedReply.text,voice:KOKORO_VOICE,signal:turn.signal,speechProfile:runtimeConfig.speechProfile,
                 onPlayer:value=>{player=value;ANI.beginPcmPerformance(()=>({...player.sample(),weights:player.weights(),...cues}),player);},
+                onWarning:speechWarning,onReport:report=>inspectReplay({speechReport:report}),
                 onWords:stamps=>{words.push(...stamps);try{cues=EMO.getPartialPerformance(words,parsedReply,available);}catch(error){speechWarning(`Emotion and gesture timing unavailable. ${error.message}`);}},
                 onClock:clock=>{
                     turn.assertCurrent();
@@ -414,6 +412,13 @@ async function prepareAndPlay(parsedReply, turn) {
                         const pause=document.getElementById('turn-pause');pause.hidden=false;pause.textContent=clock.paused?'Resume':'Pause';
                     }
                 }});
+        }catch(error){
+            if(!turn.signal.aborted){
+                const heard=error.report?.browser?.playedSeconds??0;
+                speechWarning(`Voice stopped${heard>0?` after ${heard.toFixed(1)} seconds`:''}. The reply remains above. Retry restarts the voice from the beginning. ${error.message}`);
+                inspectReplay({fallback:'text only',speechReport:error.report});
+            }
+            throw error;
         }finally{ANI.stopPerformance();}
         return;
     }
@@ -538,9 +543,9 @@ function setupReplayUI() {
     saveButton.textContent='Save test memories';
     document.getElementById('chat-empty').querySelector('h2').textContent='Try a saved scene.';
     document.getElementById('chat-empty').querySelector('p').textContent='Play the introduction, or choose a different scene in Debug.';
-    document.getElementById('replay-collapse').addEventListener('click', () => replayJsonViewer.collapseAll());
     const selector = document.getElementById('replay-case');
     for (const scenario of replay.fixture.cases) {
+        if(RUNTIME_MODE==='preview'&&!['benchmark','recall'].includes(scenario.kind))continue;
         const option = document.createElement('option');
         option.value = scenario.id;
         option.textContent = scenario.label;
@@ -568,6 +573,31 @@ function setupReplayUI() {
     voiceSelect.disabled = true;
     replayMessage('Starting scripted replay. Text will be available when startup finishes.');
     inspectReplay({ phase: 'ready', fixture: replay.fixture.description });
+    if (RUNTIME_MODE==='preview') {
+        document.getElementById('debug-mode').textContent='Scripted preview';
+        document.getElementById('debug-source').textContent=runtimeConfig.speechSource==='kokoro'?'Live Kokoro · no LLM':'Saved voice · AI services off';
+        document.getElementById('chat-mode').textContent='Preview';
+        document.getElementById('replay-description').textContent='Scripted conversation in the main chat. Speech uses the shared PCM player and selected 1 / 2 / 2 profile. Test memories stay separate.';
+        document.getElementById('chat-empty').querySelector('h2').textContent='Meet her in the main chat.';
+        document.getElementById('chat-empty').querySelector('p').textContent='Play the introduction, teasing, disagreement and emotes. Replies are scripted until LLM integration.';
+        document.getElementById('voice-note').textContent=runtimeConfig.speechSource==='kokoro'?'Used for the next scripted spoken reply.':'Saved scenes use their recorded voice.';
+        voiceSelect.disabled=runtimeConfig.speechSource!=='kokoro';
+    }
+}
+function setupDebugUI() {
+    toolPanel.enableDebug();
+    document.getElementById('replay-collapse').addEventListener('click',()=>replayJsonViewer.collapseAll());
+    const profile=runtimeConfig.speechProfile;
+    document.getElementById('speech-policy-note').textContent=runtimeConfig.speechStreaming?
+        `Speech: ${profile.label} · ${profile.strategy}.`:'Speech: complete recording.';
+    if(!replay){
+        document.getElementById('debug-tab').textContent='Debug';
+        document.getElementById('debug-mode').textContent='Live conversation';
+        document.getElementById('debug-source').textContent='Prepared services only';
+        document.getElementById('replay-description').textContent='Current turn, speech timing, queue state and performance cues.';
+        document.getElementById('replay-controls').hidden=true;
+        document.getElementById('replay-reset').hidden=true;
+    }
 }
 renderCompanionProfile();
 document.getElementById('customize-companion').addEventListener('click', () => {
@@ -631,7 +661,7 @@ async function bootstrap() {
     try {
         await loadRuntimeConfig();
         LIP_SYNC = runtimeConfig.lipSync; KOKORO_VOICE = runtimeConfig.voice;
-        if (RUNTIME_MODE === 'replay') {
+        if (RUNTIME_MODE === 'replay' || RUNTIME_MODE === 'preview') {
             const fixture = await requestJSON('/replay/benchmark.json',{timeoutMs:8000});
             replay = new ReplaySession(fixture,new URLSearchParams(location.search).get('replay-case') ?? 'benchmark');
             profileStorage = replayProfileStorage(localStorage);
@@ -645,6 +675,7 @@ async function bootstrap() {
             try { saveCompanionProfile(companionProfile,profileStorage); } catch { warnings.push('Profile applies for this visit; browser storage is unavailable.'); }
         }
         renderCompanionProfile();
+        setupDebugUI();
         if (replay) setupReplayUI();
         if (![...voiceSelect.options].some(option=>option.value===KOKORO_VOICE)) voiceSelect.add(new Option(KOKORO_VOICE,KOKORO_VOICE));
         voiceSelect.value = KOKORO_VOICE;

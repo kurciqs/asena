@@ -10,7 +10,7 @@ export function replayProfileStorage(storage) {
 }
 
 export function readRuntimeMode(value) {
-    if (!value || !['live', 'replay'].includes(value.mode)) {
+    if (!value || !['live', 'replay', 'preview'].includes(value.mode)) {
         throw new Error('Missing or invalid runtime mode. Restart the website server.');
     }
     return value.mode;

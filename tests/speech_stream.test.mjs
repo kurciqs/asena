@@ -47,3 +47,20 @@ test('abort while waiting closes the audio context and cancels the provider toke
     requestFrame:()=>1,cancelFrame:()=>{}}),/Stopped/);
   assert.equal(audio.closed,true);assert.ok(calls.includes('/api/speech/cancel'));
 });
+
+test('failure after partial playback preserves diagnostics and never starts a batch retry',async()=>{
+  const audio=context(),calls=[];let report,index=0;
+  const events=[{type:'begin',token:'owner',rate:24000,startupSeconds:2},
+    {type:'segment',token:'owner',startFrame:0,endFrame:48000,cues:[],pcm:btoa('\0\0'.repeat(48000))},
+    {type:'error',token:'owner',error:'Provider disconnected',report:{complete:false,duration:2}}];
+  const fetcher=async (url)=>{calls.push(url);if(url!=='/api/speech/stream')return {ok:true};
+    return {ok:true,body:{getReader:()=>({read:async()=>{
+      if(index===2)audio.currentTime=1;
+      return {value:enc.encode(JSON.stringify(events[index++])+'\n'),done:false};
+    }})}};};
+  await assert.rejects(playSpeechStream({text:'Hello',voice:'af_heart',fetcher,createContext:()=>audio,
+    requestFrame:()=>1,cancelFrame:()=>{},onReport:value=>report=value}),/disconnected/);
+  assert.equal(report.complete,false);assert.ok(report.browser.playedSeconds>0);
+  assert.equal(audio.closed,true);assert.ok(audio.nodes.every(node=>node.stopped));
+  assert.ok(!calls.includes('/tts'));
+});

@@ -12,12 +12,13 @@ ALIGNMENT_LOCK = threading.Lock()
 import context_budget as budget
 import private_storage as storage
 from alignment import align_audio
-from kokoro_stream import StreamRegistry
-SPEECH_STREAMS = StreamRegistry()
+from kokoro_stream import StreamRegistry, SpeechStream
 from pathlib import Path
 from service_contracts import ServiceError, require_payload, proxy_json, validate_chat_response, validate_tts_response, validate_visemes
 
-from config import STATIC_DIR, RHUBARB, RHUBARB_THREADS, ALIGNMENT_CACHE_ENTRIES, FFMPEG, LMS_API, KOKORO_API, RUNTIME_MODE, HOST, PORT, PROCESS_TIMEOUT, CHAT_MODEL, VOICE, LIP_SYNC, ASSETS, SPEECH_STREAMING, SPEECH_PROFILE
+from config import STATIC_DIR, RHUBARB, RHUBARB_THREADS, ALIGNMENT_CACHE_ENTRIES, FFMPEG, LMS_API, KOKORO_API, RUNTIME_MODE, HOST, PORT, PROCESS_TIMEOUT, CHAT_MODEL, VOICE, LIP_SYNC, ASSETS, SPEECH_STREAMING, SPEECH_PROFILE, SPEECH_SOURCE
+from recorded_speech import RecordedSpeechStream
+SPEECH_STREAMS = StreamRegistry(RecordedSpeechStream if SPEECH_SOURCE=='recorded' else SpeechStream)
 
 app = Flask(__name__, static_folder=None)
 app.config["MAX_CONTENT_LENGTH"] = 24 * 1024 * 1024
@@ -56,6 +57,9 @@ def enforce_replay_boundary():
     if RUNTIME_MODE == "replay" and request.method not in ("GET", "HEAD", "OPTIONS"):
         return jsonify({"error": "Offline replay blocks backend calls and server writes."}), 403
     replay_path = posixpath.normpath(request.path).lower()
+    if RUNTIME_MODE == 'preview' and (replay_path in ('/chat','/tts','/get_visemes','/save_audio','/save_json') or
+            replay_path.startswith('/api/') and replay_path not in ('/api/speech/stream','/api/speech/progress','/api/speech/cancel')):
+        return jsonify({'error':'Scripted preview blocks language models and private data. Only its selected speech source is enabled.'}),403
     if RUNTIME_MODE == "replay" and (replay_path in (
         "/chat", "/tts", "/get_visemes", "/save_audio", "/save_json"
     ) or replay_path.startswith(("/data/", "/src/data/", "/api/"))):
@@ -63,7 +67,7 @@ def enforce_replay_boundary():
 
 @app.route("/runtime")
 def runtime():
-    return jsonify({"mode": RUNTIME_MODE, "budget": budget.public_config(), "chatModel": CHAT_MODEL, "voice": VOICE, "lipSync": LIP_SYNC, "assets": ASSETS, "speechStreaming": SPEECH_STREAMING, "speechProfile": SPEECH_PROFILE})
+    return jsonify({"mode": RUNTIME_MODE, "budget": budget.public_config(), "chatModel": CHAT_MODEL, "voice": VOICE, "lipSync": LIP_SYNC, "assets": ASSETS, "speechStreaming": SPEECH_STREAMING, "speechProfile": SPEECH_PROFILE,"speechSource":SPEECH_SOURCE})
 
 @app.errorhandler(404)
 def page_not_found(e):
