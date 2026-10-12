@@ -91,8 +91,8 @@ def speech_payload(data):
     policy, startup = data.get('policy', '2s'), data.get('startupSeconds', 2)
     if policy not in ('1s', '2s', '3s') or type(startup) not in (int,float) or startup not in (.5,1,2,4):
         raise ServiceError('Choose 1–3 second regions and a 0.5, 1, 2 or 4 second startup buffer.', 400)
-    if data.get('strategy','whole') not in ('whole','phrases') or type(data.get('openingSeconds',2)) not in (int,float) or data.get('openingSeconds',2) not in (.5,1,2):
-        raise ServiceError('Choose whole-text or phrase generation and a 0.5, 1 or 2 second opening region.',400)
+    if data.get('strategy','whole') not in ('whole','phrases','sentences') or type(data.get('openingSeconds',2)) not in (int,float) or data.get('openingSeconds',2) not in (.5,1,2):
+        raise ServiceError('Choose whole-text, phrase or sentence generation and a 0.5, 1 or 2 second opening region.',400)
     return {**payload, 'stream': True, 'response_format': 'pcm', 'return_timestamps': True}, policy, startup
 
 
@@ -117,6 +117,36 @@ def phrase_requests(text):
         if end<=0:end=limit
         chunks.append(remaining[:end]);remaining=remaining[end:]
     return chunks
+
+
+_ABBREVIATIONS = r'(?:Mr|Mrs|Ms|Dr|Prof|St|vs|etc|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)'
+
+def sentence_requests(text):
+    """Keep full sentences and exact text; join tiny openings to the next sentence.
+
+    Ordinary sentences keep their context. For unusually long sentences prefer
+    clause boundaries; a last-resort word cut bounds inference on this 8 GiB Mac.
+    This fallback can affect prosody and is reported separately by the trial UI.
+    """
+    chunks=[];begin=0
+    for match in re.finditer(r'[.!?](?:[\"\u201d\u2019])?\s+', text):
+        before=text[:match.start()+1].rstrip()
+        if re.search(r'\b'+_ABBREVIATIONS+r'\.$',before,re.I) or re.search(r'\b(?:[A-Za-z]\.){2,}$',before):
+            continue
+        end=match.end()
+        if len(text[begin:end].strip()) >= 20:
+            chunks.append(text[begin:end]);begin=end
+    if begin < len(text):chunks.append(text[begin:])
+    bounded=[]
+    for chunk in chunks:
+        while len(chunk)>180:
+            prefix=chunk[:180]
+            clauses=[m.end() for m in re.finditer(r'[,;:]\s+',prefix) if m.end()>=30]
+            end=clauses[-1] if clauses else prefix.rfind(' ',0,180)+1
+            if end<=0:end=180
+            bounded.append(chunk[:end]);chunk=chunk[end:]
+        if chunk:bounded.append(chunk)
+    return bounded
 
 
 def decode_pcm(value):
@@ -172,7 +202,7 @@ class SpeechStream:
                  binary=RHUBARB, capture=False):
         self.payload, self.policy, self.startup = speech_payload(data)
         self.strategy=data.get('strategy','whole');self.opening=data.get('openingSeconds',2)
-        self.requests=phrase_requests(self.payload['input']) if self.strategy=='phrases' else [self.payload['input']]
+        self.requests=({'phrases':phrase_requests,'sentences':sentence_requests}.get(self.strategy,lambda text:[text]))(self.payload['input'])
         self.request_ends=[]
         self.endpoint, self.post, self.recognizer, self.binary = endpoint, post, recognizer, binary
         self.token = secrets.token_hex(16)
@@ -260,7 +290,7 @@ class SpeechStream:
             for index,text in enumerate(self.requests):
                 self.check();offset=self.frames/RATE;before=self.frames
                 payload={**self.payload,'input':text}
-                self.event({'type':'request','index':index,'characters':len(text),'requestCount':len(self.requests)})
+                self.event({'type':'request','index':index,'characters':len(text),'requestCount':len(self.requests),'text':text})
                 if self.post:response_context=self.post(self.endpoint,json=payload,stream=True,timeout=(3,15))
                 else:
                     self.transport=HttpStream(self.endpoint,payload,self.cancelled,
@@ -276,7 +306,7 @@ class SpeechStream:
                         for value in parser.push(chunk):self.ingest(value,offset,index)
                     for value in parser.push(b'',final=True):self.ingest(value,offset,index)
                 if self.frames==before:raise ValueError('Kokoro returned no speech audio for a phrase')
-                if self.strategy=='phrases':
+                if self.strategy!='whole':
                     with self.condition:
                         self.request_ends.append(self.frames);self.condition.notify_all()
             if not self.frames: raise ValueError('Kokoro returned no speech audio')
@@ -462,8 +492,8 @@ TRIAL_TEXTS.update({
         "Now, where should we begin?"
 })
 TRIAL_CASES = {
-    key: {'label': label, 'description': description, 'text': TRIAL_TEXTS[key]}
-    for key, label, description in (
+    key: {'label': f'S{number:02} · {label}', 'description': description, 'text': TRIAL_TEXTS[key]}
+    for number, (key, label, description) in enumerate((
         ('short', 'Introduction · original', 'Original short baseline for comparing earlier reports.'),
         ('sustained', 'Conversation · original', 'Original sustained baseline for comparing earlier reports.'),
         ('tiny', 'Tiny reply', 'Checks completion when the entire reply may be shorter than the startup reserve.'),
@@ -472,5 +502,5 @@ TRIAL_CASES = {
         ('mixed', 'Tiny opening, longer follow-up', 'Alternates short and long sentences to expose early starvation and phrase seams.'),
         ('numbers', 'Numbers and abbreviations', 'Tests spoken normalization, abbreviations and punctuation with variable audio lengths.'),
         ('long', 'Long conversation', 'More requests and queue turnover: watch for late gaps as well as startup delay.'),
-    )
+    ), 1)
 }

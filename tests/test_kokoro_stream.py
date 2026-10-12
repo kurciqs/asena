@@ -43,6 +43,19 @@ class KokoroStreamTests(unittest.TestCase):
         self.assertGreater(len(stream.TRIAL_TEXTS['long'].split()), 180)
         self.assertNotRegex(stream.TRIAL_TEXTS['unpunctuated'][:-1], r'[.!?;,]')
 
+    def test_real_saved_waveform_is_unchanged_by_analysis_partition(self):
+        import wave
+        with wave.open(str(Path(__file__).parents[1]/'src/stream-recordings/P02.wav')) as wav:
+            pcm=wav.readframes(wav.getnframes())
+        raw={'audio_format':'audio/pcm','audio':base64.b64encode(pcm).decode(),'timestamps':[]}
+        for opening,policy in ((.5,'1s'),(1,'2s'),(2,'3s')):
+            instance=self.make(Response([raw]),capture=True)
+            instance.opening=opening;instance.policy=policy
+            events=self.consume(instance)
+            segments=[e for e in events if e['type']=='segment']
+            self.assertEqual(b''.join(base64.b64decode(e['pcm']) for e in segments),pcm)
+            self.assertTrue(next(e for e in events if e['type']=='result')['report']['complete'])
+
     def make(self,response,**options):
         return stream.SpeechStream({'input':'Hello again.','voice':'af_heart'},post=lambda *a,**k:response,recognizer=recognize,**options)
     def consume(self,instance):
@@ -91,6 +104,21 @@ class KokoroStreamTests(unittest.TestCase):
             {'word':'later','start_time':2.5,'end_time':3}]},1,2)
         self.assertEqual([w['word'] for w in words],['valid'])
         self.assertEqual(warning['droppedWords'],2)
+
+    def test_sentence_requests_keep_the_first_you_in_its_complete_sentence(self):
+        text=stream.TRIAL_TEXTS['mixed']
+        chunks=stream.sentence_requests(text)
+        self.assertEqual(''.join(chunks),text)
+        self.assertTrue(chunks[0].endswith('better story. '))
+        self.assertIn('you mentioned yesterday',chunks[0])
+        for text in stream.TRIAL_TEXTS.values():
+            self.assertEqual(''.join(stream.sentence_requests(text)),text)
+        text='Dr. Ellis booked 7:30 p.m. on Oct. 12. The next sentence is here.'
+        self.assertEqual(stream.sentence_requests(text)[0],'Dr. Ellis booked 7:30 p.m. on Oct. 12. ')
+        text='One long sentence '+ 'without a boundary '*80
+        chunks=stream.sentence_requests(text)
+        self.assertEqual(''.join(chunks),text)
+        self.assertTrue(all(len(chunk)<=180 for chunk in chunks))
 
     def test_framing_handles_all_utf8_splits_and_rejects_truncation(self):
         payload='{"word":"héllo"}\n{"n":2}\n'.encode()
