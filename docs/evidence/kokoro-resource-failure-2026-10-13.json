@@ -1,0 +1,30 @@
+{
+  "providerImage": "ghcr.io/remsky/kokoro-fastapi-cpu:v0.9.0",
+  "providerSource": "404d122e847569012bd6a6afe36f1c3a5e1c66b7",
+  "cpuLimit": 2,
+  "memoryLimitBytes": 2147483648,
+  "failedRequest": {
+    "case": "S06",
+    "characters": 502,
+    "words": 89,
+    "strategy": "whole",
+    "loggedInferenceTokens": 344,
+    "audioPacketsReturned": 0
+  },
+  "dockerStateAfterFailure": {
+    "OOMKilled": true,
+    "ExitCode": 137,
+    "FinishedAt": "2026-10-12T22:14:22.40341817Z"
+  },
+  "providerChunkConfiguration": {
+    "target_min_tokens": 175,
+    "target_max_tokens": 250,
+    "absolute_max_tokens": 450
+  },
+  "laterHostSample": {
+    "swapUsedMiB": 9077.69,
+    "containerSampleGiB": 1.573,
+    "caveat": "Point-in-time samples; not a measured synthesis peak or proof of causal delay."
+  },
+  "endState": "Kokoro stopped after authorized diagnostics; Docker application remains available."
+}
