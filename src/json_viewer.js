@@ -1,88 +1,95 @@
-// Native disclosure controls keep large JSON branches folded and keyboard accessible.
+// Reuse native disclosure nodes so live updates preserve expansion and focus.
 export function createJsonViewer(container) {
     const document = container.ownerDocument;
-    const expanded = new Set();
+    container.classList.add('json-viewer');
+    const outer = container.closest('details');
+    const root = { element: container, children: new Map() };
     let currentValue = null;
 
-    function text(className, value) {
-        const span = document.createElement('span');
-        span.className = className;
-        span.textContent = value;
-        return span;
+    function span(className, value) {
+        const node = document.createElement('span');
+        node.className = className;
+        node.textContent = value;
+        return node;
     }
 
-    function primitive(value) {
-        const type = value === null ? 'null' : typeof value;
-        return text(`json-value json-${type}`, JSON.stringify(value) ?? String(value));
-    }
-
-    function entry(key, value, path, arrayItem = false) {
-        const composite = value !== null && typeof value === 'object';
-        const longString = typeof value === 'string' && value.length > 120;
-        const keyLabel = arrayItem ? `[${key}]` : JSON.stringify(key);
-        if (!composite && !longString) {
-            const row = document.createElement('div');
-            row.className = 'json-row';
-            row.append(text('json-key', keyLabel), document.createTextNode(': '), primitive(value));
-            return row;
-        }
-
-        const entries = composite ? Object.entries(value) : [];
-        if (composite && entries.length === 0) {
-            const row = document.createElement('div');
-            row.className = 'json-row';
-            row.append(text('json-key', keyLabel), document.createTextNode(': '),
-                text('json-value', Array.isArray(value) ? '[]' : '{}'));
-            return row;
-        }
-
-        const id = JSON.stringify(path);
-        const branch = document.createElement('details');
-        branch.className = 'json-branch';
-        const summary = document.createElement('summary');
-        const preview = longString ? `String (${value.length} characters)` :
-            `${Array.isArray(value) ? 'Array' : 'Object'} (${entries.length} ${Array.isArray(value) ? 'items' : 'keys'})`;
-        summary.append(text('json-key', keyLabel), document.createTextNode(': '), text('json-preview', preview));
-        branch.append(summary);
-
-        // Children are only mounted when requested, rather than constructing the full tree.
-        let populated = false;
-        function populate() {
-            if (populated) return;
-            populated = true;
-            const children = document.createElement('div');
-            children.className = 'json-children';
-            if (longString) children.append(primitive(value));
-            else for (const [childKey, childValue] of entries) {
-                children.append(entry(childKey, childValue, [...path, childKey], Array.isArray(value)));
+    function reconcile(parent, entries, array = false) {
+        const keep = new Set();
+        let index = 0;
+        for (const [key, value] of entries) {
+            keep.add(key);
+            const composite = value !== null && typeof value === 'object';
+            const long = typeof value === 'string' && value.length > 120;
+            const items = composite ? Object.entries(value) : [];
+            const branch = long || (composite && items.length > 0);
+            let record = parent.children.get(key);
+            if (!record || record.branch !== branch) {
+                const element = document.createElement(branch ? 'details' : 'div');
+                element.className = branch ? 'json-branch' : 'json-row';
+                const label = span('json-key', '');
+                const display = span('', '');
+                const header = branch ? document.createElement('summary') : element;
+                header.append(label, document.createTextNode(': '), display);
+                if (branch) element.append(header);
+                const previous = record;
+                record = { element, label, display, branch, children: new Map(), value };
+                parent.children.set(key, record);
+                if (previous) previous.element.replaceWith(element);
+                if (branch) element.addEventListener('toggle', () => {
+                    if (element.open && element.isConnected) populate(record);
+                });
             }
-            branch.append(children);
+            record.value = value;
+            record.label.textContent = array ? `[${key}]` : JSON.stringify(key);
+            record.display.className = branch ? 'json-preview' :
+                `json-value json-${value === null ? 'null' : typeof value}`;
+            record.display.textContent = branch ? (long ? `String (${value.length} characters)` :
+                `${Array.isArray(value) ? 'Array' : 'Object'} (${items.length} ${Array.isArray(value) ? 'items' : 'keys'})`) :
+                JSON.stringify(value) ?? String(value);
+            // Avoid moving a focused summary when the key order is unchanged.
+            if (parent.element.children[index] !== record.element) {
+                parent.element.insertBefore(record.element, parent.element.children[index] ?? null);
+            }
+            index++;
+            if (branch && record.element.open) populate(record);
         }
+        for (const [key, record] of parent.children) {
+            if (!keep.has(key)) { record.element.remove(); parent.children.delete(key); }
+        }
+    }
 
-        branch.open = expanded.has(id);
-        if (branch.open) populate();
-        branch.addEventListener('toggle', () => {
-            if (!branch.isConnected) return;
-            if (branch.open) {
-                expanded.add(id);
-                populate();
-            } else expanded.delete(id);
-        });
-        return branch;
+    function populate(record) {
+        if (!record.content) {
+            const element = document.createElement('div');
+            element.className = 'json-children';
+            record.element.append(element);
+            record.content = { element, children: new Map() };
+        }
+        const content = record.content;
+        if (typeof record.value === 'string') {
+            if (!content.longSpan) {
+                content.longSpan = span('json-value json-string', '');
+                content.element.replaceChildren(content.longSpan);
+                content.children.clear();
+            }
+            content.longSpan.textContent = JSON.stringify(record.value);
+        } else {
+            if (content.longSpan) { content.longSpan.remove(); content.longSpan = null; }
+            reconcile(content, Object.entries(record.value), Array.isArray(record.value));
+        }
     }
 
     function render() {
-        const fragment = document.createDocumentFragment();
-        if (currentValue !== null && typeof currentValue === 'object') {
-            for (const [key, value] of Object.entries(currentValue)) {
-                fragment.append(entry(key, value, [key], Array.isArray(currentValue)));
-            }
-        } else fragment.append(primitive(currentValue));
-        container.replaceChildren(fragment);
+        reconcile(root, currentValue !== null && typeof currentValue === 'object' ?
+            Object.entries(currentValue) : [['value', currentValue]], Array.isArray(currentValue));
     }
 
+    if (outer) outer.addEventListener('toggle', () => { if (outer.open) render(); });
+    container.replaceChildren();
     return {
-        update(value) { currentValue = value; render(); },
-        collapseAll() { expanded.clear(); render(); }
+        update(value) { currentValue = value; if (!outer || outer.open) render(); },
+        collapseAll() {
+            for (const branch of container.querySelectorAll('details')) branch.open = false;
+        }
     };
 }

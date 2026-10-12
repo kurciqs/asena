@@ -29,6 +29,34 @@ class StreamProbeTests(unittest.TestCase):
             with self.subTest(request=request), self.assertRaises(ValueError):
                 probe.live_trial_text(request)
 
+    def test_recording_catalog_uses_stored_cues_without_alignment_or_generation(self):
+        with patch.object(probe,'recognize',side_effect=AssertionError('New alignment forbidden')), patch.object(probe,'Probe',side_effect=AssertionError('Simulation forbidden')):
+            catalog=probe.saved_recordings()
+        self.assertGreaterEqual(len(catalog),7)
+        self.assertEqual(len({r['id'] for r in catalog}),len(catalog))
+        for clip in catalog:
+            self.assertTrue(clip['cues'])
+            self.assertTrue((probe.ROOT/'src'/clip['audio'].lstrip('/')).is_file())
+            self.assertGreater(clip['duration'],0)
+
+    def test_saved_routes_serve_only_catalog_assets_without_running_work(self):
+        import io
+        catalog=probe.saved_recordings()
+        handler=object.__new__(probe.Handler)
+        handler.server=type('Server',(),{'server_port':3002,'recordings':catalog,'allow_kokoro':False})()
+        handler.headers={'Host':'localhost:3002'}
+        statuses=[]
+        handler.send_response=statuses.append;handler.send_header=lambda *_:None;handler.end_headers=lambda:None
+        with patch.object(probe,'recognize',side_effect=AssertionError('New alignment forbidden')), patch.object(probe,'Probe',side_effect=AssertionError('Simulation forbidden')):
+            for path,status in [('/probe/recordings',200),(catalog[0]['audio'],200),('/stream-recordings/../../config.py',404)]:
+                handler.path=path;handler.wfile=io.BytesIO();handler.do_GET()
+                self.assertEqual(statuses[-1],status)
+                if path=='/probe/recordings':self.assertEqual(json.loads(handler.wfile.getvalue())['recordings'],catalog)
+                if path==catalog[0]['audio']:self.assertEqual(handler.wfile.getvalue()[:4],b'RIFF')
+            body=json.dumps({'policy':'2s','profile':'steady1x','startupSeconds':2,'repeats':1}).encode()
+            handler.path='/probe/run';handler.headers['Content-Length']=str(len(body));handler.rfile=io.BytesIO(body);handler.wfile=io.BytesIO();handler.do_POST()
+            self.assertEqual(statuses[-1],410)
+
     def source(self, seconds=4, rate=100):
         frames=seconds*rate
         return {'frames': frames, 'rate': rate, 'pcm': b'\0\0'*frames,

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Asena · Lip-sync comparison</title>
-  <link rel="stylesheet" href="/lip-sync-lab/lab.css">
+  <link rel="stylesheet" href="/lip-sync-lab/lab.css"><link rel="stylesheet" href="/json_viewer.css">
   <script type="importmap">
     {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.176.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.176.0/examples/jsm/","@pixiv/three-vrm":"https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3.5.5/lib/three-vrm.module.min.js"}}
   </script>
@@ -40,7 +40,7 @@
       <label class="check"><input id="smile" type="checkbox"> Smile stress test <span class="note">(known mouth distortion)</span></label>
       <p id="status" role="status">Loading saved samples and avatar. No inference services are called.</p>
       <details><summary>Check the rig</summary><p class="note">Five vowel shapes and a separate closed-mouth morph. F/V and tongue articulation are approximations on this rig.</p><div id="calibration"><button data-pose="closed">Closed lips</button><button data-pose="aa">AA</button><button data-pose="ih">EE / IH</button><button data-pose="ou">OO / U</button><button data-pose="oh">OH</button><button data-pose="neutral">Neutral</button></div></details>
-      <details><summary>Inspect actual mouth movement</summary><pre id="inspection">Waiting for avatar</pre></details>
+      <details><summary>Inspect actual mouth movement</summary><div class="json-tools"><button id="collapse-json" type="button">Collapse all JSON</button></div><div id="inspection">Waiting for avatar</div></details>
       <details><summary>Methods needing further preparation</summary><div id="unavailable"></div></details>
       <p class="note">These are recorded quality comparisons, not proof of streaming speed. Neural predictions are already saved; no model is loaded here. Your companion settings are untouched.</p>
     </aside>

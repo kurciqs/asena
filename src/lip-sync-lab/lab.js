@@ -1,3 +1,4 @@
+import {createJsonViewer} from '../json_viewer.js';
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {VRMLoaderPlugin,VRMUtils} from '@pixiv/three-vrm';
@@ -6,6 +7,9 @@ import {CHANNELS,boundedWeights,sampleFrames} from './mouth-adapters.js';
 
 const $=id=>document.getElementById(id);
 const audio=$('audio'),stage=$('stage');
+const inspection=createJsonViewer($('inspection'));
+inspection.update({status:'Waiting for avatar'});
+$('collapse-json').addEventListener('click',()=>inspection.collapseAll());
 let manifest,data,currentCase,vrm,mixer,renderer,camera,scene,selected='a';
 let calibration=null,stopped=true,generation=0,frame=null,lastTime=0,lastInspection=0,peak=0;
 let bindings=[],mouthBindings=[],applied=CHANNELS.map(()=>0);
@@ -136,10 +140,10 @@ function draw(now) {
     if(now-lastInspection>150 || audio.paused) {
       lastInspection=now;
       $('motion-status').textContent=`Applied mouth: ${motion.toFixed(2)} · peak ${peak.toFixed(2)}`;
-      $('inspection').textContent=JSON.stringify({method:method().id,voice:manifest.voice,audioTime:audio.currentTime,
+      inspection.update({method:method().id,voice:manifest.voice,audioTime:audio.currentTime,
         paused:audio.paused,weights:Object.fromEntries(CHANNELS.map((name,i)=>[name,Number(applied[i].toFixed(3))])),
         actualMorphs:actual.map(m=>({...m,value:Number(m.value.toFixed(3))})),mouthBindingCount:mouthBindings.length,peakAppliedMorph:peak,
-        sourceAudioSha256:currentCase?.audioSha256},null,2);
+        sourceAudioSha256:currentCase?.audioSha256});
     }
   }
   if(!audio.paused && !document.hidden)frame=requestAnimationFrame(draw);

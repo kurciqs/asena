@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from config import default_rhubarb
 from streaming_alignment import Cancelled, trim_cues, recognize as recognize_region
-from kokoro_stream import StreamRegistry, TRIAL_TEXTS, TRIAL_CASES
+from kokoro_stream import StreamRegistry, TRIAL_TEXTS, TRIAL_CASES, sentence_requests
 from service_contracts import ServiceError
 from rhubarb_benchmark import clips, process_tree_rss
 
@@ -307,12 +307,31 @@ def cli_run(policy, profile, startup, repeats):
     return result
 
 
+def saved_recordings():
+    """Only committed audio/cues; catalog construction never runs inference."""
+    fixture=json.loads((ROOT/'src/replay/benchmark.json').read_text())
+    turns=fixture['turns']+[fixture['recall'],fixture['recall']['withoutMemory']]
+    result=[]
+    for index, turn in enumerate(turns,1):
+        speech=turn['speech'];audio=speech['audio']
+        if any(r['audio']==audio for r in result):continue
+        with wave.open(str(ROOT/'src'/audio.lstrip('/'))) as wav:
+            duration=wav.getnframes()/wav.getframerate()
+        result.append({'id':f'R{index:02d}','label':f'R{index:02d} · '+turn.get('label','Memory recall'),
+            'text':speech.get('spokenText',turn.get('reply','')),'audio':audio,
+            'duration':duration,'cues':turn['visemes'],'method':'Stored Rhubarb mouth cues'})
+    extra=ROOT/'src/stream-recordings/index.json'
+    if extra.is_file():result.extend(json.loads(extra.read_text())['recordings'])
+    return result
+
+
 class ProbeServer(ThreadingHTTPServer):
     daemon_threads = True
     def __init__(self, port, allow_kokoro=False):
         super().__init__(('127.0.0.1', port), Handler)
         self.active_lock = threading.Lock(); self.active = None
         self.live = StreamRegistry(); self.allow_kokoro = allow_kokoro
+        self.recordings = saved_recordings()
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -335,6 +354,8 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if not self.allowed():
             return self.answer(403, {'error': 'Local same-origin test page only'})
+        if self.path == '/probe/recordings':
+            return self.answer(200, {'recordings':self.server.recordings})
         if self.path == '/probe/health':
             return self.answer(200, {'fixtureOnly': not self.server.allow_kokoro, 'liveEnabled':self.server.allow_kokoro,
                                     'trialTexts':TRIAL_TEXTS, 'trialCases':TRIAL_CASES,
@@ -342,16 +363,17 @@ class Handler(BaseHTTPRequestHandler):
         path = self.path.split('?', 1)[0]
         allowed = (path in ('/', '/stream-test.html', '/lip-sync-lab/lab.css',
                            '/lip-sync-lab/mouth-adapters.js', '/load_mixamo_animation.js',
-                           '/mixamo_vrm_rig_map.js', '/pcm_stream_playback.js', '/rhubarb_mouth.js',
+                           '/mixamo_vrm_rig_map.js', '/json_viewer.js', '/json_viewer.css', '/pcm_stream_playback.js', '/rhubarb_mouth.js',
                            '/vrm_models/asena_sfw.vrm', '/animations/idle.fbx')
                    or path in ('/stream-lab/client.js', '/stream-lab/playback.js',
                                '/stream-lab/viewer.js', '/stream-lab/style.css','/stream-lab/startup-timing.js'))
+        allowed = allowed or path in {r['audio'] for r in self.server.recordings} or path == '/stream-lab/saved-playback.js'
         if not allowed:
             return self.answer(404, {'error': 'Not a probe asset'})
         asset = ROOT/'src'/('stream-test.html' if path == '/' else path.lstrip('/'))
         if not asset.is_file():
             return self.answer(404, {'error': 'Missing local probe asset'})
-        types = {'.html': 'text/html', '.css': 'text/css', '.js': 'application/javascript', '.vrm': 'model/gltf-binary'}
+        types = {'.html': 'text/html', '.css': 'text/css', '.js': 'application/javascript', '.vrm': 'model/gltf-binary', '.wav':'audio/wav'}
         data = asset.read_bytes()
         self.send_response(200); self.send_header('Content-Type', types.get(asset.suffix, 'application/octet-stream'))
         self.send_header('Content-Length', str(len(data))); self.send_header('Cache-Control', 'no-store')
@@ -375,11 +397,13 @@ class Handler(BaseHTTPRequestHandler):
                 if self.path != '/probe/live' or not {'policy','startupSeconds'}<=set(data) or set(data)-{'policy','startupSeconds','repeats','strategy','openingSeconds','textCase'}:
                     raise ValueError('Unknown live trial request')
                 text = live_trial_text(data)
+                if data.get('strategy')=='whole' and len(text)>180:
+                    raise ValueError('Continuous long requests exceeded this Kokoro container’s 2 GiB memory limit. Choose complete sentences or short fragments for this passage.')
                 if self.server.active:
                     return self.answer(409, {'error':'A saved-audio test is running'})
                 stream = self.server.live.reserve({'input':text,
                     'voice':'af_heart', 'policy':data['policy'], 'startupSeconds':data['startupSeconds'],
-                    'strategy':data.get('strategy','whole'),'openingSeconds':data.get('openingSeconds',2)})
+                    'strategy':data.get('strategy','sentences'),'openingSeconds':data.get('openingSeconds',2)})
                 self.send_response(200); self.send_header('Content-Type','application/x-ndjson')
                 self.send_header('Cache-Control','no-store'); self.end_headers()
                 try:
@@ -389,51 +413,11 @@ class Handler(BaseHTTPRequestHandler):
                 finally:
                     stream.cancel(); self.server.live.release(stream)
                 return
-            if self.path in ('/probe/cancel', '/probe/progress'):
-                with self.server.active_lock:
-                    active = self.server.active
-                    if not active or data.get('token') != active['token']:
-                        return self.answer(409, {'error': 'No matching test run'})
-                    if self.path.endswith('cancel'):
-                        active['probe'].cancel()
-                    else:
-                        active['probe'].progress(data.get('playedFrames'))
-                return self.answer(200, {'ok': True})
-            if self.path != '/probe/run' or set(data) != {'policy', 'profile', 'startupSeconds', 'repeats'}:
-                raise ValueError('Unknown test request')
-            if type(data['repeats']) is not int or data['repeats'] not in (1, 3):
-                raise ValueError('Only the fixed short/long fixture is supported')
-            probe = Probe(dataset(data['repeats']), data['policy'], data['profile'], data['startupSeconds'])
+            return self.answer(410, {'error':'Saved recordings are direct playback. Legacy simulated browser runs are retired; use the offline CLI for simulation.'})
         except ServiceError as error:
             return self.answer(error.status, {'error':str(error)})
         except (ValueError, KeyError, TypeError) as error:
             return self.answer(400, {'error': str(error)})
-        token = secrets.token_hex(16)
-        with self.server.active_lock:
-            if self.server.active or self.server.live.active:
-                return self.answer(409, {'error': 'Another saved-audio test is running'})
-            self.server.active = {'token': token, 'probe': probe}
-        self.send_response(200); self.send_header('Content-Type', 'application/x-ndjson')
-        self.send_header('Cache-Control', 'no-store'); self.end_headers()
-        def emit(event):
-            self.wfile.write((json.dumps(dict(event, token=token), separators=(',', ':'))+'\n').encode())
-            self.wfile.flush()
-        probe.emit = emit
-        try:
-            result = probe.run()
-            emit({'type': 'result', 'report': result})
-        except (BrokenPipeError, ConnectionResetError):
-            probe.cancel()
-        except Exception as error:
-            probe.cancel()
-            try:
-                emit({'type': 'error', 'error': str(error)})
-            except OSError:
-                pass
-        finally:
-            probe.cancel()
-            with self.server.active_lock:
-                self.server.active = None
 
 
 def main():

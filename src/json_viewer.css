@@ -1,0 +1,11 @@
+.json-viewer { overflow-wrap: anywhere; }
+.json-viewer, .json-viewer * { font: 11px/1.6 ui-monospace, SFMono-Regular, monospace; }
+.json-viewer .json-branch { margin: 0; padding: 0; border: 0; }
+.json-viewer summary { margin: 0; padding: 3px 0; font-weight: normal; }
+.json-viewer .json-row { padding: 3px 0 3px 12px; }
+.json-viewer .json-children { margin-left: 6px; padding-left: 8px; border-left: 1px solid #ccc8df; }
+.json-viewer .json-key { color: #434776; }
+.json-viewer .json-string { color: #276348; white-space: pre-wrap; }
+.json-viewer .json-number { color: #815615; }
+.json-viewer .json-boolean, .json-viewer .json-null { color: #755194; }
+.json-viewer .json-preview { color: #62677e; }

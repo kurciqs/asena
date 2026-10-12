@@ -1,3 +1,4 @@
+@import url("./json_viewer.css");
 :root {
     color-scheme: light;
     --ink: #292b45;
@@ -118,16 +119,6 @@ summary { cursor: pointer; font-size: 12px; font-weight: 600; }
 #replay-panel button { font-size: 12px; }
 #turn-inspection { padding-top: 12px; border-top: 1px solid var(--line); }
 .json-tools { margin: 10px 0; }
-#replay-inspector { overflow-wrap: anywhere; }
-#replay-inspector, #replay-inspector * { font: 11px/1.6 ui-monospace, SFMono-Regular, monospace; }
-#replay-inspector summary { margin: 0; padding: 3px 0; }
-#replay-inspector .json-row { padding: 3px 0 3px 12px; }
-#replay-inspector .json-children { margin-left: 6px; padding-left: 8px; border-left: 1px solid #ccc8df; }
-#replay-inspector .json-key { color: #434776; }
-#replay-inspector .json-string { color: #276348; white-space: pre-wrap; }
-#replay-inspector .json-number { color: #815615; }
-#replay-inspector .json-boolean, #replay-inspector .json-null { color: #755194; }
-#replay-inspector .json-preview { color: var(--muted); }
 .reset-section { border-top: 1px solid var(--line); margin-top: 18px; padding-top: 13px; }
 .reset-section > p { margin: 9px 0; }
 .danger-button { color: #8a424c; }
