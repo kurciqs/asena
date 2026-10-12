@@ -67,6 +67,7 @@ class ServiceContractTests(unittest.TestCase):
         with patch.object(server.storage,'audio_path',return_value=Path('/tmp/fixture/input.wav')), patch.object(server.storage,'delete_audio'), patch.object(server.subprocess,'run',side_effect=subprocess.TimeoutExpired('fixture',30)) as process:
             result=self.client.post('/get_visemes',json={'audio_id':'a'*32})
             self.assertEqual(result.status_code,504)
-            self.assertEqual(process.call_args.kwargs['timeout'],30)
+            self.assertGreater(process.call_args.kwargs['timeout'],0)
+            self.assertLessEqual(process.call_args.kwargs['timeout'],30)
         with patch.object(server.storage,'audio_path',return_value=Path('/tmp/fixture/input.wav')), patch.object(server.storage,'delete_audio'), patch.object(server.subprocess,'run',side_effect=FileNotFoundError()):
             self.assertEqual(self.client.post('/get_visemes',json={'audio_id':'a'*32}).status_code,503)

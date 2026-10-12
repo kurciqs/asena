@@ -11,10 +11,11 @@ import threading
 ALIGNMENT_LOCK = threading.Lock()
 import context_budget as budget
 import private_storage as storage
+from alignment import align_audio
 from pathlib import Path
 from service_contracts import ServiceError, require_payload, proxy_json, validate_chat_response, validate_tts_response, validate_visemes
 
-from config import STATIC_DIR, RHUBARB, FFMPEG, LMS_API, KOKORO_API, RUNTIME_MODE, HOST, PORT, PROCESS_TIMEOUT, CHAT_MODEL, VOICE, LIP_SYNC, ASSETS
+from config import STATIC_DIR, RHUBARB, RHUBARB_THREADS, ALIGNMENT_CACHE_ENTRIES, FFMPEG, LMS_API, KOKORO_API, RUNTIME_MODE, HOST, PORT, PROCESS_TIMEOUT, CHAT_MODEL, VOICE, LIP_SYNC, ASSETS
 
 app = Flask(__name__, static_folder=None)
 app.config["MAX_CONTENT_LENGTH"] = 24 * 1024 * 1024
@@ -128,29 +129,22 @@ def release_audio(audio_id):
 @app.route('/get_visemes', methods=['POST'])
 def get_visemes():
     data = request.get_json(silent=True)
-    if not isinstance(data, dict) or set(data) != {'audio_id'}:
-        raise ServiceError('Expected a server-issued audio resource ID.',400)
+    if not isinstance(data, dict) or 'audio_id' not in data or set(data)-{'audio_id','spoken_text'}:
+        raise ServiceError('Expected a server-issued audio resource ID and optional spoken text.',400)
+    text=data.get('spoken_text','')
+    try:
+        valid_text=isinstance(text,str) and len(text.encode('utf-8'))<=20000 and '\0' not in text
+    except UnicodeError:
+        valid_text=False
+    if not valid_text:
+        raise ServiceError('Spoken text must be a string of at most 20,000 UTF-8 bytes.',400)
     filepath = storage.audio_path(data['audio_id'])
-    conv_path = filepath.with_name('aligned.wav')
     if not ALIGNMENT_LOCK.acquire(blocking=False):
         raise ServiceError('Audio alignment is busy. Retry shortly, or use audio without lip sync.',503)
     try:
-        result = subprocess.run([
-            FFMPEG, '-threads', '1', '-nostdin', '-y', '-i', str(filepath),
-            '-ac', '1', '-ar', '44100', '-sample_fmt', 's16', str(conv_path)
-        ], capture_output=True, text=True, timeout=PROCESS_TIMEOUT)
-        if result.returncode != 0:
-            raise ServiceError('Audio conversion failed. Check the WAV and ffmpeg, then retry.')
-        result = subprocess.run([RHUBARB, str(conv_path), '-f', 'json'],
-                                capture_output=True, text=True, timeout=PROCESS_TIMEOUT)
-        if result.returncode != 0:
-            raise ServiceError('Rhubarb alignment failed. Check the tool, then retry.')
-        try:
-            output = json.loads(result.stdout)
-            if not isinstance(output,dict): raise ValueError('Expected object')
-        except ValueError as error:
-            raise ServiceError('Rhubarb returned invalid JSON.') from error
-        return jsonify({'visemes': validate_visemes(output.get('mouthCues', []))})
+        return jsonify(align_audio(filepath,text=text,binary=RHUBARB,ffmpeg=FFMPEG,
+                       threads=RHUBARB_THREADS,timeout=PROCESS_TIMEOUT,
+                       cache_folder=storage.DATA_DIR/'alignment-cache',cache_entries=ALIGNMENT_CACHE_ENTRIES))
     finally:
         storage.delete_audio(data['audio_id'])
         ALIGNMENT_LOCK.release()

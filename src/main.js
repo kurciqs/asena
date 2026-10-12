@@ -269,7 +269,7 @@ async function generateTTS(text, turn) {
     return { audio, timestamps, audioId };
 }
 
-async function getVisemes(timestamps, turn, audioId, audioDuration) {
+async function getVisemes(timestamps, turn, audioId, audioDuration, spokenText) {
     turn.assertCurrent();
     if (replay) return replay.visemes();
     if (LIP_SYNC === "rhubarb") {
@@ -278,7 +278,7 @@ async function getVisemes(timestamps, turn, audioId, audioDuration) {
             signal: turn.signal,
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ audio_id: audioId })
+            body: JSON.stringify({ audio_id: audioId, spoken_text: spokenText })
         });
         return data.visemes;
     }
@@ -380,7 +380,7 @@ async function prepareAndPlay(parsedReply, turn) {
     turn.assertCurrent();
     let visemes = [], emotions = [], actions = [];
     try {
-        visemes = await getVisemes(timestamps, turn, audioId, audio.duration);
+        visemes = await getVisemes(timestamps, turn, audioId, audio.duration, parsedReply.text);
         if (!Array.isArray(visemes)) throw new Error('Missing mouth cues.');
         buildExpressionTracks({ duration: audio.duration, visemes }, name => name);
     } catch (error) {

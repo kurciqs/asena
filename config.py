@@ -1,5 +1,8 @@
 """Single source for local runtime configuration. Importing starts no services."""
 import os
+import hashlib
+import json
+import platform
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -26,7 +29,21 @@ if HOST != '127.0.0.1': raise RuntimeError('Remote website binding is unsupporte
 PORT = integer('ASENA_PORT',3001,1024,65535)
 DATA_DIR = Path(os.environ.get('ASENA_DATA_DIR',str(ROOT/'.runtime'))).expanduser().resolve()
 if DATA_DIR.is_relative_to(STATIC_DIR): raise RuntimeError('ASENA_DATA_DIR must be outside public assets')
-RHUBARB = str(Path(os.environ.get('ASENA_RHUBARB',str(ROOT.parent/'rhubarb'/'rhubarb'))).expanduser().resolve())
+def default_rhubarb():
+    candidate=ROOT/'.runtime/tools/rhubarb-1.14.0-arm64/rhubarb'
+    if platform.machine()=='arm64' and candidate.is_file():
+        try:
+            manifest=json.loads(candidate.with_name('build-manifest.json').read_text())
+            if (manifest.get('version')=='1.14.0' and manifest.get('algorithmChanges') is False
+                    and hashlib.sha256(candidate.read_bytes()).hexdigest()==manifest.get('binarySha256')
+                    and (candidate.parent/'res/sphinx/acoustic-model/mdef').is_file()):
+                return candidate
+        except (OSError,ValueError,AttributeError): pass
+    return ROOT.parent/'rhubarb'/'rhubarb'
+
+RHUBARB = str(Path(os.environ.get('ASENA_RHUBARB') or default_rhubarb()).expanduser().resolve())
+RHUBARB_THREADS = integer('ASENA_RHUBARB_THREADS',2,1,4)
+ALIGNMENT_CACHE_ENTRIES = integer('ASENA_ALIGNMENT_CACHE_ENTRIES',64,0,64)
 FFMPEG = os.environ.get('ASENA_FFMPEG','ffmpeg')
 LMS_API = endpoint('ASENA_LMS_API','http://127.0.0.1:1234/v1/chat/completions')
 KOKORO_API = endpoint('ASENA_KOKORO_API','http://127.0.0.1:8880/dev/captioned_speech')
