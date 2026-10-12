@@ -1,0 +1,5199 @@
+{
+  "fixtureOnly": true,
+  "runs": [
+    {
+      "fixtureOnly": true,
+      "policy": "1s",
+      "profile": "steady1x",
+      "startupSeconds": 2,
+      "duration": 77.21224489795918,
+      "sourceSha256": "3bafe03b056a552a27ad2b07262b93fee2475c74ba84a9fa9bd62757d724e472",
+      "fixtures": [
+        {
+          "id": "intro",
+          "sha256": "61cc73d4e6fa265bdc3a51a89016a5fdbe41198274066adb10bb5d91e0607a7a",
+          "startFrame": 0
+        },
+        {
+          "id": "teasing",
+          "sha256": "83c3d8df3acb6f70428d8d026a607e938404b30c035c0d14b89805e153c853a9",
+          "startFrame": 185783
+        },
+        {
+          "id": "disagreement",
+          "sha256": "f8de49f8c7df2c0b9589ede28042530c6326250dd108ea687c0bf2526cb97252",
+          "startFrame": 366287
+        },
+        {
+          "id": "emotes",
+          "sha256": "17046cdce00dc9f31df3751978e0196912e9d781c151d1646b4690d9ba0cdaac",
+          "startFrame": 582899
+        },
+        {
+          "id": "memory",
+          "sha256": "9cfff86f83ab322d5dac38264a741e4043918ea770576a532f035b79234150d4",
+          "startFrame": 782755
+        },
+        {
+          "id": "recall",
+          "sha256": "2fba29cab6b7bebce429a9df843f008639f49a6f397e95ad2f54d96ffe2066be",
+          "startFrame": 911309
+        },
+        {
+          "id": "recall-empty",
+          "sha256": "bac00cfbaf56841a9e9a302fb1442afbc36b3c2d57168b3eae45ff5e9e47048f",
+          "startFrame": 1008291
+        },
+        {
+          "id": "intro",
+          "sha256": "61cc73d4e6fa265bdc3a51a89016a5fdbe41198274066adb10bb5d91e0607a7a",
+          "startFrame": 1135020
+        },
+        {
+          "id": "teasing",
+          "sha256": "83c3d8df3acb6f70428d8d026a607e938404b30c035c0d14b89805e153c853a9",
+          "startFrame": 1320803
+        },
+        {
+          "id": "disagreement",
+          "sha256": "f8de49f8c7df2c0b9589ede28042530c6326250dd108ea687c0bf2526cb97252",
+          "startFrame": 1501307
+        },
+        {
+          "id": "emotes",
+          "sha256": "17046cdce00dc9f31df3751978e0196912e9d781c151d1646b4690d9ba0cdaac",
+          "startFrame": 1717919
+        },
+        {
+          "id": "memory",
+          "sha256": "9cfff86f83ab322d5dac38264a741e4043918ea770576a532f035b79234150d4",
+          "startFrame": 1917775
+        },
+        {
+          "id": "recall",
+          "sha256": "2fba29cab6b7bebce429a9df843f008639f49a6f397e95ad2f54d96ffe2066be",
+          "startFrame": 2046329
+        },
+        {
+          "id": "recall-empty",
+          "sha256": "bac00cfbaf56841a9e9a302fb1442afbc36b3c2d57168b3eae45ff5e9e47048f",
+          "startFrame": 2143311
+        },
+        {
+          "id": "intro",
+          "sha256": "61cc73d4e6fa265bdc3a51a89016a5fdbe41198274066adb10bb5d91e0607a7a",
+          "startFrame": 2270040
+        },
+        {
+          "id": "teasing",
+          "sha256": "83c3d8df3acb6f70428d8d026a607e938404b30c035c0d14b89805e153c853a9",
+          "startFrame": 2455823
+        },
+        {
+          "id": "disagreement",
+          "sha256": "f8de49f8c7df2c0b9589ede28042530c6326250dd108ea687c0bf2526cb97252",
+          "startFrame": 2636327
+        },
+        {
+          "id": "emotes",
+          "sha256": "17046cdce00dc9f31df3751978e0196912e9d781c151d1646b4690d9ba0cdaac",
+          "startFrame": 2852939
+        },
+        {
+          "id": "memory",
+          "sha256": "9cfff86f83ab322d5dac38264a741e4043918ea770576a532f035b79234150d4",
+          "startFrame": 3052795
+        },
+        {
+          "id": "recall",
+          "sha256": "2fba29cab6b7bebce429a9df843f008639f49a6f397e95ad2f54d96ffe2066be",
+          "startFrame": 3181349
+        },
+        {
+          "id": "recall-empty",
+          "sha256": "bac00cfbaf56841a9e9a302fb1442afbc36b3c2d57168b3eae45ff5e9e47048f",
+          "startFrame": 3278331
+        }
+      ],
+      "binarySha256": "8801954b0c462d76fbbe8a0baceb0352f9753902798110679589668a4af4f8f6",
+      "complete": true,
+      "cache": false,
+      "analysisSeconds": 71.91394667210989,
+      "peakRssBytes": 163610624,
+      "incomingPeakSeconds": 6.25,
+      "preparedPeakSeconds": 5.316530612244898,
+      "deliveryBackpressureSeconds": 0.017732383159454912,
+      "events": [
+        {
+          "type": "begin",
+          "policy": "1s",
+          "profile": "steady1x",
+          "startupSeconds": 2,
+          "duration": 77.21224489795918,
+          "rate": 44100,
+          "frames": 3405060,
+          "sha256": "3bafe03b056a552a27ad2b07262b93fee2475c74ba84a9fa9bd62757d724e472",
+          "cache": false,
+          "threads": 1,
+          "incomingLimitSeconds": 16,
+          "preparedLimitSeconds": 12,
+          "wallSeconds": 1.7910497263073921e-06
+        },
+        {
+          "type": "analysis",
+          "index": 0,
+          "region": {
+            "start": 0,
+            "end": 44100,
+            "inputStart": 0,
+            "inputEnd": 55125
+          },
+          "wallSeconds": 1.3050357910105959
+        },
+        {
+          "type": "segment",
+          "index": 0,
+          "startFrame": 0,
+          "endFrame": 44100,
+          "region": {
+            "start": 0,
+            "end": 44100,
+            "inputStart": 0,
+            "inputEnd": 55125
+          },
+          "cues": [
+            {
+              "start": 0.0,
+              "end": 0.04,
+              "value": "X"
+            },
+            {
+              "start": 0.04,
+              "end": 0.09,
+              "value": "B"
+            },
+            {
+              "start": 0.09,
+              "end": 0.17,
+              "value": "A"
+            },
+            {
+              "start": 0.17,
+              "end": 0.45,
+              "value": "B"
+            },
+            {
+              "start": 0.45,
+              "end": 0.66,
+              "value": "C"
+            },
+            {
+              "start": 0.66,
+              "end": 1.0,
+              "value": "B"
+            }
+          ],
+          "seconds": 0.8879948329995386,
+          "peakRssBytes": 162496512,
+          "pcmSha256": "a68659327fac40bdf17d62d603a7a86f2c356d4e80de9db05e8dbd4b70bfa870",
+          "incomingSeconds": 1.35,
+          "preparedSeconds": 1.0,
+          "wallSeconds": 2.1932763750082813
+        },
+        {
+          "type": "analysis",
+          "index": 1,
+          "region": {
+            "start": 44100,
+            "end": 88200,
+            "inputStart": 33075,
+            "inputEnd": 99225
+          },
+          "wallSeconds": 2.3050403330125846
+        },
+        {
+          "type": "segment",
+          "index": 1,
+          "startFrame": 44100,
+          "endFrame": 88200,
+          "region": {
+            "start": 44100,
+            "end": 88200,
+            "inputStart": 33075,
+            "inputEnd": 99225
+          },
+          "cues": [
+            {
+              "start": 1.0,
+              "end": 1.09,
+              "value": "C"
+            },
+            {
+              "start": 1.09,
+              "end": 1.16,
+              "value": "B"
+            },
+            {
+              "start": 1.16,
+              "end": 1.3,
+              "value": "F"
+            },
+            {
+              "start": 1.3,
+              "end": 1.38,
+              "value": "A"
+            },
+            {
+              "start": 1.38,
+              "end": 1.45,
+              "value": "B"
+            },
+            {
+              "start": 1.45,
+              "end": 1.63,
+              "value": "F"
+            },
+            {
+              "start": 1.63,
+              "end": 1.68,
+              "value": "E"
+            },
+            {
+              "start": 1.68,
+              "end": 2.0,
+              "value": "C"
+            }
+          ],
+          "seconds": 0.7153931250213645,
+          "peakRssBytes": 161972224,
+          "pcmSha256": "04a84f6fd452ccff072fb91ac353ccd231111a879ff395ac730bad174141e64a",
+          "incomingSeconds": 1.25,
+          "preparedSeconds": 2.0,
+          "wallSeconds": 3.0206532910233364
+        },
+        {
+          "type": "analysis",
+          "index": 2,
+          "region": {
+            "start": 88200,
+            "end": 132300,
+            "inputStart": 77175,
+            "inputEnd": 143325
+          },
+          "wallSeconds": 3.305153583001811
+        },
+        {
+          "type": "segment",
+          "index": 2,
+          "startFrame": 88200,
+          "endFrame": 132300,
+          "region": {
+            "start": 88200,
+            "end": 132300,
+            "inputStart": 77175,
+            "inputEnd": 143325
+          },
+          "cues": [
+            {
+              "start": 2.0,
+              "end": 2.25,
+              "value": "B"
+            },
+            {
+              "start": 2.25,
+              "end": 2.32,
+              "value": "C"
+            },
+            {
+              "start": 2.32,
+              "end": 2.74,
+              "value": "B"
+            },
+            {
+              "start": 2.74,
+              "end": 2.81,
+              "value": "E"
+            },
+            {
+              "start": 2.81,
+              "end": 2.95,
+              "value": "B"
+            },
+            {
+              "start": 2.95,
+              "end": 3.0,
+              "value": "C"
+            }
+          ],
+          "seconds": 0.9141894170315936,
+          "peakRssBytes": 162578432,
+          "pcmSha256": "9f0371f3c069ae0bfcba7411d1908da6e5101258902f8bad9428ab7b3aa29112",
+          "incomingSeconds": 1.45,
+          "preparedSeconds": 1.8204988662131518,
+          "wallSeconds": 4.219566416053567
+        },
+        {
+          "type": "analysis",
+          "index": 3,
+          "region": {
+            "start": 132300,
+            "end": 176400,
+            "inputStart": 121275,
+            "inputEnd": 187425
+          },
+          "wallSeconds": 4.305043333035428
+        },
+        {
+          "type": "segment",
+          "index": 3,
+          "startFrame": 132300,
+          "endFrame": 176400,
+          "region": {
+            "start": 132300,
+            "end": 176400,
+            "inputStart": 121275,
+            "inputEnd": 187425
+          },
+          "cues": [
+            {
+              "start": 3.0,
+              "end": 3.01,
+              "value": "B"
+            },
+            {
+              "start": 3.01,
+              "end": 3.15,
+              "value": "C"
+            },
+            {
+              "start": 3.15,
+              "end": 3.23,
+              "value": "A"
+            },
+            {
+              "start": 3.23,
+              "end": 3.5,
+              "value": "B"
+            },
+            {
+              "start": 3.5,
+              "end": 4.0,
+              "value": "X"
+            }
+          ],
+          "seconds": 0.7070567499613389,
+          "peakRssBytes": 160055296,
+          "pcmSha256": "150f3219325fae9fcccc2bd073f135781752aa0d1a486bcd7106170ed09eb74b",
+          "incomingSeconds": 1.25,
+          "preparedSeconds": 2.0229024943310656,
+          "wallSeconds": 5.01235620805528
+        },
+        {
+          "type": "analysis",
+          "index": 4,
+          "region": {
+            "start": 176400,
+            "end": 220500,
+            "inputStart": 165375,
+            "inputEnd": 231525
+          },
+          "wallSeconds": 5.3051310000009835
+        },
+        {
+          "type": "segment",
+          "index": 4,
+          "startFrame": 176400,
+          "endFrame": 220500,
+          "region": {
+            "start": 176400,
+            "end": 220500,
+            "inputStart": 165375,
+            "inputEnd": 231525
+          },
+          "cues": [
+            {
+              "start": 4.0,
+              "end": 4.26,
+              "value": "X"
+            },
+            {
+              "start": 4.26,
+              "end": 4.32,
+              "value": "C"
+            },
+            {
+              "start": 4.32,
+              "end": 4.38,
+              "value": "B"
+            },
+            {
+              "start": 4.38,
+              "end": 4.45,
+              "value": "F"
+            },
+            {
+              "start": 4.45,
+              "end": 4.59,
+              "value": "B"
+            },
+            {
+              "start": 4.59,
+              "end": 4.66,
+              "value": "C"
+            },
+            {
+              "start": 4.66,
+              "end": 4.73,
+              "value": "B"
+            },
+            {
+              "start": 4.73,
+              "end": 4.81,
+              "value": "A"
+            },
+            {
+              "start": 4.81,
+              "end": 4.96,
+              "value": "B"
+            },
+            {
+              "start": 4.96,
+              "end": 5.0,
+              "value": "G"
+            }
+          ],
+          "seconds": 0.9187355420435779,
+          "peakRssBytes": 161579008,
+          "pcmSha256": "8886ee560ed0a876562de2af21b032d05b52ce1c11e2e898576f4d877fc7799a",
+          "incomingSeconds": 1.45,
+          "preparedSeconds": 1.8198412698412698,
+          "wallSeconds": 6.224084750050679
+        },
+        {
+          "type": "analysis",
+          "index": 5,
+          "region": {
+            "start": 220500,
+            "end": 264600,
+            "inputStart": 209475,
+            "inputEnd": 275625
+          },
+          "wallSeconds": 6.300880250055343
+        },
+        {
+          "type": "segment",
+          "index": 5,
+          "startFrame": 220500,
+          "endFrame": 264600,
+          "region": {
+            "start": 220500,
+            "end": 264600,
+            "inputStart": 209475,
+            "inputEnd": 275625
+          },
+          "cues": [
+            {
+              "start": 5.0,
+              "end": 5.27,
+              "value": "B"
+            },
+            {
+              "start": 5.27,
+              "end": 5.35,
+              "value": "A"
+            },
+            {
+              "start": 5.35,
+              "end": 5.52,
+              "value": "B"
+            },
+            {
+              "start": 5.52,
+              "end": 5.89,
+              "value": "X"
+            },
+            {
+              "start": 5.89,
+              "end": 5.96,
+              "value": "F"
+            },
+            {
+              "start": 5.96,
+              "end": 6.0,
+              "value": "C"
+            }
+          ],
+          "seconds": 0.8449655830045231,
+          "peakRssBytes": 161841152,
+          "pcmSha256": "6c49a44cbf13348310da4ee5ff1b38fa3ed9d46463ddb4d63e41e383265e5443",
+          "incomingSeconds": 1.35,
+          "preparedSeconds": 1.887528344671202,
+          "wallSeconds": 7.146104083047248
+        },
+        {
+          "type": "analysis",
+          "index": 6,
+          "region": {
+            "start": 264600,
+            "end": 308700,
+            "inputStart": 253575,
+            "inputEnd": 319725
+          },
+          "wallSeconds": 7.305068333051167
+        },
+        {
+          "type": "segment",
+          "index": 6,
+          "startFrame": 264600,
+          "endFrame": 308700,
+          "region": {
+            "start": 264600,
+            "end": 308700,
+            "inputStart": 253575,
+            "inputEnd": 319725
+          },
+          "cues": [
+            {
+              "start": 6.0,
+              "end": 6.16,
+              "value": "C"
+            },
+            {
+              "start": 6.16,
+              "end": 6.3,
+              "value": "B"
+            },
+            {
+              "start": 6.3,
+              "end": 6.44,
+              "value": "C"
+            },
+            {
+              "start": 6.44,
+              "end": 6.52,
+              "value": "A"
+            },
+            {
+              "start": 6.52,
+              "end": 6.59,
+              "value": "B"
+            },
+            {
+              "start": 6.59,
+              "end": 6.72,
+              "value": "C"
+            },
+            {
+              "start": 6.72,
+              "end": 6.93,
+              "value": "E"
+            },
+            {
+              "start": 6.93,
+              "end": 7.0,
+              "value": "F"
+            }
+          ],
+          "seconds": 0.9458734589861706,
+          "peakRssBytes": 162562048,
+          "pcmSha256": "03163ad183545eb97d4bf0a94ddbe76662b303fdd40b4fbe58ad2b714ccd24dd",
+          "incomingSeconds": 1.45,
+          "preparedSeconds": 1.7871655328798186,
+          "wallSeconds": 8.251167958020233
+        },
+        {
+          "type": "analysis",
+          "index": 7,
+          "region": {
+            "start": 308700,
+            "end": 352800,
+            "inputStart": 297675,
+            "inputEnd": 363825
+          },
+          "wallSeconds": 8.3050727500231
+        },
+        {
+          "type": "segment",
+          "index": 7,
+          "startFrame": 308700,
+          "endFrame": 352800,
+          "region": {
+            "start": 308700,
+            "end": 352800,
+            "inputStart": 297675,
+            "inputEnd": 363825
+          },
+          "cues": [
+            {
+              "start": 7.0,
+              "end": 7.03,
+              "value": "F"
+            },
+            {
+              "start": 7.03,
+              "end": 7.1,
+              "value": "B"
+            },
+            {
+              "start": 7.1,
+              "end": 7.17,
+              "value": "C"
+            },
+            {
+              "start": 7.17,
+              "end": 7.36,
+              "value": "D"
+            },
+            {
+              "start": 7.36,
+              "end": 7.41,
+              "value": "C"
+            },
+            {
+              "start": 7.41,
+              "end": 7.59,
+              "value": "B"
+            },
+            {
+              "start": 7.59,
+              "end": 8.0,
+              "value": "X"
+            }
+          ],
+          "seconds": 0.6883957500103861,
+          "peakRssBytes": 161955840,
+          "pcmSha256": "a8b1906fc276194d3a06299fee528f298332bc92aa732f7e9447c0695c05f98e",
+          "incomingSeconds": 1.15,
+          "preparedSeconds": 2.0421995464852607,
+          "wallSeconds": 8.993675833044108
+        },
+        {
+          "type": "analysis",
+          "index": 8,
+          "region": {
+            "start": 352800,
+            "end": 396900,
+            "inputStart": 341775,
+            "inputEnd": 407925
+          },
+          "wallSeconds": 9.303554333047941
+        },
+        {
+          "type": "segment",
+          "index": 8,
+          "startFrame": 352800,
+          "endFrame": 396900,
+          "region": {
+            "start": 352800,
+            "end": 396900,
+            "inputStart": 341775,
+            "inputEnd": 407925
+          },
+          "cues": [
+            {
+              "start": 8.0,
+              "end": 8.35,
+              "value": "X"
+            },
+            {
+              "start": 8.35,
+              "end": 8.45,
+              "value": "E"
+            },
+            {
+              "start": 8.45,
+              "end": 8.59,
+              "value": "F"
+            },
+            {
+              "start": 8.59,
+              "end": 8.84,
+              "value": "C"
+            },
+            {
+              "start": 8.84,
+              "end": 8.91,
+              "value": "E"
+            },
+            {
+              "start": 8.91,
+              "end": 9.0,
+              "value": "F"
+            }
+          ],
+          "seconds": 0.9022837919765152,
+          "peakRssBytes": 160776192,
+          "pcmSha256": "0b8e2e4a4a2935770dd08f0ceabbdb0a46e02ec390ca364586b2749c143e5cca",
+          "incomingSeconds": 1.45,
+          "preparedSeconds": 1.838095238095238,
+          "wallSeconds": 10.2060602910351
+        },
+        {
+          "type": "analysis",
+          "index": 9,
+          "region": {
+            "start": 396900,
+            "end": 441000,
+            "inputStart": 385875,
+            "inputEnd": 452025
+          },
+          "wallSeconds": 10.305073791008908
+        },
+        {
+          "type": "segment",
+          "index": 9,
+          "startFrame": 396900,
+          "endFrame": 441000,
+          "region": {
+            "start": 396900,
+            "end": 441000,
+            "inputStart": 385875,
+            "inputEnd": 452025
+          },
+          "cues": [
+            {
+              "start": 9.0,
+              "end": 9.08,
+              "value": "B"
+            },
+            {
+              "start": 9.08,
+              "end": 9.22,
+              "value": "C"
+            },
+            {
+              "start": 9.22,
+              "end": 9.3,
+              "value": "A"
+            },
+            {
+              "start": 9.3,
+              "end": 9.58,
+              "value": "E"
+            },
+            {
+              "start": 9.58,
+              "end": 9.72,
+              "value": "B"
+            },
+            {
+              "start": 9.72,
+              "end": 10.0,
+              "value": "X"
+            }
+          ],
+          "seconds": 0.7539077499532141,
+          "peakRssBytes": 162627584,
+          "pcmSha256": "7a028d501c2058d74b245acf8676b12bd3634939dd93c407c15af10df67acc8a",
+          "incomingSeconds": 1.25,
+          "preparedSeconds": 1.9742857142857142,
+          "wallSeconds": 11.05918812501477
+        },
+        {
+          "type": "analysis",
+          "index": 10,
+          "region": {
+            "start": 441000,
+            "end": 485100,
+            "inputStart": 429975,
+            "inputEnd": 496125
+          },
+          "wallSeconds": 11.303426583006512
+        },
+        {
+          "type": "segment",
+          "index": 10,
+          "startFrame": 441000,
+          "endFrame": 485100,
+          "region": {
+            "start": 441000,
+            "end": 485100,
+            "inputStart": 429975,
+            "inputEnd": 496125
+          },
+          "cues": [
+            {
+              "start": 10.0,
+              "end": 10.15,
+              "value": "X"
+            },
+            {
+              "start": 10.15,
+              "end": 10.21,
+              "value": "B"
+            },
+            {
+              "start": 10.21,
+              "end": 10.26,
+              "value": "H"
+            },
+            {
+              "start": 10.26,
+              "end": 10.33,
+              "value": "C"
+            },
+            {
+              "start": 10.33,
+              "end": 10.41,
+              "value": "A"
+            },
+            {
+              "start": 10.41,
+              "end": 10.56,
+              "value": "F"
+            },
+            {
+              "start": 10.56,
+              "end": 10.7,
+              "value": "C"
+            },
+            {
+              "start": 10.7,
+              "end": 10.85,
+              "value": "B"
+            },
+            {
+              "start": 10.85,
+              "end": 10.89,
+              "value": "A"
+            },
+            {
+              "start": 10.89,
+              "end": 11.0,
+              "value": "F"
+            }
+          ],
+          "seconds": 0.8708727499470115,
+          "peakRssBytes": 162152448,
+          "pcmSha256": "302e390a9b36c4a14b5ebc3059c9a34a300e847a4354f155edd8dbbda564d4ee",
+          "incomingSeconds": 1.35,
+          "preparedSeconds": 1.8620181405895693,
+          "wallSeconds": 12.174516083032358
+        },
+        {
+          "type": "analysis",
+          "index": 11,
+          "region": {
+            "start": 485100,
+            "end": 529200,
+            "inputStart": 474075,
+            "inputEnd": 540225
+          },
+          "wallSeconds": 12.305065000022296
+        },
+        {
+          "type": "segment",
+          "index": 11,
+          "startFrame": 485100,
+          "endFrame": 529200,
+          "region": {
+            "start": 485100,
+            "end": 529200,
+            "inputStart": 474075,
+            "inputEnd": 540225
+          },
+          "cues": [
+            {
+              "start": 11.0,
+              "end": 11.12,
+              "value": "F"
+            },
+            {
+              "start": 11.12,
+              "end": 11.4,
+              "value": "B"
+            },
+            {
+              "start": 11.4,
+              "end": 11.61,
+              "value": "C"
+            },
+            {
+              "start": 11.61,
+              "end": 11.75,
+              "value": "F"
+            },
+            {
+              "start": 11.75,
+              "end": 11.96,
+              "value": "E"
+            },
+            {
+              "start": 11.96,
+              "end": 12.0,
+              "value": "C"
+            }
+          ],
+          "seconds": 0.9410590829793364,
+          "peakRssBytes": 161890304,
+          "pcmSha256": "63fd1a843091c2df0e3ad24d913907b947dfe2cd9e3e21cfe3a45fa17d9019bf",
+          "incomingSeconds": 1.45,
+          "preparedSeconds": 1.7886394557823129,
+          "wallSeconds": 13.2465012500179
+        },
+        {
+          "type": "analysis",
+          "index": 12,
+          "region": {
+            "start": 529200,
+            "end": 573300,
+            "inputStart": 518175,
+            "inputEnd": 584325
+          },
+          "wallSeconds": 13.303552083030809
+        },
+        {
+          "type": "segment",
+          "index": 12,
+          "startFrame": 529200,
+          "endFrame": 573300,
+          "region": {
+            "start": 529200,
+            "end": 573300,
+            "inputStart": 518175,
+            "inputEnd": 584325
+          },
+          "cues": [
+            {
+              "start": 12.0,
+              "end": 12.2,
+              "value": "B"
+            },
+            {
+              "start": 12.2,
+              "end": 12.28,
+              "value": "A"
+            },
+            {
+              "start": 12.28,
+              "end": 12.35,
+              "value": "C"
+            },
+            {
+              "start": 12.35,
+              "end": 12.49,
+              "value": "B"
+            },
+            {
+              "start": 12.49,
+              "end": 13.0,
+              "value": "X"
+            }
+          ],
+          "seconds": 0.745904374984093,
+          "peakRssBytes": 161693696,
+          "pcmSha256": "8a97225d2e2ff1edf7219592abc2e63af7a7260b9150542f9d8035ca3bb0068e",
+          "incomingSeconds": 1.25,
+          "preparedSeconds": 1.995328798185941,
+          "wallSeconds": 14.049682458047755
+        },
+        {
+          "type": "analysis",
+          "index": 13,
+          "region": {
+            "start": 573300,
+            "end": 617400,
+            "inputStart": 562275,
+            "inputEnd": 628425
+          },
+          "wallSeconds": 14.305048750014976
+        },
+        {
+          "type": "segment",
+          "index": 13,
+          "startFrame": 573300,
+          "endFrame": 617400,
+          "region": {
+            "start": 573300,
+            "end": 617400,
+            "inputStart": 562275,
+            "inputEnd": 628425
+          },
+          "cues": [
+            {
+              "start": 13.0,
+              "end": 13.26,
+              "value": "X"
+            },
+            {
+              "start": 13.26,
+              "end": 13.33,
+              "value": "C"
+            },
+            {
+              "start": 13.33,
+              "end": 13.46,
+              "value": "B"
+            },
+            {
+              "start": 13.46,
+              "end": 13.6,
+              "value": "C"
+            },
+            {
+              "start": 13.6,
+              "end": 13.67,
+              "value": "B"
+            },
+            {
+              "start": 13.67,
+              "end": 13.95,
+              "value": "C"
+            },
+            {
+              "start": 13.95,
+              "end": 14.0,
+              "value": "B"
+            }
+          ],
+          "seconds": 0.8976548330392689,
+          "peakRssBytes": 161447936,
+          "pcmSha256": "9570ff5077aa3619abf569bbd934dc0f6c8da150cd838a5000686e7fea0af80b",
+          "incomingSeconds": 1.35,
+          "preparedSeconds": 1.8416326530612246,
+          "wallSeconds": 15.20309200003976
+        },
+        {
+          "type": "analysis",
+          "index": 14,
+          "region": {
+            "start": 617400,
+            "end": 661500,
+            "inputStart": 606375,
+            "inputEnd": 672525
+          },
+          "wallSeconds": 15.304014291032217
+        },
+        {
+          "type": "segment",
+          "index": 14,
+          "startFrame": 617400,
+          "endFrame": 661500,
+          "region": {
+            "start": 617400,
+            "end": 661500,
+            "inputStart": 606375,
+            "inputEnd": 672525
+          },
+          "cues": [
+            {
+              "start": 14.0,
+              "end": 14.55,
+              "value": "X"
+            },
+            {
+              "start": 14.55,
+              "end": 14.75,
+              "value": "B"
+            },
+            {
+              "start": 14.75,
+              "end": 14.82,
+              "value": "F"
+            },
+            {
+              "start": 14.82,
+              "end": 14.96,
+              "value": "C"
+            },
+            {
+              "start": 14.96,
+              "end": 15.0,
+              "value": "B"
+            }
+          ],
+          "seconds": 0.8614587919437326,
+          "peakRssBytes": 161710080,
+          "pcmSha256": "44946542acd38d35b9ccdee6a0ce9c44ac2d923e53bbf0dcd7f522766e771fc0",
+          "incomingSeconds": 1.35,
+          "preparedSeconds": 1.8746485260770975,
+          "wallSeconds": 16.16572258301312
+        },
+        {
+          "type": "analysis",
+          "index": 15,
+          "region": {
+            "start": 661500,
+            "end": 705600,
+            "inputStart": 650475,
+            "inputEnd": 716625
+          },
+          "wallSeconds": 16.305066833039746
+        },
+        {
+          "type": "segment",
+          "index": 15,
+          "startFrame": 661500,
+          "endFrame": 705600,
+          "region": {
+            "start": 661500,
+            "end": 705600,
+            "inputStart": 650475,
+            "inputEnd": 716625
+          },
+          "cues": [
+            {
+              "start": 15.0,
+              "end": 15.06,
+              "value": "G"
+            },
+            {
+              "start": 15.06,
+              "end": 15.2,
+              "value": "E"
+            },
+            {
+              "start": 15.2,
+              "end": 15.27,
+              "value": "F"
+            },
+            {
+              "start": 15.27,
+              "end": 15.55,
+              "value": "B"
+            },
+            {
+              "start": 15.55,
+              "end": 15.62,
+              "value": "G"
+            },
+            {
+              "start": 15.62,
+              "end": 15.76,
+              "value": "C"
+            },
+            {
+              "start": 15.76,
+              "end": 15.83,
+              "value": "B"
+            },
+            {
+              "start": 15.83,
+              "end": 15.97,
+              "value": "E"
+            },
+            {
+              "start": 15.97,
+              "end": 16.0,
+              "value": "C"
+            }
+          ],
+          "seconds": 1.0359067500103265,
+          "peakRssBytes": 160825344,
+          "pcmSha256": "55438dbf37e1a50c15bd33338fe45bc9ad9234edf9add0a924e32f68caf55d99",
+          "incomingSeconds": 1.55,
+          "preparedSeconds": 1.6891609977324262,
+          "wallSeconds": 17.343769125000108
+        },
+        {
+          "type": "analysis",
+          "index": 16,
+          "region": {
+            "start": 705600,
+            "end": 749700,
+            "inputStart": 694575,
+            "inputEnd": 760725
+          },
+          "wallSeconds": 17.343782375042792
+        },
+        {
+          "type": "segment",
+          "index": 16,
+          "startFrame": 705600,
+          "endFrame": 749700,
+          "region": {
+            "start": 705600,
+            "end": 749700,
+            "inputStart": 694575,
+            "inputEnd": 760725
+          },
+          "cues": [
+            {
+              "start": 16.0,
+              "end": 16.13,
+              "value": "C"
+            },
+            {
+              "start": 16.13,
+              "end": 16.2,
+              "value": "G"
+            },
+            {
+              "start": 16.2,
+              "end": 16.41,
+              "value": "H"
+            },
+            {
+              "start": 16.41,
+              "end": 16.48,
+              "value": "G"
+            },
+            {
+              "start": 16.48,
+              "end": 16.62,
+              "value": "E"
+            },
+            {
+              "start": 16.62,
+              "end": 16.76,
+              "value": "C"
+            },
+            {
+              "start": 16.76,
+              "end": 16.83,
+              "value": "B"
+            },
+            {
+              "start": 16.83,
+              "end": 17.0,
+              "value": "E"
+            }
+          ],
+          "seconds": 1.9337856659549288,
+          "peakRssBytes": 136691712,
+          "pcmSha256": "1f8656f497892777a97e6eeed551e6b71e09c737c714cbc853442d6a372672c0",
+          "incomingSeconds": 2.45,
+          "preparedSeconds": 1.0,
+          "wallSeconds": 19.278030375018716
+        },
+        {
+          "type": "analysis",
+          "index": 17,
+          "region": {
+            "start": 749700,
+            "end": 793800,
+            "inputStart": 738675,
+            "inputEnd": 804825
+          },
+          "wallSeconds": 19.278043291007634
+        },
+        {
+          "type": "segment",
+          "index": 17,
+          "startFrame": 749700,
+          "endFrame": 793800,
+          "region": {
+            "start": 749700,
+            "end": 793800,
+            "inputStart": 738675,
+            "inputEnd": 804825
+          },
+          "cues": [
+            {
+              "start": 17.0,
+              "end": 17.03,
+              "value": "E"
+            },
+            {
+              "start": 17.03,
+              "end": 17.77,
+              "value": "X"
+            },
+            {
+              "start": 17.77,
+              "end": 17.85,
+              "value": "A"
+            },
+            {
+              "start": 17.85,
+              "end": 18.0,
+              "value": "B"
+            }
+          ],
+          "seconds": 1.3695298749953508,
+          "peakRssBytes": 160595968,
+          "pcmSha256": "94b430985c3112f0de228da74b5d3e0986ff6661066cb2613cf4ab219adf3dfd",
+          "incomingSeconds": 2.85,
+          "preparedSeconds": 1.0,
+          "wallSeconds": 20.648093583004083
+        },
+        {
+          "type": "analysis",
+          "index": 18,
+          "region": {
+            "start": 793800,
+            "end": 837900,
+            "inputStart": 782775,
+            "inputEnd": 848925
+          },
+          "wallSeconds": 20.64811087504495
+        },
+        {
+          "type": "segment",
+          "index": 18,
+          "startFrame": 793800,
+          "endFrame": 837900,
+          "region": {
+            "start": 793800,
+            "end": 837900,
+            "inputStart": 782775,
+            "inputEnd": 848925
+          },
+          "cues": [
+            {
+              "start": 18.0,
+              "end": 18.4,
+              "value": "B"
+            },
+            {
+              "start": 18.4,
+              "end": 18.56,
+              "value": "X"
+            },
+            {
+              "start": 18.56,
+              "end": 18.82,
+              "value": "B"
+            },
+            {
+              "start": 18.82,
+              "end": 18.91,
+              "value": "A"
+            },
+            {
+              "start": 18.91,
+              "end": 19.0,
+              "value": "B"
+            }
+          ],
+          "seconds": 1.3244436249951832,
+          "peakRssBytes": 161611776,
+          "pcmSha256": "f73d81ecade50acc7836be34b5b915a6fa42ec02e57b672a82dbbfe3ec0fa35b",
+          "incomingSeconds": 3.15,
+          "preparedSeconds": 1.0,
+          "wallSeconds": 21.97286758304108
+        },
+        {
+          "type": "analysis",
+          "index": 19,
+          "region": {
+            "start": 837900,
+            "end": 882000,
+            "inputStart": 826875,
+            "inputEnd": 893025
+          },
+          "wallSeconds": 21.972882625006605
+        },
+        {
+          "type": "segment",
+          "index": 19,
+          "startFrame": 837900,
+          "endFrame": 882000,
+          "region": {
+            "start": 837900,
+            "end": 882000,
+            "inputStart": 826875,
+            "inputEnd": 893025
+          },
+          "cues": [
+            {
+              "start": 19.0,
+              "end": 19.14,
+              "value": "B"
+            },
+            {
+              "start": 19.14,
+              "end": 19.23,
+              "value": "A"
+            },
+            {
+              "start": 19.23,
+              "end": 19.28,
+              "value": "C"
+            },
+            {
+              "start": 19.28,
+              "end": 19.4,
+              "value": "B"
+            },
+            {
+              "start": 19.4,
+              "end": 19.61,
+              "value": "C"
+            },
+            {
+              "start": 19.61,
+              "end": 19.68,
+              "value": "H"
+            },
+            {
+              "start": 19.68,
+              "end": 19.75,
+              "value": "C"
+            },
+            {
+              "start": 19.75,
+              "end": 19.96,
+              "value": "B"
+            },
+            {
+              "start": 19.96,
+              "end": 20.0,
+              "value": "X"
+            }
+          ],
+          "seconds": 1.12192858295748,
+          "peakRssBytes": 146767872,
+          "pcmSha256": "5b2463daafa20b11d113f624f5e52065e029504979b60e585fb70387ba337171",
+          "incomingSeconds": 3.25,
+          "preparedSeconds": 1.0,
+          "wallSeconds": 23.09515766601544
+        },
+        {
+          "type": "analysis",
+          "index": 20,
+          "region": {
+            "start": 882000,
+            "end": 926100,
+            "inputStart": 870975,
+            "inputEnd": 937125
+          },
+          "wallSeconds": 23.095175666036084
+        },
+        {
+          "type": "segment",
+          "index": 20,
+          "startFrame": 882000,
+          "endFrame": 926100,
+          "region": {
+            "start": 882000,
+            "end": 926100,
+            "inputStart": 870975,
+            "inputEnd": 937125
+          },
+          "cues": [
+            {
+              "start": 20.0,
+              "end": 20.68,
+              "value": "X"
+            },
+            {
+              "start": 20.68,
+              "end": 20.76,
+              "value": "B"
+            },
+            {
+              "start": 20.76,
+              "end": 20.86,
+              "value": "A"
+            },
+            {
+              "start": 20.86,
+              "end": 20.95,
+              "value": "B"
+            },
+            {
+              "start": 20.95,
+              "end": 21.0,
+              "value": "G"
+            }
+          ],
+          "seconds": 1.259989875019528,
+          "peakRssBytes": 152584192,
+          "pcmSha256": "f961b6714abada84253e29c51309467b9ffd924b4fdc233cecc0a17f087047bb",
+          "incomingSeconds": 3.55,
+          "preparedSeconds": 1.0,
+          "wallSeconds": 24.355546375038102
+        },
+        {
+          "type": "analysis",
+          "index": 21,
+          "region": {
+            "start": 926100,
+            "end": 970200,
+            "inputStart": 915075,
+            "inputEnd": 981225
+          },
+          "wallSeconds": 24.35556604102021
+        },
+        {
+          "type": "segment",
+          "index": 21,
+          "startFrame": 926100,
+          "endFrame": 970200,
+          "region": {
+            "start": 926100,
+            "end": 970200,
+            "inputStart": 915075,
+            "inputEnd": 981225
+          },
+          "cues": [
+            {
+              "start": 21.0,
+              "end": 21.01,
+              "value": "G"
+            },
+            {
+              "start": 21.01,
+              "end": 21.15,
+              "value": "E"
+            },
+            {
+              "start": 21.15,
+              "end": 21.23,
+              "value": "A"
+            },
+            {
+              "start": 21.23,
+              "end": 21.66,
+              "value": "B"
+            },
+            {
+              "start": 21.66,
+              "end": 21.8,
+              "value": "C"
+            },
+            {
+              "start": 21.8,
+              "end": 21.87,
+              "value": "H"
+            },
+            {
+              "start": 21.87,
+              "end": 21.94,
+              "value": "C"
+            },
+            {
+              "start": 21.94,
+              "end": 22.0,
+              "value": "B"
+            }
+          ],
+          "seconds": 1.5296715829754248,
+          "peakRssBytes": 134889472,
+          "pcmSha256": "eb30b5f73629a6deb41e750a88106e5e627437e6e9dd232669de51be916fca71",
+          "incomingSeconds": 4.05,
+          "preparedSeconds": 1.0,
+          "wallSeconds": 25.885785875027068
+        },
+        {
+          "type": "analysis",
+          "index": 22,
+          "region": {
+            "start": 970200,
+            "end": 1014300,
+            "inputStart": 959175,
+            "inputEnd": 1025325
+          },
+          "wallSeconds": 25.88581350003369
+        },
+        {
+          "type": "segment",
+          "index": 22,
+          "startFrame": 970200,
+          "endFrame": 1014300,
+          "region": {
+            "start": 970200,
+            "end": 1014300,
+            "inputStart": 959175,
+            "inputEnd": 1025325
+          },
+          "cues": [
+            {
+              "start": 22.0,
+              "end": 22.15,
+              "value": "B"
+            },
+            {
+              "start": 22.15,
+              "end": 22.91,
+              "value": "X"
+            },
+            {
+              "start": 22.91,
+              "end": 22.97,
+              "value": "B"
+            },
+            {
+              "start": 22.97,
+              "end": 23.0,
+              "value": "E"
+            }
+          ],
+          "seconds": 1.927914709027391,
+          "peakRssBytes": 152158208,
+          "pcmSha256": "99871bfa021441dfe96d1c0225bcc37d09cdb93c8a3ecec6d131b59454cf534c",
+          "incomingSeconds": 5.05,
+          "preparedSeconds": 1.0,
+          "wallSeconds": 27.814034208015073
+        },
+        {
+          "type": "analysis",
+          "index": 23,
+          "region": {
+            "start": 1014300,
+            "end": 1058400,
+            "inputStart": 1003275,
+            "inputEnd": 1069425
+          },
+          "wallSeconds": 27.81404729100177
+        },
+        {
+          "type": "segment",
+          "index": 23,
+          "startFrame": 1014300,
+          "endFrame": 1058400,
+          "region": {
+            "start": 1014300,
+            "end": 1058400,
+            "inputStart": 1003275,
+            "inputEnd": 1069425
+          },
+          "cues": [
+            {
+              "start": 23.0,
+              "end": 23.07,
+              "value": "E"
+            },
+            {
+              "start": 23.07,
+              "end": 23.28,
+              "value": "C"
+            },
+            {
+              "start": 23.28,
+              "end": 23.56,
+              "value": "B"
+            },
+            {
+              "start": 23.56,
+              "end": 23.63,
+              "value": "C"
+            },
+            {
+              "start": 23.63,
+              "end": 23.98,
+              "value": "B"
+            },
+            {
+              "start": 23.98,
+              "end": 24.0,
+              "value": "A"
+            }
+          ],
+          "seconds": 1.1998686250299215,
+          "peakRssBytes": 156467200,
+          "pcmSha256": "67bc1643513fa4b0ba9e3e302f2424641124c5dc232d95eef7571052b129cbc8",
+          "incomingSeconds": 5.25,
+          "preparedSeconds": 1.0,
+          "wallSeconds": 29.014177291013766
+        },
+        {
+          "type": "analysis",
+          "index": 24,
+          "region": {
+            "start": 1058400,
+            "end": 1102500,
+            "inputStart": 1047375,
+            "inputEnd": 1113525
+          },
+          "wallSeconds": 29.014188583008945
+        },
+        {
+          "type": "segment",
+          "index": 24,
+          "startFrame": 1058400,
+          "endFrame": 1102500,
+          "region": {
+            "start": 1058400,
+            "end": 1102500,
+            "inputStart": 1047375,
+            "inputEnd": 1113525
+          },
+          "cues": [
+            {
+              "start": 24.0,
+              "end": 24.09,
+              "value": "A"
+            },
+            {
+              "start": 24.09,
+              "end": 24.14,
+              "value": "B"
+            },
+            {
+              "start": 24.14,
+              "end": 24.25,
+              "value": "C"
+            },
+            {
+              "start": 24.25,
+              "end": 24.46,
+              "value": "B"
+            },
+            {
+              "start": 24.46,
+              "end": 24.53,
+              "value": "G"
+            },
+            {
+              "start": 24.53,
+              "end": 24.6,
+              "value": "E"
+            },
+            {
+              "start": 24.6,
+              "end": 24.74,
+              "value": "F"
+            },
+            {
+              "start": 24.74,
+              "end": 24.88,
+              "value": "C"
+            },
+            {
+              "start": 24.88,
+              "end": 25.0,
+              "value": "B"
+            }
+          ],
+          "seconds": 1.0518814169918187,
+          "peakRssBytes": 160727040,
+          "pcmSha256": "38c5d7fc7f5708b0375fe85a1d09a1f8be663820ded39b1ea93b93d27495119b",
+          "incomingSeconds": 5.25,
+          "preparedSeconds": 1.0,
+          "wallSeconds": 30.066398000053596
+        },
+        {
+          "type": "analysis",
+          "index": 25,
+          "region": {
+            "start": 1102500,
+            "end": 1146600,
+            "inputStart": 1091475,
+            "inputEnd": 1157625
+          },
+          "wallSeconds": 30.06641483301064
+        },
+        {
+          "type": "segment",
+          "index": 25,
+          "startFrame": 1102500,
+          "endFrame": 1146600,
+          "region": {
+            "start": 1102500,
+            "end": 1146600,
+            "inputStart": 1091475,
+            "inputEnd": 1157625
+          },
+          "cues": [
+            {
+              "start": 25.0,
+              "end": 25.78,
+              "value": "X"
+            },
+            {
+              "start": 25.78,
+              "end": 25.84,
+              "value": "C"
+            },
+            {
+              "start": 25.84,
+              "end": 26.0,
+              "value": "B"
+            }
+          ],
+          "seconds": 0.8496961669879965,
+          "peakRssBytes": 152813568,
+          "pcmSha256": "1c48eeb28b88a22b6521ace94ca4dbd0fa3b75a804f34a832ea9f520a1f292f6",
+          "incomingSeconds": 5.15,
+          "preparedSeconds": 1.1472789115646258,
+          "wallSeconds": 30.916310583008453
+        },
+        {
+          "type": "analysis",
+          "index": 26,
+          "region": {
+            "start": 1146600,
+            "end": 1190700,
+            "inputStart": 1135575,
+            "inputEnd": 1201725
+          },
+          "wallSeconds": 30.916319166019093
+        },
+        {
+          "type": "segment",
+          "index": 26,
+          "startFrame": 1146600,
+          "endFrame": 1190700,
+          "region": {
+            "start": 1146600,
+            "end": 1190700,
+            "inputStart": 1135575,
+            "inputEnd": 1201725
+          },
+          "cues": [
+            {
+              "start": 26.0,
+              "end": 26.18,
+              "value": "B"
+            },
+            {
+              "start": 26.18,
+              "end": 26.39,
+              "value": "C"
+            },
+            {
+              "start": 26.39,
+              "end": 26.74,
+              "value": "B"
+            },
+            {
+              "start": 26.74,
+              "end": 26.83,
+              "value": "C"
+            },
+            {
+              "start": 26.83,
+              "end": 26.9,
+              "value": "B"
+            },
+            {
+              "start": 26.9,
+              "end": 27.0,
+              "value": "F"
+            }
+          ],
+          "seconds": 0.9947844169801101,
+          "peakRssBytes": 149454848,
+          "pcmSha256": "c6b05d95f77b1ef16aba25c059ce96a393039b9c009de3d8f878cb0c4a75aa50",
+          "incomingSeconds": 5.15,
+          "preparedSeconds": 1.151609977324263,
+          "wallSeconds": 31.911402375029866
+        },
+        {
+          "type": "analysis",
+          "index": 27,
+          "region": {
+            "start": 1190700,
+            "end": 1234800,
+            "inputStart": 1179675,
+            "inputEnd": 1245825
+          },
+          "wallSeconds": 31.9114179580356
+        },
+        {
+          "type": "segment",
+          "index": 27,
+          "startFrame": 1190700,
+          "endFrame": 1234800,
+          "region": {
+            "start": 1190700,
+            "end": 1234800,
+            "inputStart": 1179675,
+            "inputEnd": 1245825
+          },
+          "cues": [
+            {
+              "start": 27.0,
+              "end": 27.04,
+              "value": "F"
+            },
+            {
+              "start": 27.04,
+              "end": 27.12,
+              "value": "A"
+            },
+            {
+              "start": 27.12,
+              "end": 27.19,
+              "value": "B"
+            },
+            {
+              "start": 27.19,
+              "end": 27.37,
+              "value": "F"
+            },
+            {
+              "start": 27.37,
+              "end": 27.42,
+              "value": "E"
+            },
+            {
+              "start": 27.42,
+              "end": 27.74,
+              "value": "C"
+            },
+            {
+              "start": 27.74,
+              "end": 27.98,
+              "value": "B"
+            },
+            {
+              "start": 27.98,
+              "end": 28.0,
+              "value": "C"
+            }
+          ],
+          "seconds": 1.0756105000036769,
+          "peakRssBytes": 151961600,
+          "pcmSha256": "74c1cbf3506197c8ac9d0731950ae3aa2cc8c5acea1e11fdef446a88ce93c29b",
+          "incomingSeconds": 5.15,
+          "preparedSeconds": 1.0750113378684807,
+          "wallSeconds": 32.98723550001159
+        },
+        {
+          "type": "analysis",
+          "index": 28,
+          "region": {
+            "start": 1234800,
+            "end": 1278900,
+            "inputStart": 1223775,
+            "inputEnd": 1289925
+          },
+          "wallSeconds": 32.98724491603207
+        },
+        {
+          "type": "segment",
+          "index": 28,
+          "startFrame": 1234800,
+          "endFrame": 1278900,
+          "region": {
+            "start": 1234800,
+            "end": 1278900,
+            "inputStart": 1223775,
+            "inputEnd": 1289925
+          },
+          "cues": [
+            {
+              "start": 28.0,
+              "end": 28.12,
+              "value": "C"
+            },
+            {
+              "start": 28.12,
+              "end": 28.19,
+              "value": "B"
+            },
+            {
+              "start": 28.19,
+              "end": 28.33,
+              "value": "C"
+            },
+            {
+              "start": 28.33,
+              "end": 28.47,
+              "value": "B"
+            },
+            {
+              "start": 28.47,
+              "end": 28.54,
+              "value": "E"
+            },
+            {
+              "start": 28.54,
+              "end": 28.68,
+              "value": "B"
+            },
+            {
+              "start": 28.68,
+              "end": 28.89,
+              "value": "C"
+            },
+            {
+              "start": 28.89,
+              "end": 28.97,
+              "value": "A"
+            },
+            {
+              "start": 28.97,
+              "end": 29.0,
+              "value": "B"
+            }
+          ],
+          "seconds": 0.8825570000335574,
+          "peakRssBytes": 162267136,
+          "pcmSha256": "647dc9f7830343190724db3e7b984c7d1c21cadc818913032a5fffd67a854a58",
+          "incomingSeconds": 5.05,
+          "preparedSeconds": 1.1917460317460318,
+          "wallSeconds": 33.8700780410436
+        },
+        {
+          "type": "analysis",
+          "index": 29,
+          "region": {
+            "start": 1278900,
+            "end": 1323000,
+            "inputStart": 1267875,
+            "inputEnd": 1334025
+          },
+          "wallSeconds": 33.87009062501602
+        },
+        {
+          "type": "segment",
+          "index": 29,
+          "startFrame": 1278900,
+          "endFrame": 1323000,
+          "region": {
+            "start": 1278900,
+            "end": 1323000,
+            "inputStart": 1267875,
+            "inputEnd": 1334025
+          },
+          "cues": [
+            {
+              "start": 29.0,
+              "end": 29.24,
+              "value": "B"
+            },
+            {
+              "start": 29.24,
+              "end": 30.0,
+              "value": "X"
+            }
+          ],
+          "seconds": 0.7756385420216247,
+          "peakRssBytes": 162070528,
+          "pcmSha256": "3f3ce73c5bc82cb8422a7a0a0dc133897b65d0b955a91b7dbfa8b85b99d917e5",
+          "incomingSeconds": 4.85,
+          "preparedSeconds": 1.4126530612244899,
+          "wallSeconds": 34.6459523330559
+        },
+        {
+          "type": "analysis",
+          "index": 30,
+          "region": {
+            "start": 1323000,
+            "end": 1367100,
+            "inputStart": 1311975,
+            "inputEnd": 1378125
+          },
+          "wallSeconds": 34.6459632080514
+        },
+        {
+          "type": "segment",
+          "index": 30,
+          "startFrame": 1323000,
+          "endFrame": 1367100,
+          "region": {
+            "start": 1323000,
+            "end": 1367100,
+            "inputStart": 1311975,
+            "inputEnd": 1378125
+          },
+          "cues": [
+            {
+              "start": 30.0,
+              "end": 30.06,
+              "value": "C"
+            },
+            {
+              "start": 30.06,
+              "end": 30.11,
+              "value": "B"
+            },
+            {
+              "start": 30.11,
+              "end": 30.18,
+              "value": "F"
+            },
+            {
+              "start": 30.18,
+              "end": 30.32,
+              "value": "B"
+            },
+            {
+              "start": 30.32,
+              "end": 30.39,
+              "value": "C"
+            },
+            {
+              "start": 30.39,
+              "end": 30.46,
+              "value": "B"
+            },
+            {
+              "start": 30.46,
+              "end": 30.54,
+              "value": "A"
+            },
+            {
+              "start": 30.54,
+              "end": 30.66,
+              "value": "B"
+            },
+            {
+              "start": 30.66,
+              "end": 30.73,
+              "value": "G"
+            },
+            {
+              "start": 30.73,
+              "end": 31.0,
+              "value": "B"
+            }
+          ],
+          "seconds": 0.9407288750517182,
+          "peakRssBytes": 139296768,
+          "pcmSha256": "4ab6ef0811a216d6adbd235bb2f92993852415181b5b938de454d4bd261e3dc6",
+          "incomingSeconds": 4.75,
+          "preparedSeconds": 1.474920634920635,
+          "wallSeconds": 35.58693487505661
+        },
+        {
+          "type": "analysis",
+          "index": 31,
+          "region": {
+            "start": 1367100,
+            "end": 1411200,
+            "inputStart": 1356075,
+            "inputEnd": 1422225
+          },
+          "wallSeconds": 35.58694533305243
+        },
+        {
+          "type": "segment",
+          "index": 31,
+          "startFrame": 1367100,
+          "endFrame": 1411200,
+          "region": {
+            "start": 1367100,
+            "end": 1411200,
+            "inputStart": 1356075,
+            "inputEnd": 1422225
+          },
+          "cues": [
+            {
+              "start": 31.0,
+              "end": 31.01,
+              "value": "B"
+            },
+            {
+              "start": 31.01,
+              "end": 31.09,
+              "value": "A"
+            },
+            {
+              "start": 31.09,
+              "end": 31.26,
+              "value": "B"
+            },
+            {
+              "start": 31.26,
+              "end": 31.62,
+              "value": "X"
+            },
+            {
+              "start": 31.62,
+              "end": 31.69,
+              "value": "F"
+            },
+            {
+              "start": 31.69,
+              "end": 31.89,
+              "value": "C"
+            },
+            {
+              "start": 31.89,
+              "end": 32.0,
+              "value": "B"
+            }
+          ],
+          "seconds": 0.84072862501489,
+          "peakRssBytes": 161644544,
+          "pcmSha256": "1a517408d4a7642dc8557b503de0a5baba6d6109a2b0005b0ee8b48d4900fda2",
+          "incomingSeconds": 4.65,
+          "preparedSeconds": 1.6380498866213151,
+          "wallSeconds": 36.427872625004966
+        },
+        {
+          "type": "analysis",
+          "index": 32,
+          "region": {
+            "start": 1411200,
+            "end": 1455300,
+            "inputStart": 1400175,
+            "inputEnd": 1466325
+          },
+          "wallSeconds": 36.42788112501148
+        },
+        {
+          "type": "segment",
+          "index": 32,
+          "startFrame": 1411200,
+          "endFrame": 1455300,
+          "region": {
+            "start": 1411200,
+            "end": 1455300,
+            "inputStart": 1400175,
+            "inputEnd": 1466325
+          },
+          "cues": [
+            {
+              "start": 32.0,
+              "end": 32.04,
+              "value": "B"
+            },
+            {
+              "start": 32.04,
+              "end": 32.18,
+              "value": "C"
+            },
+            {
+              "start": 32.18,
+              "end": 32.26,
+              "value": "A"
+            },
+            {
+              "start": 32.26,
+              "end": 32.31,
+              "value": "B"
+            },
+            {
+              "start": 32.31,
+              "end": 32.5,
+              "value": "C"
+            },
+            {
+              "start": 32.5,
+              "end": 32.71,
+              "value": "E"
+            },
+            {
+              "start": 32.71,
+              "end": 32.85,
+              "value": "B"
+            },
+            {
+              "start": 32.85,
+              "end": 32.92,
+              "value": "C"
+            },
+            {
+              "start": 32.92,
+              "end": 33.0,
+              "value": "D"
+            }
+          ],
+          "seconds": 0.9807527089724317,
+          "peakRssBytes": 162054144,
+          "pcmSha256": "3f4a9a69e67c21b8fbfdca3fa784e68a9ba67a6397cd039263e4f1c6e6a41e1c",
+          "incomingSeconds": 4.65,
+          "preparedSeconds": 1.6583900226757369,
+          "wallSeconds": 37.408818916010205
+        },
+        {
+          "type": "analysis",
+          "index": 33,
+          "region": {
+            "start": 1455300,
+            "end": 1499400,
+            "inputStart": 1444275,
+            "inputEnd": 1510425
+          },
+          "wallSeconds": 37.40882608300308
+        },
+        {
+          "type": "segment",
+          "index": 33,
+          "startFrame": 1455300,
+          "endFrame": 1499400,
+          "region": {
+            "start": 1455300,
+            "end": 1499400,
+            "inputStart": 1444275,
+            "inputEnd": 1510425
+          },
+          "cues": [
+            {
+              "start": 33.0,
+              "end": 33.1,
+              "value": "D"
+            },
+            {
+              "start": 33.1,
+              "end": 33.15,
+              "value": "C"
+            },
+            {
+              "start": 33.15,
+              "end": 33.33,
+              "value": "B"
+            },
+            {
+              "start": 33.33,
+              "end": 34.0,
+              "value": "X"
+            }
+          ],
+          "seconds": 0.817397125007119,
+          "peakRssBytes": 162250752,
+          "pcmSha256": "907252873e949a52cf9287f1453da36948923019d61b2a2b72f0369e68ede2f4",
+          "incomingSeconds": 4.45,
+          "preparedSeconds": 1.8336054421768708,
+          "wallSeconds": 38.22641929105157
+        },
+        {
+          "type": "analysis",
+          "index": 34,
+          "region": {
+            "start": 1499400,
+            "end": 1543500,
+            "inputStart": 1488375,
+            "inputEnd": 1554525
+          },
+          "wallSeconds": 38.226427583023906
+        },
+        {
+          "type": "segment",
+          "index": 34,
+          "startFrame": 1499400,
+          "endFrame": 1543500,
+          "region": {
+            "start": 1499400,
+            "end": 1543500,
+            "inputStart": 1488375,
+            "inputEnd": 1554525
+          },
+          "cues": [
+            {
+              "start": 34.0,
+              "end": 34.09,
+              "value": "X"
+            },
+            {
+              "start": 34.09,
+              "end": 34.19,
+              "value": "E"
+            },
+            {
+              "start": 34.19,
+              "end": 34.33,
+              "value": "F"
+            },
+            {
+              "start": 34.33,
+              "end": 34.54,
+              "value": "C"
+            },
+            {
+              "start": 34.54,
+              "end": 34.82,
+              "value": "B"
+            },
+            {
+              "start": 34.82,
+              "end": 34.96,
+              "value": "C"
+            },
+            {
+              "start": 34.96,
+              "end": 35.0,
+              "value": "A"
+            }
+          ],
+          "seconds": 0.9525247080018744,
+          "peakRssBytes": 162086912,
+          "pcmSha256": "b2f201eb3e6259d4d01abf2d445638927019c47607d606c1c2fcc1f105f66fdc",
+          "incomingSeconds": 4.35,
+          "preparedSeconds": 1.8875510204081634,
+          "wallSeconds": 39.179205666005146
+        },
+        {
+          "type": "analysis",
+          "index": 35,
+          "region": {
+            "start": 1543500,
+            "end": 1587600,
+            "inputStart": 1532475,
+            "inputEnd": 1598625
+          },
+          "wallSeconds": 39.1792183330399
+        },
+        {
+          "type": "segment",
+          "index": 35,
+          "startFrame": 1543500,
+          "endFrame": 1587600,
+          "region": {
+            "start": 1543500,
+            "end": 1587600,
+            "inputStart": 1532475,
+            "inputEnd": 1598625
+          },
+          "cues": [
+            {
+              "start": 35.0,
+              "end": 35.04,
+              "value": "A"
+            },
+            {
+              "start": 35.04,
+              "end": 35.3,
+              "value": "E"
+            },
+            {
+              "start": 35.3,
+              "end": 35.44,
+              "value": "B"
+            },
+            {
+              "start": 35.44,
+              "end": 35.89,
+              "value": "X"
+            },
+            {
+              "start": 35.89,
+              "end": 35.96,
+              "value": "H"
+            },
+            {
+              "start": 35.96,
+              "end": 36.0,
+              "value": "C"
+            }
+          ],
+          "seconds": 0.8971242909901775,
+          "peakRssBytes": 162381824,
+          "pcmSha256": "20f5046cabf40ab11b61154c8953948470cc642e1bc57ebf5d59d3e61f51c5af",
+          "incomingSeconds": 4.25,
+          "preparedSeconds": 1.9920861678004536,
+          "wallSeconds": 40.07655075000366
+        },
+        {
+          "type": "analysis",
+          "index": 36,
+          "region": {
+            "start": 1587600,
+            "end": 1631700,
+            "inputStart": 1576575,
+            "inputEnd": 1642725
+          },
+          "wallSeconds": 40.076558833010495
+        },
+        {
+          "type": "segment",
+          "index": 36,
+          "startFrame": 1587600,
+          "endFrame": 1631700,
+          "region": {
+            "start": 1587600,
+            "end": 1631700,
+            "inputStart": 1576575,
+            "inputEnd": 1642725
+          },
+          "cues": [
+            {
+              "start": 36.0,
+              "end": 36.06,
+              "value": "C"
+            },
+            {
+              "start": 36.06,
+              "end": 36.14,
+              "value": "A"
+            },
+            {
+              "start": 36.14,
+              "end": 36.29,
+              "value": "F"
+            },
+            {
+              "start": 36.29,
+              "end": 36.43,
+              "value": "C"
+            },
+            {
+              "start": 36.43,
+              "end": 36.58,
+              "value": "B"
+            },
+            {
+              "start": 36.58,
+              "end": 36.62,
+              "value": "A"
+            },
+            {
+              "start": 36.62,
+              "end": 36.84,
+              "value": "F"
+            },
+            {
+              "start": 36.84,
+              "end": 37.0,
+              "value": "B"
+            }
+          ],
+          "seconds": 0.9470524999778718,
+          "peakRssBytes": 162021376,
+          "pcmSha256": "c1b3fb005d8eb1554a3611259792f7dfa7ed24d79fe3178b33e5705cbb0fa5c4",
+          "incomingSeconds": 4.25,
+          "preparedSeconds": 2.0417233560090704,
+          "wallSeconds": 41.023808958008885
+        },
+        {
+          "type": "analysis",
+          "index": 37,
+          "region": {
+            "start": 1631700,
+            "end": 1675800,
+            "inputStart": 1620675,
+            "inputEnd": 1686825
+          },
+          "wallSeconds": 41.02381658303784
+        },
+        {
+          "type": "segment",
+          "index": 37,
+          "startFrame": 1631700,
+          "endFrame": 1675800,
+          "region": {
+            "start": 1631700,
+            "end": 1675800,
+            "inputStart": 1620675,
+            "inputEnd": 1686825
+          },
+          "cues": [
+            {
+              "start": 37.0,
+              "end": 37.1,
+              "value": "B"
+            },
+            {
+              "start": 37.1,
+              "end": 37.17,
+              "value": "H"
+            },
+            {
+              "start": 37.17,
+              "end": 37.31,
+              "value": "C"
+            },
+            {
+              "start": 37.31,
+              "end": 37.38,
+              "value": "G"
+            },
+            {
+              "start": 37.38,
+              "end": 37.52,
+              "value": "F"
+            },
+            {
+              "start": 37.52,
+              "end": 37.66,
+              "value": "E"
+            },
+            {
+              "start": 37.66,
+              "end": 37.73,
+              "value": "C"
+            },
+            {
+              "start": 37.73,
+              "end": 37.94,
+              "value": "B"
+            },
+            {
+              "start": 37.94,
+              "end": 38.0,
+              "value": "A"
+            }
+          ],
+          "seconds": 0.8209516250062734,
+          "peakRssBytes": 162136064,
+          "pcmSha256": "ea4eb72917c03078f1d598ce760210dbae53ca8cca7bd8574446aaa519ec19b7",
+          "incomingSeconds": 4.05,
+          "preparedSeconds": 2.2167573696145126,
+          "wallSeconds": 41.84497595805442
+        },
+        {
+          "type": "analysis",
+          "index": 38,
+          "region": {
+            "start": 1675800,
+            "end": 1719900,
+            "inputStart": 1664775,
+            "inputEnd": 1730925
+          },
+          "wallSeconds": 41.844984208000824
+        },
+        {
+          "type": "segment",
+          "index": 38,
+          "startFrame": 1675800,
+          "endFrame": 1719900,
+          "region": {
+            "start": 1675800,
+            "end": 1719900,
+            "inputStart": 1664775,
+            "inputEnd": 1730925
+          },
+          "cues": [
+            {
+              "start": 38.0,
+              "end": 38.02,
+              "value": "A"
+            },
+            {
+              "start": 38.02,
+              "end": 38.1,
+              "value": "C"
+            },
+            {
+              "start": 38.1,
+              "end": 38.24,
+              "value": "B"
+            },
+            {
+              "start": 38.24,
+              "end": 39.0,
+              "value": "X"
+            }
+          ],
+          "seconds": 0.7630392920109443,
+          "peakRssBytes": 161529856,
+          "pcmSha256": "a85f6568e1903cc74e4497445234046bccb8db82c8e6b279ccd33af0601c1a14",
+          "incomingSeconds": 3.85,
+          "preparedSeconds": 2.4590702947845804,
+          "wallSeconds": 42.608260125038214
+        },
+        {
+          "type": "analysis",
+          "index": 39,
+          "region": {
+            "start": 1719900,
+            "end": 1764000,
+            "inputStart": 1708875,
+            "inputEnd": 1775025
+          },
+          "wallSeconds": 42.60827283305116
+        },
+        {
+          "type": "segment",
+          "index": 39,
+          "startFrame": 1719900,
+          "endFrame": 1764000,
+          "region": {
+            "start": 1719900,
+            "end": 1764000,
+            "inputStart": 1708875,
+            "inputEnd": 1775025
+          },
+          "cues": [
+            {
+              "start": 39.0,
+              "end": 39.19,
+              "value": "B"
+            },
+            {
+              "start": 39.19,
+              "end": 39.33,
+              "value": "C"
+            },
+            {
+              "start": 39.33,
+              "end": 39.4,
+              "value": "B"
+            },
+            {
+              "start": 39.4,
+              "end": 39.68,
+              "value": "C"
+            },
+            {
+              "start": 39.68,
+              "end": 39.89,
+              "value": "B"
+            },
+            {
+              "start": 39.89,
+              "end": 40.0,
+              "value": "X"
+            }
+          ],
+          "seconds": 0.9380754160229117,
+          "peakRssBytes": 161562624,
+          "pcmSha256": "685121bfae5f01f009960e8010c9263386bfa45cc799e597335880d0a0252e81",
+          "incomingSeconds": 3.75,
+          "preparedSeconds": 2.5200226757369615,
+          "wallSeconds": 43.54671937500825
+        },
+        {
+          "type": "analysis",
+          "index": 40,
+          "region": {
+            "start": 1764000,
+            "end": 1808100,
+            "inputStart": 1752975,
+            "inputEnd": 1819125
+          },
+          "wallSeconds": 43.546737000055145
+        },
+        {
+          "type": "segment",
+          "index": 40,
+          "startFrame": 1764000,
+          "endFrame": 1808100,
+          "region": {
+            "start": 1764000,
+            "end": 1808100,
+            "inputStart": 1752975,
+            "inputEnd": 1819125
+          },
+          "cues": [
+            {
+              "start": 40.0,
+              "end": 40.28,
+              "value": "X"
+            },
+            {
+              "start": 40.28,
+              "end": 40.48,
+              "value": "B"
+            },
+            {
+              "start": 40.48,
+              "end": 40.55,
+              "value": "F"
+            },
+            {
+              "start": 40.55,
+              "end": 40.69,
+              "value": "C"
+            },
+            {
+              "start": 40.69,
+              "end": 40.76,
+              "value": "B"
+            },
+            {
+              "start": 40.76,
+              "end": 40.83,
+              "value": "G"
+            },
+            {
+              "start": 40.83,
+              "end": 40.97,
+              "value": "E"
+            },
+            {
+              "start": 40.97,
+              "end": 41.0,
+              "value": "B"
+            }
+          ],
+          "seconds": 0.7598725419957191,
+          "peakRssBytes": 161824768,
+          "pcmSha256": "08f5df98b008bc3687e2985e24d84519e71754b8e32b7abd779420afb12c25f0",
+          "incomingSeconds": 3.55,
+          "preparedSeconds": 2.752108843537415,
+          "wallSeconds": 44.3068167080055
+        },
+        {
+          "type": "analysis",
+          "index": 41,
+          "region": {
+            "start": 1808100,
+            "end": 1852200,
+            "inputStart": 1797075,
+            "inputEnd": 1863225
+          },
+          "wallSeconds": 44.30682454101043
+        },
+        {
+          "type": "segment",
+          "index": 41,
+          "startFrame": 1808100,
+          "endFrame": 1852200,
+          "region": {
+            "start": 1808100,
+            "end": 1852200,
+            "inputStart": 1797075,
+            "inputEnd": 1863225
+          },
+          "cues": [
+            {
+              "start": 41.0,
+              "end": 41.25,
+              "value": "B"
+            },
+            {
+              "start": 41.25,
+              "end": 41.32,
+              "value": "G"
+            },
+            {
+              "start": 41.32,
+              "end": 41.39,
+              "value": "B"
+            },
+            {
+              "start": 41.39,
+              "end": 41.46,
+              "value": "C"
+            },
+            {
+              "start": 41.46,
+              "end": 41.53,
+              "value": "B"
+            },
+            {
+              "start": 41.53,
+              "end": 41.67,
+              "value": "E"
+            },
+            {
+              "start": 41.67,
+              "end": 41.74,
+              "value": "F"
+            },
+            {
+              "start": 41.74,
+              "end": 41.88,
+              "value": "C"
+            },
+            {
+              "start": 41.88,
+              "end": 41.95,
+              "value": "G"
+            },
+            {
+              "start": 41.95,
+              "end": 42.0,
+              "value": "F"
+            }
+          ],
+          "seconds": 0.9013567920192145,
+          "peakRssBytes": 162103296,
+          "pcmSha256": "9c449252dd27ed53032aab82ed65e7c4982c3800e193f158540500dc9e54c4b0",
+          "incomingSeconds": 3.45,
+          "preparedSeconds": 2.858730158730159,
+          "wallSeconds": 45.20838975004153
+        },
+        {
+          "type": "analysis",
+          "index": 42,
+          "region": {
+            "start": 1852200,
+            "end": 1896300,
+            "inputStart": 1841175,
+            "inputEnd": 1907325
+          },
+          "wallSeconds": 45.20839833305217
+        },
+        {
+          "type": "segment",
+          "index": 42,
+          "startFrame": 1852200,
+          "endFrame": 1896300,
+          "region": {
+            "start": 1852200,
+            "end": 1896300,
+            "inputStart": 1841175,
+            "inputEnd": 1907325
+          },
+          "cues": [
+            {
+              "start": 42.0,
+              "end": 42.15,
+              "value": "H"
+            },
+            {
+              "start": 42.15,
+              "end": 42.22,
+              "value": "G"
+            },
+            {
+              "start": 42.22,
+              "end": 42.36,
+              "value": "E"
+            },
+            {
+              "start": 42.36,
+              "end": 42.5,
+              "value": "C"
+            },
+            {
+              "start": 42.5,
+              "end": 42.57,
+              "value": "B"
+            },
+            {
+              "start": 42.57,
+              "end": 42.78,
+              "value": "E"
+            },
+            {
+              "start": 42.78,
+              "end": 43.0,
+              "value": "X"
+            }
+          ],
+          "seconds": 0.8200891669839621,
+          "peakRssBytes": 161857536,
+          "pcmSha256": "34cc1d5a649d62ba1eba8bf54f58959bb7fcd52c791c5401d3ba456005059971",
+          "incomingSeconds": 3.25,
+          "preparedSeconds": 3.0302721088435374,
+          "wallSeconds": 46.02869583305437
+        },
+        {
+          "type": "analysis",
+          "index": 43,
+          "region": {
+            "start": 1896300,
+            "end": 1940400,
+            "inputStart": 1885275,
+            "inputEnd": 1951425
+          },
+          "wallSeconds": 46.02870412502671
+        },
+        {
+          "type": "segment",
+          "index": 43,
+          "startFrame": 1896300,
+          "endFrame": 1940400,
+          "region": {
+            "start": 1896300,
+            "end": 1940400,
+            "inputStart": 1885275,
+            "inputEnd": 1951425
+          },
+          "cues": [
+            {
+              "start": 43.0,
+              "end": 43.51,
+              "value": "X"
+            },
+            {
+              "start": 43.51,
+              "end": 43.59,
+              "value": "A"
+            },
+            {
+              "start": 43.59,
+              "end": 44.0,
+              "value": "B"
+            }
+          ],
+          "seconds": 0.6989438749733381,
+          "peakRssBytes": 162398208,
+          "pcmSha256": "b8296b475e29484694634225820feb120c63c65ea368477fb01392ba86faf268",
+          "incomingSeconds": 2.95,
+          "preparedSeconds": 3.3373922902494333,
+          "wallSeconds": 46.727852208015975
+        },
+        {
+          "type": "analysis",
+          "index": 44,
+          "region": {
+            "start": 1940400,
+            "end": 1984500,
+            "inputStart": 1929375,
+            "inputEnd": 1995525
+          },
+          "wallSeconds": 46.72786037501646
+        },
+        {
+          "type": "segment",
+          "index": 44,
+          "startFrame": 1940400,
+          "endFrame": 1984500,
+          "region": {
+            "start": 1940400,
+            "end": 1984500,
+            "inputStart": 1929375,
+            "inputEnd": 1995525
+          },
+          "cues": [
+            {
+              "start": 44.0,
+              "end": 44.1,
+              "value": "B"
+            },
+            {
+              "start": 44.1,
+              "end": 44.3,
+              "value": "X"
+            },
+            {
+              "start": 44.3,
+              "end": 44.56,
+              "value": "B"
+            },
+            {
+              "start": 44.56,
+              "end": 44.65,
+              "value": "A"
+            },
+            {
+              "start": 44.65,
+              "end": 44.88,
+              "value": "B"
+            },
+            {
+              "start": 44.88,
+              "end": 44.96,
+              "value": "A"
+            },
+            {
+              "start": 44.96,
+              "end": 45.0,
+              "value": "C"
+            }
+          ],
+          "seconds": 1.1324832920217887,
+          "peakRssBytes": 159006720,
+          "pcmSha256": "aadd85198153dfefcc3cd21e69aa46ac1287567dc0af5fedb9e74ab72af4f7a1",
+          "incomingSeconds": 3.05,
+          "preparedSeconds": 3.2,
+          "wallSeconds": 47.86054729105672
+        },
+        {
+          "type": "analysis",
+          "index": 45,
+          "region": {
+            "start": 1984500,
+            "end": 2028600,
+            "inputStart": 1973475,
+            "inputEnd": 2039625
+          },
+          "wallSeconds": 47.86055604100693
+        },
+        {
+          "type": "segment",
+          "index": 45,
+          "startFrame": 1984500,
+          "endFrame": 2028600,
+          "region": {
+            "start": 1984500,
+            "end": 2028600,
+            "inputStart": 1973475,
+            "inputEnd": 2039625
+          },
+          "cues": [
+            {
+              "start": 45.0,
+              "end": 45.06,
+              "value": "C"
+            },
+            {
+              "start": 45.06,
+              "end": 45.13,
+              "value": "B"
+            },
+            {
+              "start": 45.13,
+              "end": 45.34,
+              "value": "C"
+            },
+            {
+              "start": 45.34,
+              "end": 45.41,
+              "value": "H"
+            },
+            {
+              "start": 45.41,
+              "end": 45.48,
+              "value": "C"
+            },
+            {
+              "start": 45.48,
+              "end": 45.69,
+              "value": "B"
+            },
+            {
+              "start": 45.69,
+              "end": 46.0,
+              "value": "X"
+            }
+          ],
+          "seconds": 0.6653973330394365,
+          "peakRssBytes": 159318016,
+          "pcmSha256": "8e3e0daf0c78c6f658bb808635c33ee0095840f9226024388f7e7e714776f8b3",
+          "incomingSeconds": 2.75,
+          "preparedSeconds": 3.5336961451247166,
+          "wallSeconds": 48.52614545804681
+        },
+        {
+          "type": "analysis",
+          "index": 46,
+          "region": {
+            "start": 2028600,
+            "end": 2072700,
+            "inputStart": 2017575,
+            "inputEnd": 2083725
+          },
+          "wallSeconds": 48.52615300001344
+        },
+        {
+          "type": "segment",
+          "index": 46,
+          "startFrame": 2028600,
+          "endFrame": 2072700,
+          "region": {
+            "start": 2028600,
+            "end": 2072700,
+            "inputStart": 2017575,
+            "inputEnd": 2083725
+          },
+          "cues": [
+            {
+              "start": 46.0,
+              "end": 46.42,
+              "value": "X"
+            },
+            {
+              "start": 46.42,
+              "end": 46.5,
+              "value": "B"
+            },
+            {
+              "start": 46.5,
+              "end": 46.6,
+              "value": "A"
+            },
+            {
+              "start": 46.6,
+              "end": 46.68,
+              "value": "B"
+            },
+            {
+              "start": 46.68,
+              "end": 46.75,
+              "value": "G"
+            },
+            {
+              "start": 46.75,
+              "end": 46.89,
+              "value": "E"
+            },
+            {
+              "start": 46.89,
+              "end": 46.97,
+              "value": "A"
+            },
+            {
+              "start": 46.97,
+              "end": 47.0,
+              "value": "B"
+            }
+          ],
+          "seconds": 0.6846705839852802,
+          "peakRssBytes": 161759232,
+          "pcmSha256": "3292be022a7fae4e70305cfb2eb57968f070405d1a1d4014c882c9e832698579",
+          "incomingSeconds": 2.45,
+          "preparedSeconds": 3.8583673469387754,
+          "wallSeconds": 49.21101795800496
+        },
+        {
+          "type": "analysis",
+          "index": 47,
+          "region": {
+            "start": 2072700,
+            "end": 2116800,
+            "inputStart": 2061675,
+            "inputEnd": 2127825
+          },
+          "wallSeconds": 49.21102541603614
+        },
+        {
+          "type": "segment",
+          "index": 47,
+          "startFrame": 2072700,
+          "endFrame": 2116800,
+          "region": {
+            "start": 2072700,
+            "end": 2116800,
+            "inputStart": 2061675,
+            "inputEnd": 2127825
+          },
+          "cues": [
+            {
+              "start": 47.0,
+              "end": 47.4,
+              "value": "B"
+            },
+            {
+              "start": 47.4,
+              "end": 47.54,
+              "value": "C"
+            },
+            {
+              "start": 47.54,
+              "end": 47.61,
+              "value": "H"
+            },
+            {
+              "start": 47.61,
+              "end": 47.68,
+              "value": "C"
+            },
+            {
+              "start": 47.68,
+              "end": 47.89,
+              "value": "B"
+            },
+            {
+              "start": 47.89,
+              "end": 48.0,
+              "value": "X"
+            }
+          ],
+          "seconds": 0.68936333298916,
+          "peakRssBytes": 162316288,
+          "pcmSha256": "0d16e897d45003c62a36b81aa80bdd7eaf7c71fce64431ec883770f38c372114",
+          "incomingSeconds": 2.05,
+          "preparedSeconds": 4.166734693877551,
+          "wallSeconds": 49.90059158304939
+        },
+        {
+          "type": "analysis",
+          "index": 48,
+          "region": {
+            "start": 2116800,
+            "end": 2160900,
+            "inputStart": 2105775,
+            "inputEnd": 2171925
+          },
+          "wallSeconds": 49.90059925004607
+        },
+        {
+          "type": "segment",
+          "index": 48,
+          "startFrame": 2116800,
+          "endFrame": 2160900,
+          "region": {
+            "start": 2116800,
+            "end": 2160900,
+            "inputStart": 2105775,
+            "inputEnd": 2171925
+          },
+          "cues": [
+            {
+              "start": 48.0,
+              "end": 48.64,
+              "value": "X"
+            },
+            {
+              "start": 48.64,
+              "end": 48.7,
+              "value": "B"
+            },
+            {
+              "start": 48.7,
+              "end": 48.82,
+              "value": "E"
+            },
+            {
+              "start": 48.82,
+              "end": 48.96,
+              "value": "C"
+            },
+            {
+              "start": 48.96,
+              "end": 49.0,
+              "value": "G"
+            }
+          ],
+          "seconds": 0.8758741250494495,
+          "peakRssBytes": 162381824,
+          "pcmSha256": "b730f9fdc780c08f891a899c177d9a5aae562dd5b0c8c515300cdcb502e92271",
+          "incomingSeconds": 1.95,
+          "preparedSeconds": 4.2850793650793655,
+          "wallSeconds": 50.7766876250389
+        },
+        {
+          "type": "analysis",
+          "index": 49,
+          "region": {
+            "start": 2160900,
+            "end": 2205000,
+            "inputStart": 2149875,
+            "inputEnd": 2216025
+          },
+          "wallSeconds": 50.77669591602171
+        },
+        {
+          "type": "segment",
+          "index": 49,
+          "startFrame": 2160900,
+          "endFrame": 2205000,
+          "region": {
+            "start": 2160900,
+            "end": 2205000,
+            "inputStart": 2149875,
+            "inputEnd": 2216025
+          },
+          "cues": [
+            {
+              "start": 49.0,
+              "end": 49.07,
+              "value": "B"
+            },
+            {
+              "start": 49.07,
+              "end": 49.26,
+              "value": "X"
+            },
+            {
+              "start": 49.26,
+              "end": 49.31,
+              "value": "B"
+            },
+            {
+              "start": 49.31,
+              "end": 49.36,
+              "value": "C"
+            },
+            {
+              "start": 49.36,
+              "end": 49.71,
+              "value": "B"
+            },
+            {
+              "start": 49.71,
+              "end": 49.83,
+              "value": "A"
+            },
+            {
+              "start": 49.83,
+              "end": 49.9,
+              "value": "B"
+            },
+            {
+              "start": 49.9,
+              "end": 49.96,
+              "value": "C"
+            },
+            {
+              "start": 49.96,
+              "end": 50.0,
+              "value": "G"
+            }
+          ],
+          "seconds": 1.143933792016469,
+          "peakRssBytes": 163610624,
+          "pcmSha256": "86d83ace361954406e4567a41e378820830cd21b3ffb96cb1b979afdcc8f1414",
+          "incomingSeconds": 2.15,
+          "preparedSeconds": 4.138163265306122,
+          "wallSeconds": 51.92083483299939
+        },
+        {
+          "type": "analysis",
+          "index": 50,
+          "region": {
+            "start": 2205000,
+            "end": 2249100,
+            "inputStart": 2193975,
+            "inputEnd": 2260125
+          },
+          "wallSeconds": 51.92084345803596
+        },
+        {
+          "type": "segment",
+          "index": 50,
+          "startFrame": 2205000,
+          "endFrame": 2249100,
+          "region": {
+            "start": 2205000,
+            "end": 2249100,
+            "inputStart": 2193975,
+            "inputEnd": 2260125
+          },
+          "cues": [
+            {
+              "start": 50.0,
+              "end": 50.2,
+              "value": "B"
+            },
+            {
+              "start": 50.2,
+              "end": 50.27,
+              "value": "G"
+            },
+            {
+              "start": 50.27,
+              "end": 50.34,
+              "value": "E"
+            },
+            {
+              "start": 50.34,
+              "end": 50.48,
+              "value": "F"
+            },
+            {
+              "start": 50.48,
+              "end": 50.62,
+              "value": "C"
+            },
+            {
+              "start": 50.62,
+              "end": 50.69,
+              "value": "B"
+            },
+            {
+              "start": 50.69,
+              "end": 51.0,
+              "value": "X"
+            }
+          ],
+          "seconds": 0.6729348330409266,
+          "peakRssBytes": 162119680,
+          "pcmSha256": "cc6cb826bdf46f5375feba6af254b0d67b2b6ea116e99907188387f719127b27",
+          "incomingSeconds": 1.75,
+          "preparedSeconds": 4.46437641723356,
+          "wallSeconds": 52.59398687502835
+        },
+        {
+          "type": "analysis",
+          "index": 51,
+          "region": {
+            "start": 2249100,
+            "end": 2293200,
+            "inputStart": 2238075,
+            "inputEnd": 2304225
+          },
+          "wallSeconds": 52.593995208037086
+        },
+        {
+          "type": "segment",
+          "index": 51,
+          "startFrame": 2249100,
+          "endFrame": 2293200,
+          "region": {
+            "start": 2249100,
+            "end": 2293200,
+            "inputStart": 2238075,
+            "inputEnd": 2304225
+          },
+          "cues": [
+            {
+              "start": 51.0,
+              "end": 51.48,
+              "value": "X"
+            },
+            {
+              "start": 51.48,
+              "end": 51.56,
+              "value": "C"
+            },
+            {
+              "start": 51.56,
+              "end": 51.64,
+              "value": "A"
+            },
+            {
+              "start": 51.64,
+              "end": 51.92,
+              "value": "B"
+            },
+            {
+              "start": 51.92,
+              "end": 52.0,
+              "value": "C"
+            }
+          ],
+          "seconds": 0.7067261670017615,
+          "peakRssBytes": 162398208,
+          "pcmSha256": "fe27216524f1e5c4b8d338bdc72629f369d0ebcf13d26b09b06d72b7d233d288",
+          "incomingSeconds": 1.45,
+          "preparedSeconds": 4.762335600907029,
+          "wallSeconds": 53.30091229104437
+        },
+        {
+          "type": "analysis",
+          "index": 52,
+          "region": {
+            "start": 2293200,
+            "end": 2337300,
+            "inputStart": 2282175,
+            "inputEnd": 2348325
+          },
+          "wallSeconds": 53.30502770800376
+        },
+        {
+          "type": "segment",
+          "index": 52,
+          "startFrame": 2293200,
+          "endFrame": 2337300,
+          "region": {
+            "start": 2293200,
+            "end": 2337300,
+            "inputStart": 2282175,
+            "inputEnd": 2348325
+          },
+          "cues": [
+            {
+              "start": 52.0,
+              "end": 52.11,
+              "value": "C"
+            },
+            {
+              "start": 52.11,
+              "end": 52.48,
+              "value": "X"
+            },
+            {
+              "start": 52.48,
+              "end": 52.57,
+              "value": "C"
+            },
+            {
+              "start": 52.57,
+              "end": 52.64,
+              "value": "B"
+            },
+            {
+              "start": 52.64,
+              "end": 52.78,
+              "value": "F"
+            },
+            {
+              "start": 52.78,
+              "end": 52.86,
+              "value": "A"
+            },
+            {
+              "start": 52.86,
+              "end": 52.91,
+              "value": "B"
+            },
+            {
+              "start": 52.91,
+              "end": 53.0,
+              "value": "F"
+            }
+          ],
+          "seconds": 0.883780166041106,
+          "peakRssBytes": 162201600,
+          "pcmSha256": "5a9859bc8c74de653e14962f08699ce7bd772aba200cb1329c643821e5d952c1",
+          "incomingSeconds": 1.35,
+          "preparedSeconds": 4.881700680272109,
+          "wallSeconds": 54.189016166026704
+        },
+        {
+          "type": "analysis",
+          "index": 53,
+          "region": {
+            "start": 2337300,
+            "end": 2381400,
+            "inputStart": 2326275,
+            "inputEnd": 2392425
+          },
+          "wallSeconds": 54.30508737504715
+        },
+        {
+          "type": "segment",
+          "index": 53,
+          "startFrame": 2337300,
+          "endFrame": 2381400,
+          "region": {
+            "start": 2337300,
+            "end": 2381400,
+            "inputStart": 2326275,
+            "inputEnd": 2392425
+          },
+          "cues": [
+            {
+              "start": 53.0,
+              "end": 53.1,
+              "value": "F"
+            },
+            {
+              "start": 53.1,
+              "end": 53.15,
+              "value": "E"
+            },
+            {
+              "start": 53.15,
+              "end": 53.47,
+              "value": "C"
+            },
+            {
+              "start": 53.47,
+              "end": 53.68,
+              "value": "B"
+            },
+            {
+              "start": 53.68,
+              "end": 53.82,
+              "value": "C"
+            },
+            {
+              "start": 53.82,
+              "end": 54.0,
+              "value": "B"
+            }
+          ],
+          "seconds": 0.8491883340175264,
+          "peakRssBytes": 162283520,
+          "pcmSha256": "f563e29e90e59fd9ea8c0f3dd9538fd8532c4d8abd23cad304203a1298e24166",
+          "incomingSeconds": 1.35,
+          "preparedSeconds": 4.909455782312925,
+          "wallSeconds": 55.15448537503835
+        },
+        {
+          "type": "analysis",
+          "index": 54,
+          "region": {
+            "start": 2381400,
+            "end": 2425500,
+            "inputStart": 2370375,
+            "inputEnd": 2436525
+          },
+          "wallSeconds": 55.30508270801511
+        },
+        {
+          "type": "segment",
+          "index": 54,
+          "startFrame": 2381400,
+          "endFrame": 2425500,
+          "region": {
+            "start": 2381400,
+            "end": 2425500,
+            "inputStart": 2370375,
+            "inputEnd": 2436525
+          },
+          "cues": [
+            {
+              "start": 54.0,
+              "end": 54.2,
+              "value": "B"
+            },
+            {
+              "start": 54.2,
+              "end": 54.27,
+              "value": "E"
+            },
+            {
+              "start": 54.27,
+              "end": 54.48,
+              "value": "B"
+            },
+            {
+              "start": 54.48,
+              "end": 54.62,
+              "value": "C"
+            },
+            {
+              "start": 54.62,
+              "end": 54.7,
+              "value": "A"
+            },
+            {
+              "start": 54.7,
+              "end": 54.98,
+              "value": "B"
+            },
+            {
+              "start": 54.98,
+              "end": 55.0,
+              "value": "X"
+            }
+          ],
+          "seconds": 0.7596008749678731,
+          "peakRssBytes": 161873920,
+          "pcmSha256": "719687c0363c37457369dbc38d597580fb64346bfe8958c034ea308484a1e224",
+          "incomingSeconds": 1.25,
+          "preparedSeconds": 4.997165532879818,
+          "wallSeconds": 56.06491462502163
+        },
+        {
+          "type": "analysis",
+          "index": 55,
+          "region": {
+            "start": 2425500,
+            "end": 2469600,
+            "inputStart": 2414475,
+            "inputEnd": 2480625
+          },
+          "wallSeconds": 56.302890875027515
+        },
+        {
+          "type": "segment",
+          "index": 55,
+          "startFrame": 2425500,
+          "endFrame": 2469600,
+          "region": {
+            "start": 2425500,
+            "end": 2469600,
+            "inputStart": 2414475,
+            "inputEnd": 2480625
+          },
+          "cues": [
+            {
+              "start": 55.0,
+              "end": 55.73,
+              "value": "X"
+            },
+            {
+              "start": 55.73,
+              "end": 55.79,
+              "value": "C"
+            },
+            {
+              "start": 55.79,
+              "end": 55.85,
+              "value": "B"
+            },
+            {
+              "start": 55.85,
+              "end": 55.92,
+              "value": "F"
+            },
+            {
+              "start": 55.92,
+              "end": 56.0,
+              "value": "B"
+            }
+          ],
+          "seconds": 0.9787747090449557,
+          "peakRssBytes": 162775040,
+          "pcmSha256": "f2ebdd359e2d692b03485aaf2049225a21d8fea0f56297d2f9b5fd769b6be15c",
+          "incomingSeconds": 1.45,
+          "preparedSeconds": 4.788866213151928,
+          "wallSeconds": 57.28187116602203
+        },
+        {
+          "type": "analysis",
+          "index": 56,
+          "region": {
+            "start": 2469600,
+            "end": 2513700,
+            "inputStart": 2458575,
+            "inputEnd": 2524725
+          },
+          "wallSeconds": 57.3050986250164
+        },
+        {
+          "type": "segment",
+          "index": 56,
+          "startFrame": 2469600,
+          "endFrame": 2513700,
+          "region": {
+            "start": 2469600,
+            "end": 2513700,
+            "inputStart": 2458575,
+            "inputEnd": 2524725
+          },
+          "cues": [
+            {
+              "start": 56.0,
+              "end": 56.06,
+              "value": "B"
+            },
+            {
+              "start": 56.06,
+              "end": 56.13,
+              "value": "C"
+            },
+            {
+              "start": 56.13,
+              "end": 56.2,
+              "value": "B"
+            },
+            {
+              "start": 56.2,
+              "end": 56.28,
+              "value": "A"
+            },
+            {
+              "start": 56.28,
+              "end": 56.75,
+              "value": "B"
+            },
+            {
+              "start": 56.75,
+              "end": 56.83,
+              "value": "A"
+            },
+            {
+              "start": 56.83,
+              "end": 57.0,
+              "value": "B"
+            }
+          ],
+          "seconds": 0.8817536249989644,
+          "peakRssBytes": 161955840,
+          "pcmSha256": "17bc3291869cb94185c5d22e76501d63e04a34a6f19d699f348c5e962ec4aad8",
+          "incomingSeconds": 1.35,
+          "preparedSeconds": 4.879206349206349,
+          "wallSeconds": 58.18707695801277
+        },
+        {
+          "type": "analysis",
+          "index": 57,
+          "region": {
+            "start": 2513700,
+            "end": 2557800,
+            "inputStart": 2502675,
+            "inputEnd": 2568825
+          },
+          "wallSeconds": 58.30503204104025
+        },
+        {
+          "type": "segment",
+          "index": 57,
+          "startFrame": 2513700,
+          "endFrame": 2557800,
+          "region": {
+            "start": 2513700,
+            "end": 2557800,
+            "inputStart": 2502675,
+            "inputEnd": 2568825
+          },
+          "cues": [
+            {
+              "start": 57.0,
+              "end": 57.36,
+              "value": "B"
+            },
+            {
+              "start": 57.36,
+              "end": 57.43,
+              "value": "F"
+            },
+            {
+              "start": 57.43,
+              "end": 57.63,
+              "value": "C"
+            },
+            {
+              "start": 57.63,
+              "end": 57.77,
+              "value": "B"
+            },
+            {
+              "start": 57.77,
+              "end": 57.84,
+              "value": "C"
+            },
+            {
+              "start": 57.84,
+              "end": 57.91,
+              "value": "H"
+            },
+            {
+              "start": 57.91,
+              "end": 57.99,
+              "value": "A"
+            },
+            {
+              "start": 57.99,
+              "end": 58.0,
+              "value": "B"
+            }
+          ],
+          "seconds": 1.0421362919732928,
+          "peakRssBytes": 162676736,
+          "pcmSha256": "c43e9563488e8cbd6883ec79483bbe4e9f4725fc452894585a59000273a27a79",
+          "incomingSeconds": 1.55,
+          "preparedSeconds": 4.712448979591837,
+          "wallSeconds": 59.34754712501308
+        },
+        {
+          "type": "analysis",
+          "index": 58,
+          "region": {
+            "start": 2557800,
+            "end": 2601900,
+            "inputStart": 2546775,
+            "inputEnd": 2612925
+          },
+          "wallSeconds": 59.34756866603857
+        },
+        {
+          "type": "segment",
+          "index": 58,
+          "startFrame": 2557800,
+          "endFrame": 2601900,
+          "region": {
+            "start": 2557800,
+            "end": 2601900,
+            "inputStart": 2546775,
+            "inputEnd": 2612925
+          },
+          "cues": [
+            {
+              "start": 58.0,
+              "end": 58.05,
+              "value": "B"
+            },
+            {
+              "start": 58.05,
+              "end": 58.24,
+              "value": "C"
+            },
+            {
+              "start": 58.24,
+              "end": 58.45,
+              "value": "E"
+            },
+            {
+              "start": 58.45,
+              "end": 58.59,
+              "value": "B"
+            },
+            {
+              "start": 58.59,
+              "end": 58.66,
+              "value": "C"
+            },
+            {
+              "start": 58.66,
+              "end": 58.85,
+              "value": "D"
+            },
+            {
+              "start": 58.85,
+              "end": 58.9,
+              "value": "C"
+            },
+            {
+              "start": 58.9,
+              "end": 59.0,
+              "value": "B"
+            }
+          ],
+          "seconds": 0.948993000027258,
+          "peakRssBytes": 161038336,
+          "pcmSha256": "977bd165f6d3455506d4475652f5dd9f056b2b38062a3ca64485c3d57e76f848",
+          "incomingSeconds": 1.45,
+          "preparedSeconds": 4.76265306122449,
+          "wallSeconds": 60.29675145802321
+        },
+        {
+          "type": "analysis",
+          "index": 59,
+          "region": {
+            "start": 2601900,
+            "end": 2646000,
+            "inputStart": 2590875,
+            "inputEnd": 2657025
+          },
+          "wallSeconds": 60.30509045801591
+        },
+        {
+          "type": "segment",
+          "index": 59,
+          "startFrame": 2601900,
+          "endFrame": 2646000,
+          "region": {
+            "start": 2601900,
+            "end": 2646000,
+            "inputStart": 2590875,
+            "inputEnd": 2657025
+          },
+          "cues": [
+            {
+              "start": 59.0,
+              "end": 59.83,
+              "value": "X"
+            },
+            {
+              "start": 59.83,
+              "end": 60.0,
+              "value": "F"
+            }
+          ],
+          "seconds": 1.417771584005095,
+          "peakRssBytes": 159858688,
+          "pcmSha256": "a3a709eba5beb61e42dee5fbd9e553000f63950e47275bb1bcde141a80b7d2ef",
+          "incomingSeconds": 1.95,
+          "preparedSeconds": 4.337573696145125,
+          "wallSeconds": 61.723152000049595
+        },
+        {
+          "type": "analysis",
+          "index": 60,
+          "region": {
+            "start": 2646000,
+            "end": 2690100,
+            "inputStart": 2634975,
+            "inputEnd": 2701125
+          },
+          "wallSeconds": 61.723167333053425
+        },
+        {
+          "type": "segment",
+          "index": 60,
+          "startFrame": 2646000,
+          "endFrame": 2690100,
+          "region": {
+            "start": 2646000,
+            "end": 2690100,
+            "inputStart": 2634975,
+            "inputEnd": 2701125
+          },
+          "cues": [
+            {
+              "start": 60.0,
+              "end": 60.07,
+              "value": "F"
+            },
+            {
+              "start": 60.07,
+              "end": 60.28,
+              "value": "C"
+            },
+            {
+              "start": 60.28,
+              "end": 60.56,
+              "value": "B"
+            },
+            {
+              "start": 60.56,
+              "end": 60.63,
+              "value": "C"
+            },
+            {
+              "start": 60.63,
+              "end": 60.7,
+              "value": "B"
+            },
+            {
+              "start": 60.7,
+              "end": 60.78,
+              "value": "A"
+            },
+            {
+              "start": 60.78,
+              "end": 61.0,
+              "value": "E"
+            }
+          ],
+          "seconds": 0.9540905000176281,
+          "peakRssBytes": 159678464,
+          "pcmSha256": "e9441cc430b719577adf416a151f244473916a76d0484aef7ca3036d63d51ba6",
+          "incomingSeconds": 1.85,
+          "preparedSeconds": 4.382267573696145,
+          "wallSeconds": 62.67744841601234
+        },
+        {
+          "type": "analysis",
+          "index": 61,
+          "region": {
+            "start": 2690100,
+            "end": 2734200,
+            "inputStart": 2679075,
+            "inputEnd": 2745225
+          },
+          "wallSeconds": 62.677456041041296
+        },
+        {
+          "type": "segment",
+          "index": 61,
+          "startFrame": 2690100,
+          "endFrame": 2734200,
+          "region": {
+            "start": 2690100,
+            "end": 2734200,
+            "inputStart": 2679075,
+            "inputEnd": 2745225
+          },
+          "cues": [
+            {
+              "start": 61.0,
+              "end": 61.04,
+              "value": "E"
+            },
+            {
+              "start": 61.04,
+              "end": 61.18,
+              "value": "B"
+            },
+            {
+              "start": 61.18,
+              "end": 61.63,
+              "value": "X"
+            },
+            {
+              "start": 61.63,
+              "end": 61.68,
+              "value": "B"
+            },
+            {
+              "start": 61.68,
+              "end": 61.73,
+              "value": "H"
+            },
+            {
+              "start": 61.73,
+              "end": 61.8,
+              "value": "C"
+            },
+            {
+              "start": 61.8,
+              "end": 61.88,
+              "value": "A"
+            },
+            {
+              "start": 61.88,
+              "end": 62.0,
+              "value": "F"
+            }
+          ],
+          "seconds": 0.9608921249746345,
+          "peakRssBytes": 162430976,
+          "pcmSha256": "d04effaa546c3049986fff2c3dbc779d3fcc7c9482e70eb1e13b86a3e2016d3b",
+          "incomingSeconds": 1.85,
+          "preparedSeconds": 4.430249433106576,
+          "wallSeconds": 63.63858133304166
+        },
+        {
+          "type": "analysis",
+          "index": 62,
+          "region": {
+            "start": 2734200,
+            "end": 2778300,
+            "inputStart": 2723175,
+            "inputEnd": 2789325
+          },
+          "wallSeconds": 63.63859083305579
+        },
+        {
+          "type": "segment",
+          "index": 62,
+          "startFrame": 2734200,
+          "endFrame": 2778300,
+          "region": {
+            "start": 2734200,
+            "end": 2778300,
+            "inputStart": 2723175,
+            "inputEnd": 2789325
+          },
+          "cues": [
+            {
+              "start": 62.0,
+              "end": 62.07,
+              "value": "F"
+            },
+            {
+              "start": 62.07,
+              "end": 62.14,
+              "value": "C"
+            },
+            {
+              "start": 62.14,
+              "end": 62.28,
+              "value": "B"
+            },
+            {
+              "start": 62.28,
+              "end": 62.41,
+              "value": "X"
+            },
+            {
+              "start": 62.41,
+              "end": 62.48,
+              "value": "B"
+            },
+            {
+              "start": 62.48,
+              "end": 62.55,
+              "value": "F"
+            },
+            {
+              "start": 62.55,
+              "end": 62.83,
+              "value": "B"
+            },
+            {
+              "start": 62.83,
+              "end": 62.9,
+              "value": "H"
+            },
+            {
+              "start": 62.9,
+              "end": 63.0,
+              "value": "C"
+            }
+          ],
+          "seconds": 0.9886218750034459,
+          "peakRssBytes": 162430976,
+          "pcmSha256": "153c0fb48721938da3fae8745963e52f3013885dab574f5e7c13bb0ab3eb803a",
+          "incomingSeconds": 1.85,
+          "preparedSeconds": 4.433287981859411,
+          "wallSeconds": 64.62741945800371
+        },
+        {
+          "type": "analysis",
+          "index": 63,
+          "region": {
+            "start": 2778300,
+            "end": 2822400,
+            "inputStart": 2767275,
+            "inputEnd": 2833425
+          },
+          "wallSeconds": 64.62742920801975
+        },
+        {
+          "type": "segment",
+          "index": 63,
+          "startFrame": 2778300,
+          "endFrame": 2822400,
+          "region": {
+            "start": 2778300,
+            "end": 2822400,
+            "inputStart": 2767275,
+            "inputEnd": 2833425
+          },
+          "cues": [
+            {
+              "start": 63.0,
+              "end": 63.05,
+              "value": "C"
+            },
+            {
+              "start": 63.05,
+              "end": 63.12,
+              "value": "G"
+            },
+            {
+              "start": 63.12,
+              "end": 63.26,
+              "value": "F"
+            },
+            {
+              "start": 63.26,
+              "end": 63.4,
+              "value": "E"
+            },
+            {
+              "start": 63.4,
+              "end": 63.47,
+              "value": "C"
+            },
+            {
+              "start": 63.47,
+              "end": 63.68,
+              "value": "B"
+            },
+            {
+              "start": 63.68,
+              "end": 63.76,
+              "value": "A"
+            },
+            {
+              "start": 63.76,
+              "end": 63.98,
+              "value": "B"
+            },
+            {
+              "start": 63.98,
+              "end": 64.0,
+              "value": "X"
+            }
+          ],
+          "seconds": 0.8156330829951912,
+          "peakRssBytes": 161873920,
+          "pcmSha256": "3d76535a26f0255ddf252b3eddd176a181106918c13469507c6c88c9760e918e",
+          "incomingSeconds": 1.65,
+          "preparedSeconds": 4.620907029478458,
+          "wallSeconds": 65.44326200004434
+        },
+        {
+          "type": "analysis",
+          "index": 64,
+          "region": {
+            "start": 2822400,
+            "end": 2866500,
+            "inputStart": 2811375,
+            "inputEnd": 2877525
+          },
+          "wallSeconds": 65.44327100005466
+        },
+        {
+          "type": "segment",
+          "index": 64,
+          "startFrame": 2822400,
+          "endFrame": 2866500,
+          "region": {
+            "start": 2822400,
+            "end": 2866500,
+            "inputStart": 2811375,
+            "inputEnd": 2877525
+          },
+          "cues": [
+            {
+              "start": 64.0,
+              "end": 64.74,
+              "value": "X"
+            },
+            {
+              "start": 64.74,
+              "end": 64.93,
+              "value": "B"
+            },
+            {
+              "start": 64.93,
+              "end": 65.0,
+              "value": "C"
+            }
+          ],
+          "seconds": 0.7641206249827519,
+          "peakRssBytes": 162201600,
+          "pcmSha256": "50ceae891cb82c8ffc39f42237ef55fd36fb0f58e96da1052186c766afc60975",
+          "incomingSeconds": 1.45,
+          "preparedSeconds": 4.85140589569161,
+          "wallSeconds": 66.2076123750303
+        },
+        {
+          "type": "analysis",
+          "index": 65,
+          "region": {
+            "start": 2866500,
+            "end": 2910600,
+            "inputStart": 2855475,
+            "inputEnd": 2921625
+          },
+          "wallSeconds": 66.30237229104387
+        },
+        {
+          "type": "segment",
+          "index": 65,
+          "startFrame": 2866500,
+          "endFrame": 2910600,
+          "region": {
+            "start": 2866500,
+            "end": 2910600,
+            "inputStart": 2855475,
+            "inputEnd": 2921625
+          },
+          "cues": [
+            {
+              "start": 65.0,
+              "end": 65.4,
+              "value": "C"
+            },
+            {
+              "start": 65.4,
+              "end": 65.61,
+              "value": "B"
+            },
+            {
+              "start": 65.61,
+              "end": 66.0,
+              "value": "X"
+            }
+          ],
+          "seconds": 0.9780160000082105,
+          "peakRssBytes": 162791424,
+          "pcmSha256": "97e43f3a5406be253f5c0774ca57190869b3e325046c2ffa316ddf87caa5b919",
+          "incomingSeconds": 1.45,
+          "preparedSeconds": 4.787482993197279,
+          "wallSeconds": 67.28087800001958
+        },
+        {
+          "type": "analysis",
+          "index": 66,
+          "region": {
+            "start": 2910600,
+            "end": 2954700,
+            "inputStart": 2899575,
+            "inputEnd": 2965725
+          },
+          "wallSeconds": 67.30256545805605
+        },
+        {
+          "type": "segment",
+          "index": 66,
+          "startFrame": 2910600,
+          "endFrame": 2954700,
+          "region": {
+            "start": 2910600,
+            "end": 2954700,
+            "inputStart": 2899575,
+            "inputEnd": 2965725
+          },
+          "cues": [
+            {
+              "start": 66.0,
+              "end": 66.02,
+              "value": "X"
+            },
+            {
+              "start": 66.02,
+              "end": 66.26,
+              "value": "B"
+            },
+            {
+              "start": 66.26,
+              "end": 66.4,
+              "value": "C"
+            },
+            {
+              "start": 66.4,
+              "end": 66.47,
+              "value": "B"
+            },
+            {
+              "start": 66.47,
+              "end": 66.54,
+              "value": "G"
+            },
+            {
+              "start": 66.54,
+              "end": 66.68,
+              "value": "E"
+            },
+            {
+              "start": 66.68,
+              "end": 66.75,
+              "value": "F"
+            },
+            {
+              "start": 66.75,
+              "end": 67.0,
+              "value": "B"
+            }
+          ],
+          "seconds": 0.9388837919686921,
+          "peakRssBytes": 160071680,
+          "pcmSha256": "cd678ab170b1ef22cdb2dd3d9612b920178f7f715539106a31a617bf8f324124",
+          "incomingSeconds": 1.45,
+          "preparedSeconds": 4.817777777777778,
+          "wallSeconds": 68.2416902500554
+        },
+        {
+          "type": "analysis",
+          "index": 67,
+          "region": {
+            "start": 2954700,
+            "end": 2998800,
+            "inputStart": 2943675,
+            "inputEnd": 3009825
+          },
+          "wallSeconds": 68.30504333303543
+        },
+        {
+          "type": "segment",
+          "index": 67,
+          "startFrame": 2954700,
+          "endFrame": 2998800,
+          "region": {
+            "start": 2954700,
+            "end": 2998800,
+            "inputStart": 2943675,
+            "inputEnd": 3009825
+          },
+          "cues": [
+            {
+              "start": 67.0,
+              "end": 67.12,
+              "value": "B"
+            },
+            {
+              "start": 67.12,
+              "end": 67.26,
+              "value": "C"
+            },
+            {
+              "start": 67.26,
+              "end": 67.4,
+              "value": "E"
+            },
+            {
+              "start": 67.4,
+              "end": 67.47,
+              "value": "F"
+            },
+            {
+              "start": 67.47,
+              "end": 67.61,
+              "value": "C"
+            },
+            {
+              "start": 67.61,
+              "end": 67.68,
+              "value": "G"
+            },
+            {
+              "start": 67.68,
+              "end": 67.89,
+              "value": "H"
+            },
+            {
+              "start": 67.89,
+              "end": 67.96,
+              "value": "G"
+            },
+            {
+              "start": 67.96,
+              "end": 68.0,
+              "value": "E"
+            }
+          ],
+          "seconds": 0.974069916002918,
+          "peakRssBytes": 162119680,
+          "pcmSha256": "1e044c7e13862677f86a30dff948e60fd7075fc429b314b343fecbdeaed3cd30",
+          "incomingSeconds": 1.45,
+          "preparedSeconds": 4.779727891156463,
+          "wallSeconds": 69.27963616600027
+        },
+        {
+          "type": "analysis",
+          "index": 68,
+          "region": {
+            "start": 2998800,
+            "end": 3042900,
+            "inputStart": 2987775,
+            "inputEnd": 3053925
+          },
+          "wallSeconds": 69.30354650004301
+        },
+        {
+          "type": "segment",
+          "index": 68,
+          "startFrame": 2998800,
+          "endFrame": 3042900,
+          "region": {
+            "start": 2998800,
+            "end": 3042900,
+            "inputStart": 2987775,
+            "inputEnd": 3053925
+          },
+          "cues": [
+            {
+              "start": 68.0,
+              "end": 68.03,
+              "value": "E"
+            },
+            {
+              "start": 68.03,
+              "end": 68.24,
+              "value": "C"
+            },
+            {
+              "start": 68.24,
+              "end": 68.31,
+              "value": "B"
+            },
+            {
+              "start": 68.31,
+              "end": 68.52,
+              "value": "E"
+            },
+            {
+              "start": 68.52,
+              "end": 69.0,
+              "value": "X"
+            }
+          ],
+          "seconds": 0.7661839579814114,
+          "peakRssBytes": 162545664,
+          "pcmSha256": "d15be7aab14c2d902c6e7e04e3c48ebb6c83f68efc9b7b9ae8eb819e688ae55e",
+          "incomingSeconds": 1.25,
+          "preparedSeconds": 5.000113378684807,
+          "wallSeconds": 70.06995766604086
+        },
+        {
+          "type": "analysis",
+          "index": 69,
+          "region": {
+            "start": 3042900,
+            "end": 3087000,
+            "inputStart": 3031875,
+            "inputEnd": 3098025
+          },
+          "wallSeconds": 70.30511016602395
+        },
+        {
+          "type": "segment",
+          "index": 69,
+          "startFrame": 3042900,
+          "endFrame": 3087000,
+          "region": {
+            "start": 3042900,
+            "end": 3087000,
+            "inputStart": 3031875,
+            "inputEnd": 3098025
+          },
+          "cues": [
+            {
+              "start": 69.0,
+              "end": 69.25,
+              "value": "X"
+            },
+            {
+              "start": 69.25,
+              "end": 69.33,
+              "value": "A"
+            },
+            {
+              "start": 69.33,
+              "end": 69.87,
+              "value": "B"
+            },
+            {
+              "start": 69.87,
+              "end": 70.0,
+              "value": "X"
+            }
+          ],
+          "seconds": 0.9083328749984503,
+          "peakRssBytes": 160858112,
+          "pcmSha256": "0dff68de887a35b1764a47286f3f63e2a700b11289e1c7cbc6f33586e02913bb",
+          "incomingSeconds": 1.45,
+          "preparedSeconds": 4.846349206349206,
+          "wallSeconds": 71.21372058300767
+        },
+        {
+          "type": "analysis",
+          "index": 70,
+          "region": {
+            "start": 3087000,
+            "end": 3131100,
+            "inputStart": 3075975,
+            "inputEnd": 3142125
+          },
+          "wallSeconds": 71.3050466250279
+        },
+        {
+          "type": "segment",
+          "index": 70,
+          "startFrame": 3087000,
+          "endFrame": 3131100,
+          "region": {
+            "start": 3087000,
+            "end": 3131100,
+            "inputStart": 3075975,
+            "inputEnd": 3142125
+          },
+          "cues": [
+            {
+              "start": 70.0,
+              "end": 70.04,
+              "value": "X"
+            },
+            {
+              "start": 70.04,
+              "end": 70.29,
+              "value": "B"
+            },
+            {
+              "start": 70.29,
+              "end": 70.39,
+              "value": "A"
+            },
+            {
+              "start": 70.39,
+              "end": 70.62,
+              "value": "B"
+            },
+            {
+              "start": 70.62,
+              "end": 70.7,
+              "value": "A"
+            },
+            {
+              "start": 70.7,
+              "end": 70.75,
+              "value": "C"
+            },
+            {
+              "start": 70.75,
+              "end": 70.86,
+              "value": "B"
+            },
+            {
+              "start": 70.86,
+              "end": 71.0,
+              "value": "C"
+            }
+          ],
+          "seconds": 0.943627959000878,
+          "peakRssBytes": 162398208,
+          "pcmSha256": "8ea306b94ea14e99d011b9a055cf404480f001104add516b4daa3a846003d243",
+          "incomingSeconds": 1.45,
+          "preparedSeconds": 4.809931972789116,
+          "wallSeconds": 72.24888875003671
+        },
+        {
+          "type": "analysis",
+          "index": 71,
+          "region": {
+            "start": 3131100,
+            "end": 3175200,
+            "inputStart": 3120075,
+            "inputEnd": 3186225
+          },
+          "wallSeconds": 72.30508016602835
+        },
+        {
+          "type": "segment",
+          "index": 71,
+          "startFrame": 3131100,
+          "endFrame": 3175200,
+          "region": {
+            "start": 3131100,
+            "end": 3175200,
+            "inputStart": 3120075,
+            "inputEnd": 3186225
+          },
+          "cues": [
+            {
+              "start": 71.0,
+              "end": 71.07,
+              "value": "C"
+            },
+            {
+              "start": 71.07,
+              "end": 71.14,
+              "value": "H"
+            },
+            {
+              "start": 71.14,
+              "end": 71.21,
+              "value": "C"
+            },
+            {
+              "start": 71.21,
+              "end": 71.42,
+              "value": "B"
+            },
+            {
+              "start": 71.42,
+              "end": 72.0,
+              "value": "X"
+            }
+          ],
+          "seconds": 0.6034001670195721,
+          "peakRssBytes": 161792000,
+          "pcmSha256": "e231ab10c9f7501115bd54920b82239cc526aaca0ae2a74642cb6552af94724c",
+          "incomingSeconds": 1.15,
+          "preparedSeconds": 5.153265306122449,
+          "wallSeconds": 72.9086918750545
+        },
+        {
+          "type": "analysis",
+          "index": 72,
+          "region": {
+            "start": 3175200,
+            "end": 3219300,
+            "inputStart": 3164175,
+            "inputEnd": 3230325
+          },
+          "wallSeconds": 73.30124916601926
+        },
+        {
+          "type": "segment",
+          "index": 72,
+          "startFrame": 3175200,
+          "endFrame": 3219300,
+          "region": {
+            "start": 3175200,
+            "end": 3219300,
+            "inputStart": 3164175,
+            "inputEnd": 3230325
+          },
+          "cues": [
+            {
+              "start": 72.0,
+              "end": 72.16,
+              "value": "X"
+            },
+            {
+              "start": 72.16,
+              "end": 72.24,
+              "value": "F"
+            },
+            {
+              "start": 72.24,
+              "end": 72.33,
+              "value": "A"
+            },
+            {
+              "start": 72.33,
+              "end": 72.42,
+              "value": "B"
+            },
+            {
+              "start": 72.42,
+              "end": 72.49,
+              "value": "G"
+            },
+            {
+              "start": 72.49,
+              "end": 72.63,
+              "value": "E"
+            },
+            {
+              "start": 72.63,
+              "end": 72.71,
+              "value": "A"
+            },
+            {
+              "start": 72.71,
+              "end": 73.0,
+              "value": "B"
+            }
+          ],
+          "seconds": 0.7719393330044113,
+          "peakRssBytes": 160120832,
+          "pcmSha256": "3a961fbe511670290b68ce5bb610429be868c5f53e9e257e5d4646b1fee15aae",
+          "incomingSeconds": 1.25,
+          "preparedSeconds": 4.995963718820862,
+          "wallSeconds": 74.07341308303876
+        },
+        {
+          "type": "analysis",
+          "index": 73,
+          "region": {
+            "start": 3219300,
+            "end": 3263400,
+            "inputStart": 3208275,
+            "inputEnd": 3274425
+          },
+          "wallSeconds": 74.30515458300943
+        },
+        {
+          "type": "segment",
+          "index": 73,
+          "startFrame": 3219300,
+          "endFrame": 3263400,
+          "region": {
+            "start": 3219300,
+            "end": 3263400,
+            "inputStart": 3208275,
+            "inputEnd": 3274425
+          },
+          "cues": [
+            {
+              "start": 73.0,
+              "end": 73.07,
+              "value": "B"
+            },
+            {
+              "start": 73.07,
+              "end": 73.28,
+              "value": "C"
+            },
+            {
+              "start": 73.28,
+              "end": 73.35,
+              "value": "H"
+            },
+            {
+              "start": 73.35,
+              "end": 73.42,
+              "value": "C"
+            },
+            {
+              "start": 73.42,
+              "end": 73.63,
+              "value": "B"
+            },
+            {
+              "start": 73.63,
+              "end": 74.0,
+              "value": "X"
+            }
+          ],
+          "seconds": 0.7518725839909166,
+          "peakRssBytes": 161841152,
+          "pcmSha256": "4af140f29b44f211c4913880e6d9d7c988b7e9494dca658720071dbd5800cd9b",
+          "incomingSeconds": 1.25,
+          "preparedSeconds": 5.012607709750567,
+          "wallSeconds": 75.05726166605018
+        },
+        {
+          "type": "analysis",
+          "index": 74,
+          "region": {
+            "start": 3263400,
+            "end": 3307500,
+            "inputStart": 3252375,
+            "inputEnd": 3318525
+          },
+          "wallSeconds": 75.30512154102325
+        },
+        {
+          "type": "segment",
+          "index": 74,
+          "startFrame": 3263400,
+          "endFrame": 3307500,
+          "region": {
+            "start": 3263400,
+            "end": 3307500,
+            "inputStart": 3252375,
+            "inputEnd": 3318525
+          },
+          "cues": [
+            {
+              "start": 74.0,
+              "end": 74.38,
+              "value": "X"
+            },
+            {
+              "start": 74.38,
+              "end": 74.43,
+              "value": "C"
+            },
+            {
+              "start": 74.43,
+              "end": 74.47,
+              "value": "B"
+            },
+            {
+              "start": 74.47,
+              "end": 74.54,
+              "value": "E"
+            },
+            {
+              "start": 74.54,
+              "end": 74.75,
+              "value": "C"
+            },
+            {
+              "start": 74.75,
+              "end": 75.0,
+              "value": "B"
+            }
+          ],
+          "seconds": 0.9006422919919714,
+          "peakRssBytes": 162529280,
+          "pcmSha256": "c35fe0b47a7293c6c580d28d03eb529913cf22b8463d4a7a06692fbfadb2a1da",
+          "incomingSeconds": 1.45,
+          "preparedSeconds": 4.859977324263038,
+          "wallSeconds": 76.20598325005267
+        },
+        {
+          "type": "analysis",
+          "index": 75,
+          "region": {
+            "start": 3307500,
+            "end": 3351600,
+            "inputStart": 3296475,
+            "inputEnd": 3362625
+          },
+          "wallSeconds": 76.30507175001549
+        },
+        {
+          "type": "segment",
+          "index": 75,
+          "startFrame": 3307500,
+          "endFrame": 3351600,
+          "region": {
+            "start": 3307500,
+            "end": 3351600,
+            "inputStart": 3296475,
+            "inputEnd": 3362625
+          },
+          "cues": [
+            {
+              "start": 75.0,
+              "end": 75.05,
+              "value": "B"
+            },
+            {
+              "start": 75.05,
+              "end": 75.1,
+              "value": "C"
+            },
+            {
+              "start": 75.1,
+              "end": 75.17,
+              "value": "B"
+            },
+            {
+              "start": 75.17,
+              "end": 75.24,
+              "value": "G"
+            },
+            {
+              "start": 75.24,
+              "end": 75.45,
+              "value": "B"
+            },
+            {
+              "start": 75.45,
+              "end": 75.56,
+              "value": "A"
+            },
+            {
+              "start": 75.56,
+              "end": 75.62,
+              "value": "B"
+            },
+            {
+              "start": 75.62,
+              "end": 75.68,
+              "value": "C"
+            },
+            {
+              "start": 75.68,
+              "end": 75.75,
+              "value": "G"
+            },
+            {
+              "start": 75.75,
+              "end": 75.96,
+              "value": "B"
+            },
+            {
+              "start": 75.96,
+              "end": 76.0,
+              "value": "G"
+            }
+          ],
+          "seconds": 0.8035742920474149,
+          "peakRssBytes": 161939456,
+          "pcmSha256": "c5b76699b92af6a35a73cbe09090ae65b00fa0f0d153bd79f24e2f6d114cdfea",
+          "incomingSeconds": 1.35,
+          "preparedSeconds": 4.950090702947846,
+          "wallSeconds": 77.10884595802054
+        },
+        {
+          "type": "analysis",
+          "index": 76,
+          "region": {
+            "start": 3351600,
+            "end": 3395700,
+            "inputStart": 3340575,
+            "inputEnd": 3405060
+          },
+          "wallSeconds": 77.21414250001544
+        },
+        {
+          "type": "segment",
+          "index": 76,
+          "startFrame": 3351600,
+          "endFrame": 3395700,
+          "region": {
+            "start": 3351600,
+            "end": 3395700,
+            "inputStart": 3340575,
+            "inputEnd": 3405060
+          },
+          "cues": [
+            {
+              "start": 76.0,
+              "end": 76.07,
+              "value": "E"
+            },
+            {
+              "start": 76.07,
+              "end": 76.21,
+              "value": "F"
+            },
+            {
+              "start": 76.21,
+              "end": 76.35,
+              "value": "C"
+            },
+            {
+              "start": 76.35,
+              "end": 76.42,
+              "value": "B"
+            },
+            {
+              "start": 76.42,
+              "end": 77.0,
+              "value": "X"
+            }
+          ],
+          "seconds": 0.6781690000207163,
+          "peakRssBytes": 162480128,
+          "pcmSha256": "c9abbcbba786fd803e8e092a29d691e4fd0cbbed54f3d3d361a8369a3a8ab021",
+          "incomingSeconds": 0.46224489795918366,
+          "preparedSeconds": 5.176009070294785,
+          "wallSeconds": 77.89249916601693
+        },
+        {
+          "type": "analysis",
+          "index": 77,
+          "region": {
+            "start": 3395700,
+            "end": 3405060,
+            "inputStart": 3384675,
+            "inputEnd": 3405060
+          },
+          "wallSeconds": 77.89250700001139
+        },
+        {
+          "type": "segment",
+          "index": 77,
+          "startFrame": 3395700,
+          "endFrame": 3405060,
+          "region": {
+            "start": 3395700,
+            "end": 3405060,
+            "inputStart": 3384675,
+            "inputEnd": 3405060
+          },
+          "cues": [
+            {
+              "start": 77.0,
+              "end": 77.21,
+              "value": "X"
+            }
+          ],
+          "seconds": 0.07090354198589921,
+          "peakRssBytes": 0,
+          "pcmSha256": "b38a4115030a9504592191502f477810d9424f3f7a513f9f1997e904f3a04163",
+          "incomingSeconds": 0.25,
+          "preparedSeconds": 5.316530612244898,
+          "wallSeconds": 77.96350525005255
+        },
+        {
+          "type": "eos",
+          "wallSeconds": 77.96351633302402
+        },
+        {
+          "type": "complete",
+          "wallSeconds": 83.27511683304328
+        }
+      ],
+      "receiver": {
+        "receiver": "measured wall-clock sink; no browser/audio-device playback",
+        "firstPlaybackSeconds": 3.0328570830170065,
+        "gaps": [
+          {
+            "start": 19.032857083017007,
+            "seconds": 0.25543866702355444
+          },
+          {
+            "start": 20.27575545804575,
+            "seconds": 0.37947804195573553
+          },
+          {
+            "start": 21.64269145805156,
+            "seconds": 0.33498954196693376
+          },
+          {
+            "start": 22.965122750028968,
+            "seconds": 0.130619540985208
+          },
+          {
+            "start": 24.083316041040234,
+            "seconds": 0.28178949997527525
+          },
+          {
+            "start": 25.354587875015568,
+            "seconds": 0.5402735410025343
+          },
+          {
+            "start": 26.882253083051182,
+            "seconds": 0.9385241249692626
+          },
+          {
+            "start": 28.80824558302993,
+            "seconds": 0.21201999997720122
+          },
+          {
+            "start": 30.00814150000224,
+            "seconds": 0.0627267500385642
+          }
+        ],
+        "gapSeconds": 3.1358597078942694,
+        "bufferPeakSeconds": 5.303978564969249,
+        "bufferMinimumSeconds": 0.0,
+        "playedFrames": 3405060
+      }
+    }
+  ],
+  "provenance": {
+    "date": "2026-10-12",
+    "binary": ".runtime/tools/rhubarb-1.14.0-arm64/rhubarb",
+    "binarySha256": "8801954b0c462d76fbbe8a0baceb0352f9753902798110679589668a4af4f8f6",
+    "threads": 1,
+    "recognizer": "pocketSphinx",
+    "cache": false,
+    "contextSeconds": 0.25,
+    "guardMemoryMiB": 384,
+    "guardTimeoutSeconds": 15,
+    "providerServicesStarted": false
+  }
+}

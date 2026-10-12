@@ -148,3 +148,7 @@ The matrix supports distinct labels, alternate executables/recognizers and bound
 [Machine-readable measurements and cue outputs](evidence/rhubarb-optimization-2026-10-12.json) are tracked. Full logs, copied source, compiler builds and intermediates remain in ignored `.runtime/rhubarb-optimization/`, approximately **976 MiB** at measurement. The independent installed native tool/resources are about **85 MiB** in `.runtime/tools/rhubarb-1.14.0-arm64/`. Original 24 kHz test inputs were copied from the prior temporary capture and had only WAV headers rebuilt; their PCM samples were preserved. Their availability is not guaranteed after temporary-directory cleanup.
 
 TODO **11b** is deliberately unchecked. Later pruning can remove the studio's unused alternatives, vendor/preparation code and experiment/build cache, while preserving the selected runtime tool, measurements and original fixtures. The user's separate edit to the older speech plan was left untouched. Visual boundary-policy acceptance, a captured live PCM contract and the combined resource benchmark remain the next gates.
+
+## Continuous saved-audio follow-up
+
+The [paced saved-audio probe](rhubarb-saved-stream-test-2026-10-12.md) replaces simulated readiness with actual serial Rhubarb work and measured CLI/browser consumption. It includes sustained runs and a delivery-stall failure case. Kokoro remains off; live stage 2 awaits coordination.

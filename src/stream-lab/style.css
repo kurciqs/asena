@@ -1,0 +1,6 @@
+#metrics { margin: 20px 0; font-size: .83rem; }
+#metrics > div { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid #a396bd40; }
+#metrics dd { margin: 0; font-variant-numeric: tabular-nums; font-weight: 600; }
+#start { max-width: 100%; }
+select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12'%3E%3Cpath d='m2 4 4 4 4-4' fill='none' stroke='%236b617e' stroke-width='1.5'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; }
+@media(forced-colors:active){select{appearance:auto;background-image:none;}}

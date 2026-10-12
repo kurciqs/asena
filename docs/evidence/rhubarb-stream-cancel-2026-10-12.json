@@ -1,0 +1,13 @@
+{
+  "fixtureOnly": true,
+  "actualRecognizerSeen": true,
+  "recognizerTerminated": true,
+  "temporaryRegionRemoved": true,
+  "cancelToStreamEndSeconds": 0.007437084044795483,
+  "lateSegments": 0,
+  "terminalEvents": [
+    "cancelled",
+    "result"
+  ],
+  "serverIdle": true
+}

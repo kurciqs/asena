@@ -1,0 +1,16 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Asena · Saved-audio streaming test</title>
+<link rel="stylesheet" href="/lip-sync-lab/lab.css"><link rel="stylesheet" href="/stream-lab/style.css">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.176.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.176.0/examples/jsm/","@pixiv/three-vrm":"https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3.5.5/lib/three-vrm.module.min.js"}}</script>
+<script type="module" src="/stream-lab/client.js"></script></head><body><main>
+<section class="viewer" aria-label="Streaming avatar"><div id="stage"></div><div class="viewer-label"><span class="eyebrow">Saved voice · real Rhubarb analysis</span><h1>Keep the conversation flowing.</h1><p id="active-method">Preparing avatar…</p></div><div class="viewer-footer"><span id="position">0.00s</span><span id="motion-status">Waiting for avatar</span></div></section>
+<aside><a href="http://localhost:3001/lip-sync-samples.html">← Comparison studio</a><p class="eyebrow">Stage 1 / saved audio only</p><h2>Test continuous speech.</h2><p class="intro">Saved Kokoro recordings arrive gradually. Rhubarb prepares each region while the previous audio plays. Kokoro and the language model stay off.</p>
+<label for="policy">Analysis regions</label><select id="policy"><option value="1s">1 second</option><option value="2s" selected>2 seconds</option><option value="3s">3 seconds</option><option value="sentences">Sentence boundaries (up to 5 seconds)</option></select>
+<label for="profile">Audio delivery</label><select id="profile"><option value="steady1x">Steady · playback speed</option><option value="steady2x">Steady · twice playback speed</option><option value="bursty1x">Bursts · includes a two-second stall</option></select>
+<label for="startup">Prepared audio before playback</label><select id="startup"><option value="2">At least 2 seconds</option><option value="4" selected>At least 4 seconds</option></select>
+<label for="length">Test length</label><select id="length"><option value="1">Short · 26 seconds</option><option value="3">Sustained · 77 seconds</option></select>
+<div class="playback"><button class="primary" id="start" disabled>Start saved-audio test</button><button id="stop" disabled>Stop</button><button id="download" disabled>Save report</button></div>
+<p id="status" role="status">Loading avatar. Analysis starts only when you press Start.</p>
+<dl id="metrics"><div><dt>First playback</dt><dd id="first">—</dd></div><div><dt>Prepared audio remaining</dt><dd id="buffer">0.00s</dd></div><div><dt>Playback gaps</dt><dd id="gaps">0</dd></div><div><dt>Alignment work</dt><dd id="compute">0.00s</dd></div><div><dt>Rhubarb peak memory</dt><dd id="memory">—</dd></div></dl>
+<details><summary>Inspect this test</summary><pre id="inspection">No test run yet.</pre></details>
+<p class="note">250 ms analysis context on each side; audio overlap is never played twice. One native Rhubarb process at a time, no alignment cache. These delivery patterns are synthetic and exclude Kokoro startup delay and competing inference.</p>
+</aside></main></body></html>
