@@ -13,6 +13,7 @@ import { CLOSENESS, COMPANION_STORAGE_KEY, DEFAULT_COMPANION_PROFILE, buildCompa
 import { REPLAY_MEMORY_KEY, ReplaySession, loadFixtureAudio, loadReplayMemories, replayProfileStorage, saveReplayMemories } from './replay.js';
 import { createToolPanel, wireChatLayout } from './ui_panels.js';
 import { createJsonViewer } from './json_viewer.js';
+import {MemoryWork, MEMORY_INSTRUCTION, mergeMemories} from './memory_work.js';
 
 let replay = null;
 let startupReady = false;
@@ -291,12 +292,40 @@ async function getVisemes(timestamps, turn, audioId, audioDuration, spokenText) 
 }
 
 let ind = 0;
+const memoryWork = new MemoryWork();
+async function extractPendingMemories(turn) {
+    if (!memoryWork.pending) return;
+    turn.phase('remembering');
+    try {
+        await memoryWork.drain(turn, async (job, owner) => {
+            if (replay) {
+                if (typeof job.fixture !== 'string') throw new Error('No extraction fixture. No model was called.');
+                return job.fixture;
+            }
+            const packed = packConversation({systemPrompt:MEMORY_INSTRUCTION, dialogue:job.dialogue, config:contextBudget});
+            const data = await requestJSON('/chat', {signal:owner.signal, method:'POST',
+                headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:runtimeConfig.chatModel,
+                    messages:packed.messages, max_tokens:Math.min(128,packed.maxTokens), temperature:0.2})});
+            lastExtractionUsage = data.usage ?? null;
+            return data.choices?.[0]?.message?.content;
+        }, result => {
+            memories = mergeMemories(memories,result);
+            renderContextBudget();
+            document.getElementById('memory-save-status').textContent='New facts ready to save.';
+            inspectReplay({memoryExtraction:result, memoryPhase:'ready to save'});
+        });
+    } catch (error) {
+        if (turn.signal.aborted) throw error;
+        document.getElementById('memory-save-status').textContent=`Memory extraction postponed: ${error.message}`;
+        inspectReplay({memoryPhase:'postponed', memoryError:error.message});
+    }
+}
 const turnController = new TurnController(state => {
     const labels = { idle: 'Ready', requesting: 'Getting a reply', 'preparing-speech': 'Preparing speech',
-        speaking: 'Speaking', completed: 'Finished', stopped: 'Stopped', failed: 'Failed' };
+        speaking: 'Speaking', remembering: 'Updating memory', completed: 'Finished', stopped: 'Stopped', failed: 'Failed' };
     document.getElementById('turn-status').textContent = state.error || labels[state.phase];
     document.getElementById('turn-status').dataset.phase = state.phase;
-    document.getElementById('turn-stop').disabled = !['requesting', 'preparing-speech', 'speaking'].includes(state.phase);
+    document.getElementById('turn-stop').disabled = !['requesting', 'preparing-speech', 'speaking', 'remembering'].includes(state.phase);
     if(state.phase!=='speaking')document.getElementById('turn-pause').hidden=true;
     inspectReplay({ turn: state, phase: state.phase });
 });
@@ -330,21 +359,12 @@ async function handleTextResponse({ reuseUser = false } = {}) {
             message_history.push({ role: 'assistant', content: rawReply });
             ind++;
             if (ind % 5 === 0) {
-                const extractionHistory = [...message_history, { role: 'user', content:
-                    'Summarize the recent dialogue into 1–2 short bullet points of explicitly stated user facts and preferences.' }];
-                try {
-                    const extracted = await chat(extractionHistory, 'memory', turn);
-                    turn.assertCurrent();
-                    memories.push(...('\n' + extracted).split(/\n\s*-\s+/).map(item => item.trim()).filter(Boolean));
-                    inspectReplay({ phase: 'memory extracted' });
-                } catch (error) {
-                    if (turn.signal.aborted) throw error;
-                    speechWarning(`Memory extraction skipped: ${error.message}`);
-                }
+                memoryWork.enqueue(message_history.slice(2), replay?.active?.memoryExtraction ?? null);
             }
             renderMessages();
             lastRetry = { parsedReply, message };
             await prepareAndPlay(parsedReply, turn);
+            await extractPendingMemories(turn);
             document.getElementById('turn-retry').hidden = true;
             lastRetry = null;
             turn.assertCurrent();
@@ -450,6 +470,7 @@ document.getElementById('turn-retry').addEventListener('click', async () => {
         turn.own(() => ANI.stopPerformance());
         try {
             await prepareAndPlay(retry.parsedReply, turn);
+            await extractPendingMemories(turn);
             turn.assertCurrent();
             lastRetry = null;
             if (replay) { textInput.value = replay.nextPrompt; replayMessage('Scene finished.'); }

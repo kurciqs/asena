@@ -8,6 +8,7 @@ import {buildExpressionTracks, prepareVrmExpressionTracks} from '../src/expressi
 import * as EMO from '../src/emotion_classifier.js';
 import {AudioPerformanceScheduler} from '../src/performance_scheduler.js';
 import {ClockedAvatarPerformance} from '../src/clocked_avatar_performance.js';
+import {MemoryWork} from '../src/memory_work.js';
 
 // Execute the production orchestration with controlled IO. This catches ordering
 // and fallback gaps that isolated loader/controller/track tests cannot exercise.
@@ -150,4 +151,19 @@ test('opt-in live speech streams parsed text and keeps complete/replay paths sep
     h.context.playSpeechStream=async options=>{input=options.text;assert.equal(options.speechProfile,h.context.runtimeConfig.speechProfile);options.onPlayer({sample:()=>({}),weights:()=>[]});options.onWords([{word:'Hello',start_time:0,end_time:1}]);options.onClock({playedFrames:100,buffering:false});};
     h.context.document={getElementById:()=>({})};
     await h.run();assert.equal(input,'Hello');assert.equal(h.starts(),0);assert.equal(cleanups,1);
+});
+
+test('the fifth production reply is displayed and spoken before fact extraction',async()=>{
+    const events=[],work=new MemoryWork();
+    const context=vm.createContext({startupReady:true,ANI:{getPlaybackState:()=>({loading:false}),stopPerformance(){}},
+        replay:null,textInput:{value:'Remember my tea.'},lastRetry:null,document:{getElementById:()=>({})},
+        message_history:[{role:'system',content:''},{role:'system',content:''}],ind:4,memoryWork:work,
+        turnController:{run:async fn=>fn({own(){},assertCurrent(){},signal:new AbortController().signal})},
+        chat:async()=>{events.push('reply');return '*smiles* Mint tea. I will remember.';},EMO,
+        inspectReplay(){},renderMessages(){events.push('display');},replayMessage(){},
+        prepareAndPlay:async()=>events.push('speech'),extractPendingMemories:async()=>events.push('extract')});
+    vm.runInContext(section(main,'async function handleTextResponse(', '\nlet lastRetry ='),context);
+    await context.handleTextResponse();
+    assert.deepEqual(events.slice(-3),['display','speech','extract']);
+    assert.equal(work.pending.dialogue.at(-1).role,'assistant');
 });
