@@ -1,0 +1,584 @@
+{
+  "fixtureOnly": false,
+  "provider": "Kokoro captioned PCM",
+  "rate": 24000,
+  "policy": "2s",
+  "startupSeconds": 2,
+  "complete": true,
+  "strategy": "phrases",
+  "openingSeconds": 1,
+  "requestCount": 2,
+  "textCharacters": 72,
+  "textWords": 14,
+  "duration": 4.375666666666667,
+  "sourceSha256": "b3f722c2910a304706a4569b43e57c8c1f3d1ce95359b41f5f8637a9d3b95cb9",
+  "firstProviderAudioSeconds": 2.208332040987443,
+  "providerFinishedSeconds": 3.9105422910070047,
+  "providerPackets": [
+    {
+      "index": 0,
+      "wallSeconds": 2.208332040987443,
+      "startFrame": 0,
+      "frames": 62046,
+      "wordCount": 11,
+      "requestIndex": 0
+    },
+    {
+      "index": 1,
+      "wallSeconds": 3.909759000001941,
+      "startFrame": 62046,
+      "frames": 42970,
+      "wordCount": 7,
+      "requestIndex": 1
+    }
+  ],
+  "analysisSeconds": 3.350024209008552,
+  "peakRssBytes": 160907264,
+  "incomingPeakSeconds": 3.6256666666666666,
+  "preparedPeakSeconds": 3.5845833333333332,
+  "limits": {
+    "incomingSeconds": 16,
+    "preparedSeconds": 12,
+    "decodedPacketSeconds": 30,
+    "audioSeconds": 180,
+    "deadlineSeconds": 180,
+    "providerReadTimeoutSeconds": 15
+  },
+  "events": [
+    {
+      "type": "begin",
+      "rate": 24000,
+      "startupSeconds": 2,
+      "source": "live Kokoro",
+      "cache": false,
+      "threads": 1,
+      "text": "Hi, I'm Asena. It's lovely to meet you. Tell me a little about yourself.",
+      "strategy": "phrases",
+      "openingSeconds": 1,
+      "token": "ac045517c51f52d21395d374de74bc9f",
+      "wallSeconds": 0.005280499986838549
+    },
+    {
+      "type": "request",
+      "index": 0,
+      "characters": 40,
+      "requestCount": 2,
+      "token": "ac045517c51f52d21395d374de74bc9f",
+      "wallSeconds": 0.005887790990527719
+    },
+    {
+      "type": "provider",
+      "packet": {
+        "index": 0,
+        "wallSeconds": 2.208332040987443,
+        "startFrame": 0,
+        "frames": 62046,
+        "wordCount": 11,
+        "requestIndex": 0
+      },
+      "token": "ac045517c51f52d21395d374de74bc9f",
+      "wallSeconds": 2.2083343749982305
+    },
+    {
+      "type": "words",
+      "timestamps": [
+        {
+          "word": "Hi",
+          "start_time": 0.03766666666666668,
+          "end_time": 0.21266666666666667
+        },
+        {
+          "word": ",",
+          "start_time": 0.21266666666666667,
+          "end_time": 0.25016666666666665
+        },
+        {
+          "word": "I'm",
+          "start_time": 0.25016666666666665,
+          "end_time": 0.4126666666666667
+        },
+        {
+          "word": "Asena",
+          "start_time": 0.4126666666666667,
+          "end_time": 0.9876666666666667
+        },
+        {
+          "word": ".",
+          "start_time": 0.9876666666666667,
+          "end_time": 1.1126666666666667
+        },
+        {
+          "word": "It's",
+          "start_time": 1.1126666666666667,
+          "end_time": 1.3626666666666667
+        },
+        {
+          "word": "lovely",
+          "start_time": 1.3626666666666667,
+          "end_time": 1.7126666666666666
+        },
+        {
+          "word": "to",
+          "start_time": 1.7126666666666666,
+          "end_time": 1.8001666666666667
+        },
+        {
+          "word": "meet",
+          "start_time": 1.8001666666666667,
+          "end_time": 1.9876666666666667
+        },
+        {
+          "word": "you",
+          "start_time": 1.9876666666666667,
+          "end_time": 2.4126666666666665
+        },
+        {
+          "word": ".",
+          "start_time": 2.4126666666666665,
+          "end_time": 2.587666666666667
+        }
+      ],
+      "token": "ac045517c51f52d21395d374de74bc9f",
+      "wallSeconds": 2.2088772910065018
+    },
+    {
+      "type": "analysis",
+      "index": 0,
+      "region": {
+        "start": 0,
+        "end": 24000,
+        "inputStart": 0,
+        "inputEnd": 30000
+      },
+      "token": "ac045517c51f52d21395d374de74bc9f",
+      "wallSeconds": 2.2097007500124164
+    },
+    {
+      "type": "request",
+      "index": 1,
+      "characters": 32,
+      "requestCount": 2,
+      "token": "ac045517c51f52d21395d374de74bc9f",
+      "wallSeconds": 2.210922875034157
+    },
+    {
+      "type": "segment",
+      "index": 0,
+      "startFrame": 0,
+      "endFrame": 24000,
+      "cues": [
+        {
+          "start": 0,
+          "end": 0.04,
+          "value": "X"
+        },
+        {
+          "start": 0.04,
+          "end": 0.21,
+          "value": "C"
+        },
+        {
+          "start": 0.21,
+          "end": 0.35,
+          "value": "B"
+        },
+        {
+          "start": 0.35,
+          "end": 0.43,
+          "value": "A"
+        },
+        {
+          "start": 0.43,
+          "end": 0.5,
+          "value": "C"
+        },
+        {
+          "start": 0.5,
+          "end": 0.77,
+          "value": "B"
+        },
+        {
+          "start": 0.77,
+          "end": 0.91,
+          "value": "E"
+        },
+        {
+          "start": 0.91,
+          "end": 1,
+          "value": "X"
+        }
+      ],
+      "seconds": 1.1515584170119837,
+      "peakRssBytes": 160907264,
+      "pcmSha256": "1ab8ad479c1a17dd86db87338eeed77f1e9843e8f189e936ccae6227987930e6",
+      "timestamps": [
+        {
+          "word": "Hi",
+          "start_time": 0.03766666666666668,
+          "end_time": 0.21266666666666667
+        },
+        {
+          "word": ",",
+          "start_time": 0.21266666666666667,
+          "end_time": 0.25016666666666665
+        },
+        {
+          "word": "I'm",
+          "start_time": 0.25016666666666665,
+          "end_time": 0.4126666666666667
+        },
+        {
+          "word": "Asena",
+          "start_time": 0.4126666666666667,
+          "end_time": 0.9876666666666667
+        },
+        {
+          "word": ".",
+          "start_time": 0.9876666666666667,
+          "end_time": 1.1126666666666667
+        },
+        {
+          "word": "It's",
+          "start_time": 1.1126666666666667,
+          "end_time": 1.3626666666666667
+        }
+      ],
+      "token": "ac045517c51f52d21395d374de74bc9f",
+      "wallSeconds": 3.3624026250327006
+    },
+    {
+      "type": "analysis",
+      "index": 1,
+      "region": {
+        "start": 24000,
+        "end": 62046,
+        "inputStart": 18000,
+        "inputEnd": 62046
+      },
+      "token": "ac045517c51f52d21395d374de74bc9f",
+      "wallSeconds": 3.362512915977277
+    },
+    {
+      "type": "provider",
+      "packet": {
+        "index": 1,
+        "wallSeconds": 3.909759000001941,
+        "startFrame": 62046,
+        "frames": 42970,
+        "wordCount": 7,
+        "requestIndex": 1
+      },
+      "token": "ac045517c51f52d21395d374de74bc9f",
+      "wallSeconds": 3.909765249991324
+    },
+    {
+      "type": "words",
+      "timestamps": [
+        {
+          "word": "Tell",
+          "start_time": 2.6067916666666666,
+          "end_time": 2.7942916666666666
+        },
+        {
+          "word": "me",
+          "start_time": 2.7942916666666666,
+          "end_time": 2.8942916666666667
+        },
+        {
+          "word": "a",
+          "start_time": 2.8942916666666667,
+          "end_time": 2.9442916666666665
+        },
+        {
+          "word": "little",
+          "start_time": 2.9442916666666665,
+          "end_time": 3.1817916666666664
+        },
+        {
+          "word": "about",
+          "start_time": 3.1817916666666664,
+          "end_time": 3.4692916666666664
+        },
+        {
+          "word": "yourself",
+          "start_time": 3.4692916666666664,
+          "end_time": 4.181791666666666
+        },
+        {
+          "word": ".",
+          "start_time": 4.181791666666666,
+          "end_time": 4.331791666666667
+        }
+      ],
+      "token": "ac045517c51f52d21395d374de74bc9f",
+      "wallSeconds": 3.9099420409766026
+    },
+    {
+      "type": "segment",
+      "index": 1,
+      "startFrame": 24000,
+      "endFrame": 62046,
+      "cues": [
+        {
+          "start": 1,
+          "end": 1.2,
+          "value": "X"
+        },
+        {
+          "start": 1.2,
+          "end": 1.37,
+          "value": "B"
+        },
+        {
+          "start": 1.37,
+          "end": 1.44,
+          "value": "H"
+        },
+        {
+          "start": 1.44,
+          "end": 1.51,
+          "value": "C"
+        },
+        {
+          "start": 1.51,
+          "end": 1.58,
+          "value": "G"
+        },
+        {
+          "start": 1.58,
+          "end": 1.65,
+          "value": "B"
+        },
+        {
+          "start": 1.65,
+          "end": 1.79,
+          "value": "F"
+        },
+        {
+          "start": 1.79,
+          "end": 1.87,
+          "value": "A"
+        },
+        {
+          "start": 1.87,
+          "end": 1.94,
+          "value": "B"
+        },
+        {
+          "start": 1.94,
+          "end": 2.2199999999999998,
+          "value": "F"
+        },
+        {
+          "start": 2.2199999999999998,
+          "end": 2.58,
+          "value": "X"
+        }
+      ],
+      "seconds": 1.2212515419814736,
+      "peakRssBytes": 157253632,
+      "pcmSha256": "a35f38b1c40081d83bf23a37067e567a6aadce74ad4b008a33ab6b257d6569e5",
+      "timestamps": [
+        {
+          "word": "Asena",
+          "start_time": 0.75,
+          "end_time": 0.9876666666666667
+        },
+        {
+          "word": ".",
+          "start_time": 0.9876666666666667,
+          "end_time": 1.1126666666666667
+        },
+        {
+          "word": "It's",
+          "start_time": 1.1126666666666667,
+          "end_time": 1.3626666666666667
+        },
+        {
+          "word": "lovely",
+          "start_time": 1.3626666666666667,
+          "end_time": 1.7126666666666666
+        },
+        {
+          "word": "to",
+          "start_time": 1.7126666666666666,
+          "end_time": 1.8001666666666667
+        },
+        {
+          "word": "meet",
+          "start_time": 1.8001666666666667,
+          "end_time": 1.9876666666666667
+        },
+        {
+          "word": "you",
+          "start_time": 1.9876666666666667,
+          "end_time": 2.4126666666666665
+        },
+        {
+          "word": ".",
+          "start_time": 2.4126666666666665,
+          "end_time": 2.587666666666667
+        }
+      ],
+      "token": "ac045517c51f52d21395d374de74bc9f",
+      "wallSeconds": 4.583994458022062
+    },
+    {
+      "type": "analysis",
+      "index": 2,
+      "region": {
+        "start": 62046,
+        "end": 105016,
+        "inputStart": 56046,
+        "inputEnd": 105016
+      },
+      "token": "ac045517c51f52d21395d374de74bc9f",
+      "wallSeconds": 4.584040249988902
+    },
+    {
+      "type": "segment",
+      "index": 2,
+      "startFrame": 62046,
+      "endFrame": 105016,
+      "cues": [
+        {
+          "start": 2.58525,
+          "end": 2.64525,
+          "value": "B"
+        },
+        {
+          "start": 2.64525,
+          "end": 2.7152499999999997,
+          "value": "C"
+        },
+        {
+          "start": 2.7152499999999997,
+          "end": 2.78525,
+          "value": "H"
+        },
+        {
+          "start": 2.78525,
+          "end": 2.8652499999999996,
+          "value": "A"
+        },
+        {
+          "start": 2.8652499999999996,
+          "end": 3.1752499999999997,
+          "value": "B"
+        },
+        {
+          "start": 3.1752499999999997,
+          "end": 3.2552499999999998,
+          "value": "A"
+        },
+        {
+          "start": 3.2552499999999998,
+          "end": 3.4052499999999997,
+          "value": "C"
+        },
+        {
+          "start": 3.4052499999999997,
+          "end": 3.68525,
+          "value": "B"
+        },
+        {
+          "start": 3.68525,
+          "end": 3.8252499999999996,
+          "value": "C"
+        },
+        {
+          "start": 3.8252499999999996,
+          "end": 3.89525,
+          "value": "H"
+        },
+        {
+          "start": 3.89525,
+          "end": 4.03525,
+          "value": "G"
+        },
+        {
+          "start": 4.03525,
+          "end": 4.375249999999999,
+          "value": "X"
+        }
+      ],
+      "seconds": 0.9772142500150949,
+      "peakRssBytes": 160694272,
+      "pcmSha256": "52a98b38c957dd54562b54f07e73bac9c8f7a2d5d7c7310fa3e9cdc683b2a9ff",
+      "timestamps": [
+        {
+          "word": "you",
+          "start_time": 2.33525,
+          "end_time": 2.4126666666666665
+        },
+        {
+          "word": ".",
+          "start_time": 2.4126666666666665,
+          "end_time": 2.587666666666667
+        },
+        {
+          "word": "Tell",
+          "start_time": 2.6067916666666666,
+          "end_time": 2.7942916666666666
+        },
+        {
+          "word": "me",
+          "start_time": 2.7942916666666666,
+          "end_time": 2.8942916666666667
+        },
+        {
+          "word": "a",
+          "start_time": 2.8942916666666667,
+          "end_time": 2.9442916666666665
+        },
+        {
+          "word": "little",
+          "start_time": 2.9442916666666665,
+          "end_time": 3.1817916666666664
+        },
+        {
+          "word": "about",
+          "start_time": 3.1817916666666664,
+          "end_time": 3.4692916666666664
+        },
+        {
+          "word": "yourself",
+          "start_time": 3.4692916666666664,
+          "end_time": 4.181791666666666
+        },
+        {
+          "word": ".",
+          "start_time": 4.181791666666666,
+          "end_time": 4.331791666666667
+        }
+      ],
+      "token": "ac045517c51f52d21395d374de74bc9f",
+      "wallSeconds": 5.5614839579793625
+    },
+    {
+      "type": "eos",
+      "token": "ac045517c51f52d21395d374de74bc9f",
+      "wallSeconds": 5.561501207994297
+    }
+  ],
+  "browser": {
+    "playedFrames": 105016,
+    "playedSeconds": 4.375666666666667,
+    "bufferSeconds": 0,
+    "firstPlaybackSeconds": 4.726243333381018,
+    "gapCount": 0,
+    "gapSeconds": 0,
+    "buffering": false,
+    "paused": false,
+    "waitingSeconds": 0,
+    "finished": true,
+    "receiver": "Web Audio sample clock",
+    "gaps": [],
+    "bufferPeakSeconds": 3.49525,
+    "bufferMinimumSeconds": 1.7190833333333333,
+    "peakObservedMorph": 0.6,
+    "audioContextRate": 48000,
+    "baseLatency": 0.005333333333333333,
+    "outputLatency": 0.016
+  }
+}

@@ -68,3 +68,12 @@ test('user pause suspends the sample clock without being reported as starvation'
   assert.equal(player.sample().paused,true);assert.equal(player.sample().playedFrames,before);assert.equal(player.sample().buffering,false);
   await player.resume();assert.equal(player.sample().paused,false);assert.equal(context.suspended,false);
 });
+test('aggressive startup waits for a complete aligned half-second and keeps starvation neutral',()=>{
+  const context=fakeContext(),player=new PCMPlayer(context,{rate:100,startupSeconds:.5,now:()=>0});
+  player.add(segment(0,25,100));assert.equal(context.nodes.length,0);
+  player.add(segment(25,50,100));assert.equal(context.nodes.length,2);
+  context.currentTime=.7;
+  assert.equal(player.sample().buffering,true);assert.deepEqual(player.weights(),[0,0,0,0,0,0]);
+  player.add(segment(50,100,100));assert.equal(player.gaps.length,1);
+  context.currentTime=.8;assert.equal(player.sample().buffering,false);
+});

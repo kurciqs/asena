@@ -11,6 +11,7 @@ import http.client
 import json
 from pathlib import Path
 import queue
+import re
 import secrets
 import socket
 import threading
@@ -81,13 +82,38 @@ class JsonLines:
 
 
 def speech_payload(data):
-    if not isinstance(data, dict) or set(data)-{'input', 'voice', 'speed', 'policy', 'startupSeconds'}:
+    if not isinstance(data, dict) or set(data)-{'input', 'voice', 'speed', 'policy', 'startupSeconds', 'strategy', 'openingSeconds'}:
         raise ServiceError('Expected speech text, voice and streaming buffer options.', 400)
     payload = require_payload({k: v for k, v in data.items() if k in ('input', 'voice', 'speed')}, 'tts')
     policy, startup = data.get('policy', '2s'), data.get('startupSeconds', 2)
-    if policy not in ('1s', '2s', '3s') or type(startup) is not int or startup not in (2, 4):
-        raise ServiceError('Choose 1–3 second regions and a 2 or 4 second startup buffer.', 400)
+    if policy not in ('1s', '2s', '3s') or type(startup) not in (int,float) or startup not in (.5,1,2,4):
+        raise ServiceError('Choose 1–3 second regions and a 0.5, 1, 2 or 4 second startup buffer.', 400)
+    if data.get('strategy','whole') not in ('whole','phrases') or type(data.get('openingSeconds',2)) not in (int,float) or data.get('openingSeconds',2) not in (.5,1,2):
+        raise ServiceError('Choose whole-text or phrase generation and a 0.5, 1 or 2 second opening region.',400)
     return {**payload, 'stream': True, 'response_format': 'pcm', 'return_timestamps': True}, policy, startup
+
+
+def phrase_requests(text):
+    """Keep exact text order; prefer punctuation, with bounded whitespace fallback.
+
+    A small opening avoids waiting for a paragraph-sized provider packet. Later
+    requests are larger to amortize synthesis setup. These are text boundaries,
+    not phoneme-token counts or promises about generated audio duration.
+    """
+    chunks=[];remaining=text
+    while remaining:
+        limit=60 if not chunks else 90
+        if len(remaining)<=limit:chunks.append(remaining);break
+        prefix=remaining[:limit+1]
+        boundaries=[]
+        for match in re.finditer(r'[.!?;,](?:[\"\u201d\u2019])?\s+',prefix):
+            before=prefix[:match.start()+1].rstrip()
+            if re.search(r'\b(?:Mr|Mrs|Ms|Dr|Prof|St|vs|etc)\.$',before,re.I):continue
+            if len(before)>=20:boundaries.append(match.end())
+        end=boundaries[-1] if boundaries else prefix.rfind(' ',0,limit+1)+1
+        if end<=0:end=limit
+        chunks.append(remaining[:end]);remaining=remaining[end:]
+    return chunks
 
 
 def decode_packet(value, previous_start=0):
@@ -110,6 +136,9 @@ class SpeechStream:
     def __init__(self, data, *, endpoint=KOKORO_API, post=None, recognizer=recognize,
                  binary=RHUBARB, capture=False):
         self.payload, self.policy, self.startup = speech_payload(data)
+        self.strategy=data.get('strategy','whole');self.opening=data.get('openingSeconds',2)
+        self.requests=phrase_requests(self.payload['input']) if self.strategy=='phrases' else [self.payload['input']]
+        self.request_ends=[]
         self.endpoint, self.post, self.recognizer, self.binary = endpoint, post, recognizer, binary
         self.token = secrets.token_hex(16)
         self.cancelled = threading.Event(); self.condition = threading.Condition()
@@ -155,8 +184,11 @@ class SpeechStream:
             try: self.queue.put(value, timeout=.05); return
             except queue.Full: pass
 
-    def ingest(self, value):
-        pcm, words = decode_packet(value, self.last_word_start)
+    def ingest(self, value, offset=0, request_index=0):
+        pcm, words = decode_packet(value)
+        words=[{**w,'start_time':w['start_time']+offset,'end_time':w['end_time']+offset} for w in words]
+        if words and words[0]['start_time']<self.last_word_start:
+            raise ValueError('Kokoro word timestamps moved backwards')
         self.word_count += len(words)
         if len(self.arrivals) >= 512 or self.word_count > 20000:
             raise ValueError('Kokoro stream exceeded its packet or word limit')
@@ -167,9 +199,10 @@ class SpeechStream:
         if any(w['end_time'] > end_seconds+.1 for w in words):
             raise ValueError('Kokoro timestamps exceed the received audio timeline')
         arrival = {'index': len(self.arrivals), 'wallSeconds': time.monotonic()-self.started,
-                   'startFrame': self.frames, 'frames': len(pcm)//2, 'wordCount': len(words)}
+                   'startFrame': self.frames, 'frames': len(pcm)//2, 'wordCount': len(words), 'requestIndex':request_index}
         self.first_packet = self.first_packet if self.first_packet is not None else arrival['wallSeconds']
         self.arrivals.append(arrival)
+        self.event({'type':'provider','packet':arrival})
         if self.capture: self.protocol.append(value)
         self.digest.update(pcm)
         # A decoded provider packet can itself contain up to 30 seconds. Append in
@@ -186,18 +219,25 @@ class SpeechStream:
 
     def produce(self):
         try:
-            if self.post: response_context=self.post(self.endpoint, json=self.payload, stream=True, timeout=(3,15))
-            else:
-                self.transport=HttpStream(self.endpoint,self.payload,self.cancelled)
-                response_context=self.transport
-            with response_context as response:
-                if response.status_code != 200:
-                    raise RuntimeError(f'Kokoro returned HTTP {response.status_code}')
-                parser = JsonLines()
-                for chunk in response.iter_content(4096):
-                    self.check()
-                    for value in parser.push(chunk): self.ingest(value)
-                for value in parser.push(b'', final=True): self.ingest(value)
+            for index,text in enumerate(self.requests):
+                self.check();offset=self.frames/RATE;before=self.frames
+                payload={**self.payload,'input':text}
+                self.event({'type':'request','index':index,'characters':len(text),'requestCount':len(self.requests)})
+                if self.post:response_context=self.post(self.endpoint,json=payload,stream=True,timeout=(3,15))
+                else:
+                    self.transport=HttpStream(self.endpoint,payload,self.cancelled)
+                    response_context=self.transport
+                with response_context as response:
+                    if response.status_code != 200:raise RuntimeError(f'Kokoro returned HTTP {response.status_code}')
+                    parser=JsonLines()
+                    for chunk in response.iter_content(4096):
+                        self.check()
+                        for value in parser.push(chunk):self.ingest(value,offset,index)
+                    for value in parser.push(b'',final=True):self.ingest(value,offset,index)
+                if self.frames==before:raise ValueError('Kokoro returned no speech audio for a phrase')
+                if self.strategy=='phrases':
+                    with self.condition:
+                        self.request_ends.append(self.frames);self.condition.notify_all()
             if not self.frames: raise ValueError('Kokoro returned no speech audio')
             with self.condition:
                 self.done = True; self.provider_finished = time.monotonic()-self.started
@@ -211,6 +251,8 @@ class SpeechStream:
         segments = [e for e in self.events if e['type'] == 'segment']
         return {'fixtureOnly': False, 'provider': 'Kokoro captioned PCM', 'rate': RATE,
                 'policy': self.policy, 'startupSeconds': self.startup, 'complete': complete,
+                'strategy':self.strategy,'openingSeconds':self.opening,'requestCount':len(self.requests),
+                'textCharacters':len(self.payload['input']),'textWords':len(self.payload['input'].split()),
                 'duration': self.frames/RATE, 'sourceSha256': self.digest.hexdigest(),
                 'firstProviderAudioSeconds': self.first_packet, 'providerFinishedSeconds': self.provider_finished,
                 'providerPackets': self.arrivals, 'analysisSeconds': sum(e['seconds'] for e in segments),
@@ -229,15 +271,23 @@ class SpeechStream:
             try: fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
             except BlockingIOError as error: raise RuntimeError('Another Rhubarb stream is running') from error
             self.event({'type':'begin', 'rate':RATE, 'startupSeconds':self.startup,
-                        'source':'live Kokoro', 'cache':False, 'threads':1})
+                        'source':'live Kokoro', 'cache':False, 'threads':1,
+                        'text':self.payload['input'],'strategy':self.strategy,'openingSeconds':self.opening})
             self.producer = threading.Thread(target=self.produce, daemon=True); self.producer.start()
             hop, context, start, index = int(self.policy[0])*RATE, RATE//4, 0, 0
             while True:
-                self.wait(lambda: self.done or self.frames >= start+hop+context)
+                region_hop=min(hop,round(self.opening*RATE)) if index==0 else hop
+                # A finalized phrase is a natural analysis boundary. Flush its
+                # short tail without waiting for the next synthesis request.
+                def available():
+                    boundary=next((end for end in self.request_ends if end>start),None)
+                    return self.done or self.frames>=start+region_hop+context or boundary is not None and boundary<=start+region_hop+context
+                self.wait(available)
                 with self.condition:
                     if self.done and start == self.frames: break
-                    end = min(start+hop, self.frames)
-                    left, right = max(0, start-context), min(self.frames, end+context)
+                    boundary=next((end for end in self.request_ends if end>start),self.frames if self.done else start+region_hop+context)
+                    end = min(start+region_hop, self.frames,boundary)
+                    left, right = max(0, start-context), min(self.frames, end+context,boundary)
                 self.wait(lambda: end-self.played <= 12*RATE)
                 with self.condition:
                     audio = bytes(self.pcm[(left-self.base)*2:(right-self.base)*2])
@@ -256,6 +306,7 @@ class SpeechStream:
                     self.emitted = end; keep = max(0,end-context)
                     del self.pcm[:(keep-self.base)*2]; self.base = keep
                     self.words = [w for w in self.words if w['end_time'] > keep/RATE]
+                    self.request_ends=[frame for frame in self.request_ends if frame>end]
                     self.prepared_peak = max(self.prepared_peak, self.emitted-self.played)
                     self.condition.notify_all()
                 self.event({'type':'segment', 'index':index, 'startFrame':start, 'endFrame':end,

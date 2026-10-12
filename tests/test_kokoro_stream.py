@@ -109,6 +109,44 @@ class KokoroStreamTests(unittest.TestCase):
             events=self.consume(self.make(response));self.assertEqual(events[-1]['type'],'error')
             self.assertFalse(any(e['type']=='result' for e in events));self.assertTrue(response.closed)
 
+    def test_phrase_tail_plays_before_next_request_and_timestamps_are_global(self):
+        release=threading.Event();calls=[]
+        text=stream.TRIAL_TEXTS['short']
+        def post(*args,**options):
+            calls.append(options['json']['input'])
+            if len(calls)==2:release.wait(2)
+            return Response([packet(2.4 if len(calls)==1 else 1.7,word='Hello' if len(calls)==1 else 'Again')])
+        instance=stream.SpeechStream({'input':text,'voice':'af_heart','strategy':'phrases',
+            'startupSeconds':1,'openingSeconds':1},post=post,recognizer=recognize)
+        iterator=instance.iterate();events=[]
+        try:
+            while len([e for e in events if e['type']=='segment'])<2:
+                event=next(iterator);events.append(event)
+                if event['type']=='segment':instance.progress(event['endFrame'])
+            # Finalized phrase tail is available even while the next provider blocks.
+            segments=[e for e in events if e['type']=='segment']
+            self.assertEqual([(e['startFrame'],e['endFrame']) for e in segments],[(0,24000),(24000,57600)])
+            release.set()
+            for event in iterator:
+                events.append(event)
+                if event['type']=='segment':instance.progress(event['endFrame'])
+            self.assertEqual(''.join(calls),text)
+            words=[w for e in events if e['type']=='words' for w in e['timestamps']]
+            self.assertEqual(words[1]['start_time'],2.4)
+            self.assertEqual(events[-1]['report']['duration'],4.1)
+            self.assertTrue(events[-1]['report']['complete'])
+            self.assertEqual(b''.join(base64.b64decode(e['pcm']) for e in events if e['type']=='segment'),b'\0\0'*98400)
+        finally:release.set();instance.cancel();iterator.close();instance.worker.join(timeout=2)
+
+    def test_phrase_segmentation_preserves_text_and_options_are_bounded(self):
+        for text in (stream.TRIAL_TEXTS['sustained'],'Dr. Smith said hello. '*20,'hello '*100,'x'*200):
+            chunks=stream.phrase_requests(text)
+            self.assertEqual(''.join(chunks),text);self.assertTrue(all(chunks))
+            self.assertLessEqual(len(chunks[0]),61);self.assertTrue(all(len(s)<=91 for s in chunks[1:]))
+        for options in ({'startupSeconds':True},{'startupSeconds':float('nan')},{'openingSeconds':0},
+                        {'strategy':'arbitrary'},{'openingSeconds':True}):
+            with self.assertRaises(stream.ServiceError):stream.SpeechStream({'input':'Hi','voice':'af_heart',**options})
+
     def test_backpressure_cancellation_releases_producer_and_never_emits_late_audio(self):
         response=Response([packet(30)]);instance=self.make(response)
         iterator=instance.iterate()

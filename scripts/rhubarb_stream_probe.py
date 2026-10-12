@@ -325,6 +325,7 @@ class Handler(BaseHTTPRequestHandler):
             return self.answer(403, {'error': 'Local same-origin test page only'})
         if self.path == '/probe/health':
             return self.answer(200, {'fixtureOnly': not self.server.allow_kokoro, 'liveEnabled':self.server.allow_kokoro,
+                                    'trialTexts':TRIAL_TEXTS,
                                     'running': bool(self.server.active or self.server.live.active)})
         path = self.path.split('?', 1)[0]
         allowed = (path in ('/', '/stream-test.html', '/lip-sync-lab/lab.css',
@@ -359,14 +360,15 @@ class Handler(BaseHTTPRequestHandler):
                     return self.answer(403, {'error':'Live Kokoro trials are disabled'})
                 if self.path in ('/probe/live/progress', '/probe/live/cancel'):
                     return self.answer(200, self.server.live.control(data, cancel=self.path.endswith('cancel')))
-                if self.path != '/probe/live' or set(data) != {'policy','startupSeconds','repeats'}:
+                if self.path != '/probe/live' or not {'policy','startupSeconds','repeats'}<=set(data) or set(data)-{'policy','startupSeconds','repeats','strategy','openingSeconds'}:
                     raise ValueError('Unknown live trial request')
                 if type(data['repeats']) is not int or data['repeats'] not in (1,3):
                     raise ValueError('Choose the fixed short or sustained trial')
                 if self.server.active:
                     return self.answer(409, {'error':'A saved-audio test is running'})
                 stream = self.server.live.reserve({'input':TRIAL_TEXTS['short' if data['repeats']==1 else 'sustained'],
-                    'voice':'af_heart', 'policy':data['policy'], 'startupSeconds':data['startupSeconds']})
+                    'voice':'af_heart', 'policy':data['policy'], 'startupSeconds':data['startupSeconds'],
+                    'strategy':data.get('strategy','whole'),'openingSeconds':data.get('openingSeconds',2)})
                 self.send_response(200); self.send_header('Content-Type','application/x-ndjson')
                 self.send_header('Cache-Control','no-store'); self.end_headers()
                 try:
