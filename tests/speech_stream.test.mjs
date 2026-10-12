@@ -1,0 +1,49 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {playSpeechStream} from '../src/speech_stream.js';
+import {getPartialPerformance} from '../src/emotion_classifier.js';
+
+const context=()=>({currentTime:0,nodes:[],resume:async()=>{},close:async function(){this.closed=true;},
+  createBuffer:(_,n)=>({getChannelData:()=>new Float32Array(n)}),createBufferSource(){const n={connect(){},disconnect(){},start(){},stop(){this.stopped=true;}};this.nodes.push(n);return n;}});
+const enc=new TextEncoder();
+test('partial word anchors never fire a tag whose words have not arrived',()=>{
+  const parsed={text:'Hello there friend.',actions:[{value:'wave',position:0},{value:'head_nod',position:12}],emotions:[{value:'happy',position:6}]};
+  let cues=getPartialPerformance([{word:'Hello',start_time:0,end_time:1}],parsed,new Set(['wave','head_nod']));
+  assert.deepEqual(cues.actions,[{value:'wave',start:0}]);assert.deepEqual(cues.emotions,[]);
+  cues=getPartialPerformance([{word:'Hello',start_time:0,end_time:1},{word:'there',start_time:1,end_time:2}],parsed,new Set(['wave','head_nod']));
+  assert.deepEqual(cues.actions,[{value:'wave',start:0}]);assert.equal(cues.emotions[0].start,1);
+  assert.throws(()=>getPartialPerformance([{word:'Different',start_time:0,end_time:1}],parsed),/do not match/);
+});
+test('stream consumer uses 24 kHz PCM, forwards timings, completes and releases audio ownership',async()=>{
+  const audio=context(),calls=[];let words=null,player=null,index=0;
+  const events=[{type:'begin',token:'test',rate:24000,startupSeconds:2},
+    {type:'words',token:'test',timestamps:[{word:'Hi',start_time:0,end_time:2}]},
+    {type:'segment',token:'test',startFrame:0,endFrame:48000,cues:[{start:0,end:2,value:'D'}],pcm:btoa('\0\0'.repeat(48000))},
+    {type:'eos',token:'test'},{type:'result',token:'test',report:{complete:true}}];
+  const fetcher=async(url,options)=>{calls.push([url,JSON.parse(options.body)]);
+    if(url!=='/api/speech/stream')return {ok:true};
+    return {ok:true,body:{getReader:()=>({read:async()=>{
+      if(index===events.length)return {done:true};
+      if(index===4)audio.currentTime=3;
+      return {value:enc.encode(JSON.stringify(events[index++])+'\n'),done:false};
+    }})}};
+  };
+  const result=await playSpeechStream({text:'Hi',voice:'af_heart',fetcher,createContext:()=>audio,
+    requestFrame:()=>1,cancelFrame:()=>{},onPlayer:p=>player=p,onWords:w=>words=w});
+  assert.equal(player.rate,24000);assert.equal(words[0].word,'Hi');assert.equal(result.browser.finished,true);
+  assert.equal(audio.closed,true);assert.ok(calls.some(([url])=>url==='/api/speech/cancel'));
+  assert.equal(calls[0][1].input,'Hi');
+});
+test('abort while waiting closes the audio context and cancels the provider token',async()=>{
+  const audio=context(),owner=new AbortController(),calls=[];let reads=0;
+  const fetcher=async(url,options)=>{
+    calls.push(url);if(url!=='/api/speech/stream')return {ok:true};
+    return {ok:true,body:{getReader:()=>({read:async()=>{
+      if(reads++===0)return {value:enc.encode('{"type":"begin","token":"owner","rate":24000,"startupSeconds":2}\n'),done:false};
+      owner.abort();throw new DOMException('Stopped','AbortError');
+    }})}};
+  };
+  await assert.rejects(playSpeechStream({text:'Hi',voice:'af_heart',signal:owner.signal,fetcher,createContext:()=>audio,
+    requestFrame:()=>1,cancelFrame:()=>{}}),/Stopped/);
+  assert.equal(audio.closed,true);assert.ok(calls.includes('/api/speech/cancel'));
+});

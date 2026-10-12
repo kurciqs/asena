@@ -50,6 +50,7 @@ KOKORO_API = endpoint('ASENA_KOKORO_API','http://127.0.0.1:8880/dev/captioned_sp
 CHAT_MODEL = os.environ.get('ASENA_CHAT_MODEL','qwen3.5-2b')
 VOICE = os.environ.get('ASENA_VOICE','af_heart')
 LIP_SYNC = os.environ.get('ASENA_LIP_SYNC','rhubarb')
+SPEECH_STREAMING = os.environ.get('ASENA_SPEECH_STREAMING','0') == '1'
 if not CHAT_MODEL or len(CHAT_MODEL)>200: raise RuntimeError('Invalid ASENA_CHAT_MODEL')
 if not VOICE or not all(c.isalnum() or c in '_-+' for c in VOICE): raise RuntimeError('Invalid ASENA_VOICE')
 if LIP_SYNC not in ('rhubarb','dictionary'): raise RuntimeError('ASENA_LIP_SYNC must be rhubarb or dictionary')

@@ -4,6 +4,7 @@
 <script type="module" src="/stream-lab/client.js"></script></head><body><main>
 <section class="viewer" aria-label="Streaming avatar"><div id="stage"></div><div class="viewer-label"><span class="eyebrow">Saved voice · real Rhubarb analysis</span><h1>Keep the conversation flowing.</h1><p id="active-method">Preparing avatar…</p></div><div class="viewer-footer"><span id="position">0.00s</span><span id="motion-status">Waiting for avatar</span></div></section>
 <aside><a href="http://localhost:3001/lip-sync-samples.html">← Comparison studio</a><p class="eyebrow">Stage 1 / saved audio only</p><h2>Test continuous speech.</h2><p class="intro">Saved Kokoro recordings arrive gradually. Rhubarb prepares each region while the previous audio plays. Kokoro and the language model stay off.</p>
+<label for="source">Voice source</label><select id="source"><option value="saved">Saved recordings · services off</option><option value="live" disabled>Live Kokoro · real generation</option></select>
 <label for="policy">Analysis regions</label><select id="policy"><option value="1s">1 second</option><option value="2s" selected>2 seconds</option><option value="3s">3 seconds</option><option value="sentences">Sentence boundaries (up to 5 seconds)</option></select>
 <label for="profile">Audio delivery</label><select id="profile"><option value="steady1x">Steady · playback speed</option><option value="steady2x">Steady · twice playback speed</option><option value="bursty1x">Bursts · includes a two-second stall</option><option value="bufferingDemo">Show buffering · eight-second delivery pause</option></select>
 <p class="note" id="delivery-note">Choose “Show buffering” to deliberately exhaust the prepared audio mid-speech. This exaggerated pause demonstrates waiting; it is not measured Kokoro behaviour.</p>
@@ -13,6 +14,7 @@
 <p id="status" role="status">Loading avatar. Analysis starts only when you press Start.</p>
 <p id="playback-state" data-state="ready" role="status">Ready</p>
 <dl id="metrics"><div><dt>First playback</dt><dd id="first">—</dd></div><div><dt>Prepared audio remaining</dt><dd id="buffer">0.00s</dd></div><div><dt>Playback gaps</dt><dd id="gaps">0</dd></div><div><dt>Alignment work</dt><dd id="compute">0.00s</dd></div><div><dt>Rhubarb peak memory</dt><dd id="memory">—</dd></div></dl>
+<p class="note" id="provider-timing">Saved delivery excludes speech generation time.</p>
 <details><summary>Inspect this test</summary><pre id="inspection">No test run yet.</pre></details>
-<p class="note">250 ms analysis context on each side; audio overlap is never played twice. One native Rhubarb process at a time, no alignment cache. These delivery patterns are synthetic and exclude Kokoro startup delay and competing inference.</p>
+<p class="note" id="analysis-note">250 ms analysis context on each side; audio overlap is never played twice. One native Rhubarb process at a time, no alignment cache. These delivery patterns are synthetic and exclude Kokoro startup delay and competing inference.</p>
 </aside></main></body></html>

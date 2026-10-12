@@ -1,0 +1,408 @@
+{
+  "liveProvider": true,
+  "llmCalled": false,
+  "cancelToWorkerExitSeconds": 0.006923833047039807,
+  "cancelAtSeconds": 13.824085749976803,
+  "nativePid": 33940,
+  "childGone": true,
+  "providerReaderGone": true,
+  "queuedEventsAfterCancel": [],
+  "providerPacketsReceived": [
+    {
+      "index": 0,
+      "wallSeconds": 13.708300750004128,
+      "startFrame": 0,
+      "frames": 327018,
+      "wordCount": 50
+    }
+  ],
+  "eventsBeforeCancel": [
+    {
+      "type": "begin",
+      "rate": 24000,
+      "startupSeconds": 2,
+      "source": "live Kokoro",
+      "cache": false,
+      "threads": 1,
+      "token": "8fbbbd4367e9be61fe3774aa0b5b7922",
+      "wallSeconds": 0.0002483749995008111
+    },
+    {
+      "type": "heartbeat",
+      "token": "8fbbbd4367e9be61fe3774aa0b5b7922"
+    },
+    {
+      "type": "heartbeat",
+      "token": "8fbbbd4367e9be61fe3774aa0b5b7922"
+    },
+    {
+      "type": "heartbeat",
+      "token": "8fbbbd4367e9be61fe3774aa0b5b7922"
+    },
+    {
+      "type": "heartbeat",
+      "token": "8fbbbd4367e9be61fe3774aa0b5b7922"
+    },
+    {
+      "type": "heartbeat",
+      "token": "8fbbbd4367e9be61fe3774aa0b5b7922"
+    },
+    {
+      "type": "heartbeat",
+      "token": "8fbbbd4367e9be61fe3774aa0b5b7922"
+    },
+    {
+      "type": "heartbeat",
+      "token": "8fbbbd4367e9be61fe3774aa0b5b7922"
+    },
+    {
+      "type": "heartbeat",
+      "token": "8fbbbd4367e9be61fe3774aa0b5b7922"
+    },
+    {
+      "type": "heartbeat",
+      "token": "8fbbbd4367e9be61fe3774aa0b5b7922"
+    },
+    {
+      "type": "heartbeat",
+      "token": "8fbbbd4367e9be61fe3774aa0b5b7922"
+    },
+    {
+      "type": "heartbeat",
+      "token": "8fbbbd4367e9be61fe3774aa0b5b7922"
+    },
+    {
+      "type": "heartbeat",
+      "token": "8fbbbd4367e9be61fe3774aa0b5b7922"
+    },
+    {
+      "type": "heartbeat",
+      "token": "8fbbbd4367e9be61fe3774aa0b5b7922"
+    },
+    {
+      "type": "heartbeat",
+      "token": "8fbbbd4367e9be61fe3774aa0b5b7922"
+    },
+    {
+      "type": "heartbeat",
+      "token": "8fbbbd4367e9be61fe3774aa0b5b7922"
+    },
+    {
+      "type": "heartbeat",
+      "token": "8fbbbd4367e9be61fe3774aa0b5b7922"
+    },
+    {
+      "type": "heartbeat",
+      "token": "8fbbbd4367e9be61fe3774aa0b5b7922"
+    },
+    {
+      "type": "heartbeat",
+      "token": "8fbbbd4367e9be61fe3774aa0b5b7922"
+    },
+    {
+      "type": "heartbeat",
+      "token": "8fbbbd4367e9be61fe3774aa0b5b7922"
+    },
+    {
+      "type": "heartbeat",
+      "token": "8fbbbd4367e9be61fe3774aa0b5b7922"
+    },
+    {
+      "type": "heartbeat",
+      "token": "8fbbbd4367e9be61fe3774aa0b5b7922"
+    },
+    {
+      "type": "heartbeat",
+      "token": "8fbbbd4367e9be61fe3774aa0b5b7922"
+    },
+    {
+      "type": "heartbeat",
+      "token": "8fbbbd4367e9be61fe3774aa0b5b7922"
+    },
+    {
+      "type": "heartbeat",
+      "token": "8fbbbd4367e9be61fe3774aa0b5b7922"
+    },
+    {
+      "type": "heartbeat",
+      "token": "8fbbbd4367e9be61fe3774aa0b5b7922"
+    },
+    {
+      "type": "heartbeat",
+      "token": "8fbbbd4367e9be61fe3774aa0b5b7922"
+    },
+    {
+      "type": "heartbeat",
+      "token": "8fbbbd4367e9be61fe3774aa0b5b7922"
+    },
+    {
+      "type": "words",
+      "timestamps": [
+        {
+          "word": "Hi",
+          "start_time": 0.04758333333333331,
+          "end_time": 0.3475833333333333
+        },
+        {
+          "word": ",",
+          "start_time": 0.3475833333333333,
+          "end_time": 0.42258333333333337
+        },
+        {
+          "word": "I'm",
+          "start_time": 0.42258333333333337,
+          "end_time": 0.6600833333333334
+        },
+        {
+          "word": "Asena",
+          "start_time": 0.6600833333333334,
+          "end_time": 1.4225833333333333
+        },
+        {
+          "word": ".",
+          "start_time": 1.4225833333333333,
+          "end_time": 1.5475833333333333
+        },
+        {
+          "word": "It's",
+          "start_time": 1.5475833333333333,
+          "end_time": 1.8100833333333333
+        },
+        {
+          "word": "lovely",
+          "start_time": 1.8100833333333333,
+          "end_time": 2.1725833333333333
+        },
+        {
+          "word": "to",
+          "start_time": 2.1725833333333333,
+          "end_time": 2.2725833333333334
+        },
+        {
+          "word": "meet",
+          "start_time": 2.2725833333333334,
+          "end_time": 2.4725833333333336
+        },
+        {
+          "word": "you",
+          "start_time": 2.4725833333333336,
+          "end_time": 2.8975833333333334
+        },
+        {
+          "word": ".",
+          "start_time": 2.8975833333333334,
+          "end_time": 3.0600833333333335
+        },
+        {
+          "word": "Tell",
+          "start_time": 3.0600833333333335,
+          "end_time": 3.2850833333333336
+        },
+        {
+          "word": "me",
+          "start_time": 3.2850833333333336,
+          "end_time": 3.3975833333333334
+        },
+        {
+          "word": "a",
+          "start_time": 3.3975833333333334,
+          "end_time": 3.4600833333333334
+        },
+        {
+          "word": "little",
+          "start_time": 3.4600833333333334,
+          "end_time": 3.6600833333333336
+        },
+        {
+          "word": "about",
+          "start_time": 3.6600833333333336,
+          "end_time": 3.9225833333333333
+        },
+        {
+          "word": "yourself",
+          "start_time": 3.9225833333333333,
+          "end_time": 4.872583333333333
+        },
+        {
+          "word": ".",
+          "start_time": 4.872583333333333,
+          "end_time": 5.010083333333333
+        },
+        {
+          "word": "I",
+          "start_time": 5.010083333333333,
+          "end_time": 5.197583333333333
+        },
+        {
+          "word": "like",
+          "start_time": 5.197583333333333,
+          "end_time": 5.385083333333333
+        },
+        {
+          "word": "a",
+          "start_time": 5.385083333333333,
+          "end_time": 5.447583333333333
+        },
+        {
+          "word": "conversation",
+          "start_time": 5.447583333333333,
+          "end_time": 6.197583333333333
+        },
+        {
+          "word": "with",
+          "start_time": 6.197583333333333,
+          "end_time": 6.335083333333333
+        },
+        {
+          "word": "a",
+          "start_time": 6.335083333333333,
+          "end_time": 6.397583333333333
+        },
+        {
+          "word": "little",
+          "start_time": 6.397583333333333,
+          "end_time": 6.660083333333333
+        },
+        {
+          "word": "warmth",
+          "start_time": 6.660083333333333,
+          "end_time": 7.122583333333333
+        },
+        {
+          "word": ",",
+          "start_time": 7.122583333333333,
+          "end_time": 7.197583333333333
+        },
+        {
+          "word": "a",
+          "start_time": 7.197583333333333,
+          "end_time": 7.297583333333333
+        },
+        {
+          "word": "little",
+          "start_time": 7.297583333333333,
+          "end_time": 7.610083333333333
+        },
+        {
+          "word": "wit",
+          "start_time": 7.610083333333333,
+          "end_time": 7.947583333333332
+        },
+        {
+          "word": ",",
+          "start_time": 7.947583333333332,
+          "end_time": 8.022583333333333
+        },
+        {
+          "word": "and",
+          "start_time": 8.022583333333333,
+          "end_time": 8.222583333333333
+        },
+        {
+          "word": "room",
+          "start_time": 8.222583333333333,
+          "end_time": 8.622583333333333
+        },
+        {
+          "word": "for",
+          "start_time": 8.622583333333333,
+          "end_time": 8.747583333333333
+        },
+        {
+          "word": "disagreement",
+          "start_time": 8.747583333333333,
+          "end_time": 9.772583333333333
+        },
+        {
+          "word": ".",
+          "start_time": 9.772583333333333,
+          "end_time": 9.872583333333333
+        },
+        {
+          "word": "If",
+          "start_time": 9.872583333333333,
+          "end_time": 10.022583333333333
+        },
+        {
+          "word": "you",
+          "start_time": 10.022583333333333,
+          "end_time": 10.147583333333333
+        },
+        {
+          "word": "tell",
+          "start_time": 10.147583333333333,
+          "end_time": 10.360083333333334
+        },
+        {
+          "word": "me",
+          "start_time": 10.360083333333334,
+          "end_time": 10.497583333333333
+        },
+        {
+          "word": "something",
+          "start_time": 10.497583333333333,
+          "end_time": 10.797583333333334
+        },
+        {
+          "word": "important",
+          "start_time": 10.797583333333334,
+          "end_time": 11.547583333333334
+        },
+        {
+          "word": ",",
+          "start_time": 11.547583333333334,
+          "end_time": 11.647583333333333
+        },
+        {
+          "word": "I",
+          "start_time": 11.647583333333333,
+          "end_time": 11.797583333333334
+        },
+        {
+          "word": "want",
+          "start_time": 11.797583333333334,
+          "end_time": 11.997583333333333
+        },
+        {
+          "word": "to",
+          "start_time": 11.997583333333333,
+          "end_time": 12.085083333333333
+        },
+        {
+          "word": "remember",
+          "start_time": 12.085083333333333,
+          "end_time": 12.472583333333333
+        },
+        {
+          "word": "it",
+          "start_time": 12.472583333333333,
+          "end_time": 12.635083333333332
+        },
+        {
+          "word": "accurately",
+          "start_time": 12.635083333333332,
+          "end_time": 13.547583333333334
+        },
+        {
+          "word": ".",
+          "start_time": 13.547583333333334,
+          "end_time": 13.697583333333332
+        }
+      ],
+      "token": "8fbbbd4367e9be61fe3774aa0b5b7922",
+      "wallSeconds": 13.70859150000615
+    },
+    {
+      "type": "analysis",
+      "index": 0,
+      "region": {
+        "start": 0,
+        "end": 48000,
+        "inputStart": 0,
+        "inputEnd": 54000
+      },
+      "token": "8fbbbd4367e9be61fe3774aa0b5b7922",
+      "wallSeconds": 13.708986875019036
+    }
+  ]
+}

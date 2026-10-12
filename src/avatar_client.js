@@ -39,6 +39,7 @@ export class AvatarClient {
     beginPerformance(options) {if(!this.module)throw new Error('Avatar unavailable');return this.module.beginPerformance(options);}
     enqueuePerformanceSegment(data) {if(!this.module)throw new Error('Avatar unavailable');this.module.enqueuePerformanceSegment(data);}
     finishPerformance() {this.module?.finishPerformance();}
+    beginPcmPerformance(sample,player) {if(!this.module)throw new Error('Avatar unavailable');return this.module.beginPcmPerformance(sample,player);}
     setRenderPreferences(value) { this.module?.setRenderPreferences(value); }
 }
 export const avatar = new AvatarClient();

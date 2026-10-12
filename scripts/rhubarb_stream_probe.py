@@ -1,7 +1,8 @@
-"""Saved-audio-only paced Rhubarb probe. No inference/network-provider imports.
+"""Paced Rhubarb probe with optional, explicitly enabled live Kokoro trials.
 
 CLI uses a measured wall-clock receiver (no audible output); --serve enables a
 separate loopback test page with actual Web Audio playback and cancellation.
+Default CLI/server modes use saved audio only; imports never contact providers.
 """
 import argparse
 import base64
@@ -15,9 +16,7 @@ from pathlib import Path
 import re
 import secrets
 import signal
-import subprocess
 import sys
-import tempfile
 import threading
 import time
 import wave
@@ -25,15 +24,14 @@ import wave
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from config import default_rhubarb
+from streaming_alignment import Cancelled, trim_cues, recognize as recognize_region
+from kokoro_stream import StreamRegistry, TRIAL_TEXTS
+from service_contracts import ServiceError
 from rhubarb_benchmark import clips, process_tree_rss
 
 RATE = 44100
 POLICIES = ('1s', '2s', '3s', 'sentences')
 PROFILES = ('steady1x', 'steady2x', 'bursty1x', 'bufferingDemo')
-
-
-class Cancelled(Exception):
-    pass
 
 
 def dataset(repeats=1):
@@ -107,72 +105,9 @@ def delivery_schedule(source, profile):
     return result
 
 
-def trim_cues(cues, region, rate):
-    output = []
-    duration = (region['inputEnd'] - region['inputStart']) / rate
-    previous = 0
-    for cue in cues:
-        if (not isinstance(cue, dict) or not isinstance(cue.get('value'), str)
-                or len(cue['value']) != 1 or cue['value'] not in 'ABCDEFGHX'
-                or not all(isinstance(cue.get(k), (int, float)) and math.isfinite(cue[k]) for k in ('start', 'end'))
-                or cue['start'] < previous or cue['end'] < cue['start'] or cue['end'] > duration + .05):
-            raise ValueError('Invalid Rhubarb mouth cues')
-        previous = cue['end']
-        a = max(region['start'], region['inputStart'] + round(cue['start'] * rate))
-        b = min(region['end'], region['inputStart'] + round(cue['end'] * rate))
-        if b > a:
-            output.append({'start': a / rate, 'end': b / rate, 'value': cue['value']})
-    return output
-
-
-def kill_group(child):
-    try:
-        os.killpg(child.pid, signal.SIGKILL)
-    except ProcessLookupError:
-        pass
-    child.wait()
-
-
 def recognize(binary, source, region, cancelled, active=None, timeout=15, memory_mib=384):
-    """No cache. Every region invokes real Rhubarb with a finalized private WAV."""
-    if cancelled.is_set():
-        raise Cancelled()
-    started, peak = time.perf_counter(), 0
-    with tempfile.TemporaryDirectory(prefix='asena-stream-region-') as folder:
-        folder = Path(folder)
-        audio, dialog = folder/'input.wav', folder/'dialog.txt'
-        with wave.open(str(audio), 'wb') as wav:
-            wav.setparams((1, 2, source['rate'], 0, 'NONE', 'NONE'))
-            wav.writeframes(source['pcm'][region['inputStart']*2:region['inputEnd']*2])
-        dialog.write_text(' '.join(s['word'] for s in source['timestamps']
-                                  if s['start_time'] < region['inputEnd']/source['rate']
-                                  and s['end_time'] > region['inputStart']/source['rate']))
-        with (folder/'out').open('w') as out, (folder/'err').open('w') as err:
-            child = subprocess.Popen([str(binary), '-f', 'json', '-q', '-r', 'pocketSphinx',
-                                      '--threads', '1', '-d', str(dialog), str(audio)],
-                                     stdout=out, stderr=err, start_new_session=True,
-                                     env=dict(os.environ, OMP_NUM_THREADS='1', OPENBLAS_NUM_THREADS='1'))
-            if active:
-                active(child.pid)
-            try:
-                while child.poll() is None:
-                    if cancelled.wait(.05):
-                        raise Cancelled()
-                    if time.perf_counter() - started > timeout:
-                        raise RuntimeError('Rhubarb region exceeded its 15-second deadline')
-                    rss = process_tree_rss(child.pid)
-                    peak = max(peak, rss)
-                    if peak > memory_mib * 1024**2:
-                        raise RuntimeError('Rhubarb exceeded the 384 MiB process-tree budget')
-                if child.returncode:
-                    raise RuntimeError('Rhubarb failed: ' + (folder/'err').read_text()[-1000:])
-                cues = trim_cues(json.loads((folder/'out').read_text())['mouthCues'], region, source['rate'])
-            finally:
-                if child.poll() is None:
-                    kill_group(child)
-                if active:
-                    active(None)
-    return {'cues': cues, 'seconds': time.perf_counter()-started, 'peakRssBytes': peak}
+    return recognize_region(binary, source, region, cancelled, active, timeout, memory_mib,
+                            rss_monitor=process_tree_rss)
 
 
 class Probe:
@@ -362,9 +297,10 @@ def cli_run(policy, profile, startup, repeats):
 
 class ProbeServer(ThreadingHTTPServer):
     daemon_threads = True
-    def __init__(self, port):
+    def __init__(self, port, allow_kokoro=False):
         super().__init__(('127.0.0.1', port), Handler)
         self.active_lock = threading.Lock(); self.active = None
+        self.live = StreamRegistry(); self.allow_kokoro = allow_kokoro
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -388,11 +324,12 @@ class Handler(BaseHTTPRequestHandler):
         if not self.allowed():
             return self.answer(403, {'error': 'Local same-origin test page only'})
         if self.path == '/probe/health':
-            return self.answer(200, {'fixtureOnly': True, 'running': self.server.active is not None})
+            return self.answer(200, {'fixtureOnly': not self.server.allow_kokoro, 'liveEnabled':self.server.allow_kokoro,
+                                    'running': bool(self.server.active or self.server.live.active)})
         path = self.path.split('?', 1)[0]
         allowed = (path in ('/', '/stream-test.html', '/lip-sync-lab/lab.css',
                            '/lip-sync-lab/mouth-adapters.js', '/load_mixamo_animation.js',
-                           '/mixamo_vrm_rig_map.js',
+                           '/mixamo_vrm_rig_map.js', '/pcm_stream_playback.js', '/rhubarb_mouth.js',
                            '/vrm_models/asena_sfw.vrm', '/animations/idle.fbx')
                    or path in ('/stream-lab/client.js', '/stream-lab/playback.js',
                                '/stream-lab/viewer.js', '/stream-lab/style.css'))
@@ -417,6 +354,28 @@ class Handler(BaseHTTPRequestHandler):
             data = json.loads(self.rfile.read(size))
             if not isinstance(data, dict):
                 raise ValueError('Expected an object')
+            if self.path.startswith('/probe/live'):
+                if not self.server.allow_kokoro:
+                    return self.answer(403, {'error':'Live Kokoro trials are disabled'})
+                if self.path in ('/probe/live/progress', '/probe/live/cancel'):
+                    return self.answer(200, self.server.live.control(data, cancel=self.path.endswith('cancel')))
+                if self.path != '/probe/live' or set(data) != {'policy','startupSeconds','repeats'}:
+                    raise ValueError('Unknown live trial request')
+                if type(data['repeats']) is not int or data['repeats'] not in (1,3):
+                    raise ValueError('Choose the fixed short or sustained trial')
+                if self.server.active:
+                    return self.answer(409, {'error':'A saved-audio test is running'})
+                stream = self.server.live.reserve({'input':TRIAL_TEXTS['short' if data['repeats']==1 else 'sustained'],
+                    'voice':'af_heart', 'policy':data['policy'], 'startupSeconds':data['startupSeconds']})
+                self.send_response(200); self.send_header('Content-Type','application/x-ndjson')
+                self.send_header('Cache-Control','no-store'); self.end_headers()
+                try:
+                    for event in stream.iterate():
+                        self.wfile.write((json.dumps(event,separators=(',',':'))+'\n').encode()); self.wfile.flush()
+                except (BrokenPipeError, ConnectionResetError): pass
+                finally:
+                    stream.cancel(); self.server.live.release(stream)
+                return
             if self.path in ('/probe/cancel', '/probe/progress'):
                 with self.server.active_lock:
                     active = self.server.active
@@ -432,11 +391,13 @@ class Handler(BaseHTTPRequestHandler):
             if type(data['repeats']) is not int or data['repeats'] not in (1, 3):
                 raise ValueError('Only the fixed short/long fixture is supported')
             probe = Probe(dataset(data['repeats']), data['policy'], data['profile'], data['startupSeconds'])
+        except ServiceError as error:
+            return self.answer(error.status, {'error':str(error)})
         except (ValueError, KeyError, TypeError) as error:
             return self.answer(400, {'error': str(error)})
         token = secrets.token_hex(16)
         with self.server.active_lock:
-            if self.server.active:
+            if self.server.active or self.server.live.active:
                 return self.answer(409, {'error': 'Another saved-audio test is running'})
             self.server.active = {'token': token, 'probe': probe}
         self.send_response(200); self.send_header('Content-Type', 'application/x-ndjson')
@@ -465,6 +426,7 @@ class Handler(BaseHTTPRequestHandler):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--serve', action='store_true'); parser.add_argument('--port', type=int, default=3002)
+    parser.add_argument('--allow-kokoro', action='store_true', help='Enable explicit live trial requests; starts no provider on its own')
     parser.add_argument('--matrix', action='store_true'); parser.add_argument('--output', type=Path,
                         default=ROOT/'docs/evidence/rhubarb-stream-probe-2026-10-12.json')
     parser.add_argument('--policy', choices=POLICIES, default='2s')
@@ -473,11 +435,12 @@ def main():
     parser.add_argument('--repeats', type=int, choices=(1, 3), default=1)
     args = parser.parse_args()
     if args.serve:
-        server = ProbeServer(args.port)
-        print(f'Saved-audio test only: http://localhost:{args.port}/stream-test.html', flush=True)
+        server = ProbeServer(args.port, allow_kokoro=args.allow_kokoro)
+        print(f'{"Saved audio + explicit live trials" if args.allow_kokoro else "Saved-audio test only"}: http://localhost:{args.port}/stream-test.html', flush=True)
         try:
             server.serve_forever()
         finally:
+            if server.live.active: server.live.active.cancel()
             if server.active:
                 active=server.active['probe'];active.cancel()
                 deadline=time.monotonic()+2

@@ -3,6 +3,7 @@ import { MOUTH_EXPRESSIONS, resolveExpressionBinding } from './expression_tracks
 import { BodyPlayback } from './body_blending.js';
 import { AudioPerformanceScheduler } from './performance_scheduler.js';
 import { ClockedAvatarPerformance } from './clocked_avatar_performance.js';
+import {CHANNELS,boundedWeights} from './rhubarb_mouth.js';
 import { LatestLoad, withAbort, withDeadline } from './asset_loading.js';
 import { LazyAnimations } from './lazy_animations.js';
 import { RENDER_PROFILES, RENDER_STORAGE_KEY, renderPreferences, pixelRatio, RenderLoop, BlinkClock } from './render_policy.js';
@@ -50,6 +51,7 @@ let expressionPlayback = { trackCount: 0, peakMouthWeight: 0, peakMouthMorphWeig
 let lastPlaybackNotification = 0;
 let gestureGeneration = 0;
 let clockedPerformance = null;
+let pcmPerformance = null;
 let previewRemaining = null;
 const performanceScheduler = new AudioPerformanceScheduler({
     onSegment:data=>{
@@ -67,8 +69,11 @@ const performanceScheduler = new AudioPerformanceScheduler({
 export function stopPerformance() {
     gestureGeneration++;
     previewRemaining=null;
+    pcmPerformance=null;
     performanceScheduler.stop();
     if (currentVrm) {
+        currentVrm.scene.traverse(mesh=>{const index=mesh.morphTargetDictionary?.Fcl_MTH_Close;if(index!==undefined)mesh.morphTargetInfluences[index]=0;});
+        for(const name of CHANNELS.slice(0,5))if(currentVrm.expressionManager.getExpression(name))currentVrm.expressionManager.setValue(name,0);
         for (const name of new Set([...Object.values(rhubarbToVRM), ...expressionOptions])) {
             if (currentVrm.expressionManager.getExpression(name)) currentVrm.expressionManager.setValue(name, 0);
         }
@@ -77,6 +82,7 @@ export function stopPerformance() {
     if (animations.idle) {
         transitionBody(animations.idle);
     }
+    animationSelect.disabled=!animationLibrary?.files.size;
     notifyPlaybackState();
 }
 
@@ -287,26 +293,42 @@ export function setExpression(name, value) {
 
 function animate(deltaTime) {
     elapsedTime += deltaTime;
+    const pcmState=pcmPerformance?.sample();
+    const bodyDelta=pcmState&&(pcmState.paused||pcmState.buffering)&&currentAnimation!==animations.idle?0:deltaTime;
 
     let bodySettled=false;
     if(clockedPerformance) performanceScheduler.sample(deltaTime);
     else {
         if(previewRemaining!==null) {
-            previewRemaining-=deltaTime;
+            previewRemaining-=bodyDelta;
             if(previewRemaining<=0) {previewRemaining=null;if(animations.idle)transitionBody(animations.idle);}
         }
-        bodySettled=bodyPlayback?.update(deltaTime);
-        currentMixer?.update(deltaTime);
+        bodySettled=bodyPlayback?.update(bodyDelta);
+        currentMixer?.update(bodyDelta);
     }
 
+    let pcmWeights=null;
+    if(pcmPerformance&&currentVrm){
+        const s=pcmState;pcmWeights=boundedWeights(s.weights);
+        CHANNELS.slice(0,5).forEach((name,index)=>{if(currentVrm.expressionManager.getExpression(name))currentVrm.expressionManager.setValue(name,pcmWeights[index]);});
+        for(const name of expressionOptions){
+            const cue=(s.emotions??[]).findLast(c=>c.value===name&&c.start<=s.playedSeconds&&s.playedSeconds<c.end);
+            if(currentVrm.expressionManager.getExpression(name))currentVrm.expressionManager.setValue(name,cue?(name==='happy'?.3:.5):0);
+        }
+        const due=s.paused||s.buffering?[]:(s.actions??[]).filter(c=>c.start<=s.playedSeconds&&!pcmPerformance.seen.has(`${c.value}:${c.start}`));
+        due.forEach(c=>pcmPerformance.seen.add(`${c.value}:${c.start}`));
+        const cue=due.at(-1);
+        if(cue&&animations[cue.value]){transitionBody(animations[cue.value]);previewRemaining=Math.max(0,animations[cue.value].getClip().duration-ANIMATION_CROSSFADE);}
+    }
     if (currentVrm) {
         const blink = blinkClock.update(deltaTime,(currentVrm.expressionManager.getValue('happy') ?? 0)>0.5);
         currentVrm.expressionManager.setValue('blinkLeft',Number(blink));
         currentVrm.expressionManager.setValue('blinkRight',Number(blink));
         currentVrm.update(Math.min(deltaTime,0.1)); // Bound spring physics after a busy frame.
+        if(pcmWeights)for(const {mesh,index} of pcmPerformance.close)mesh.morphTargetInfluences[index]=pcmWeights[5];
     }
 
-    if (clockedPerformance && currentVrm) {
+    if ((clockedPerformance||pcmPerformance) && currentVrm) {
         // Measure both the animated expression and the morph applied by the VRM
         // manager. A valid cue list alone cannot establish visible mouth motion.
         const mouth = mouthPlaybackState();
@@ -346,8 +368,9 @@ export function setRenderPreferences(value) {
 export function disposeRenderer() { stopPerformance(); renderLoop.stop(); controls.dispose(); renderer.dispose(); renderer.domElement.remove(); }
 
 export function getPlaybackState() {
+    const pcmClock=pcmPerformance?.sample();
     return { ...assetState, ready: animationsLoaded, clips: [...(animationLibrary?.files.keys() ?? [])], loadedClips: Object.keys(animations),
-        scheduler:performanceScheduler.snapshot(),
+        scheduler:pcmClock?{...pcmClock,streaming:true,phase:pcmClock.paused?'paused':pcmClock.buffering?'buffering':pcmClock.playedFrames>0?'playing':'starting'}:performanceScheduler.snapshot(),
         rendering: {...renderSettings, fpsLimit:renderLoop.fps, pixelRatio:renderer.getPixelRatio(),
             width:renderer.domElement.width,height:renderer.domElement.height,frames:renderLoop.frames,callbacks:renderLoop.callbacks,
             paused:!renderLoop.running,resizeCount,geometries:renderer.info.memory.geometries,textures:renderer.info.memory.textures,
@@ -355,7 +378,7 @@ export function getPlaybackState() {
         currentClip: Object.entries(animations).find(([, action]) => action === currentAnimation)?.[0] ?? null,
         bodyWeights: Object.fromEntries(Object.entries(animations).filter(([, action]) => action.isRunning()).map(
             ([name, action]) => [name, Number(action.getEffectiveWeight().toFixed(3))])),
-        expressions: { ...expressionPlayback, active: Boolean(clockedPerformance),
+        expressions: { ...expressionPlayback, active: Boolean(clockedPerformance||pcmPerformance),
             boundMouthChannels: MOUTH_EXPRESSIONS.filter(name => currentVrm && resolveExpressionBinding(currentVrm.expressionManager, name)),
             missingMouthChannels: MOUTH_EXPRESSIONS.filter(name => currentVrm && !resolveExpressionBinding(currentVrm.expressionManager, name)),
             ...mouthPlaybackState() } };
@@ -396,8 +419,16 @@ export function talk(data) {
     return performanceScheduler.play([data],{signal:data.signal});
 }
 
-export function pausePerformance() {performanceScheduler.pause();}
-export function resumePerformance() {performanceScheduler.resume();}
+export function pausePerformance() {
+    const owner=pcmPerformance;
+    if(owner)owner.player.pause().then(()=>{if(pcmPerformance===owner)notifyPlaybackState();}).catch(()=>{if(pcmPerformance===owner)stopPerformance();});
+    else performanceScheduler.pause();
+}
+export function resumePerformance() {
+    const owner=pcmPerformance;
+    if(owner)owner.player.resume().then(()=>{if(pcmPerformance===owner)notifyPlaybackState();}).catch(()=>{if(pcmPerformance===owner)stopPerformance();});
+    else performanceScheduler.resume();
+}
 // Streaming producers must prepare each complete segment before enqueueing it.
 export function beginPerformance(options) {
     if(!animationsLoaded)throw new Error('Avatar animations are not ready.');
@@ -405,6 +436,15 @@ export function beginPerformance(options) {
 }
 export function enqueuePerformanceSegment(data) {performanceScheduler.enqueue(data);}
 export function finishPerformance() {performanceScheduler.finish();}
+
+export function beginPcmPerformance(sample,player) {
+    if(!animationsLoaded)throw new Error('Avatar animations are not ready.');
+    stopPerformance();
+    const close=[];
+    currentVrm.scene.traverse(mesh=>{const index=mesh.morphTargetDictionary?.Fcl_MTH_Close;if(index!==undefined)close.push({mesh,index});});
+    pcmPerformance={sample,player,close,seen:new Set()};
+    animationSelect.disabled=true;notifyPlaybackState();
+}
 
 async function playAnimationFromSelect() {
     const generation = ++gestureGeneration;

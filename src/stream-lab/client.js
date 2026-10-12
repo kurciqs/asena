@@ -2,8 +2,21 @@ import {PCMPlayer,Lines} from './playback.js';
 import {createViewer} from './viewer.js';
 const $=id=>document.getElementById(id),zero=[0,0,0,0,0,0];
 let viewer,run=null,report=null,drawId=null;
-const controls=['policy','profile','startup','length'];
-function state(running){controls.forEach(id=>$(id).disabled=running);$('start').disabled=running||!viewer;$('stop').disabled=!running;$('download').disabled=!report;}
+const controls=['source','policy','profile','startup','length'];
+function state(running){controls.forEach(id=>$(id).disabled=running);$('profile').disabled=running||$('source').value==='live';$('start').disabled=running||!viewer;$('stop').disabled=!running;$('download').disabled=!report;}
+function sourceChanged(){
+  const live=$('source').value==='live';
+  document.querySelector('aside > .eyebrow').textContent=live?'Stage 2 / live speech':'Stage 1 / saved audio only';
+  document.querySelector('.viewer-label .eyebrow').textContent=live?'Live voice · real Rhubarb analysis':'Saved voice · real Rhubarb analysis';
+  $('policy').options[3].disabled=live;if(live&&$('policy').value==='sentences')$('policy').value='2s';
+  $('analysis-note').textContent=live?'250 ms context on each side. Audio stays at Kokoro’s 24 kHz; Rhubarb reads finalized regions, and playback uses the same PCM samples. One recognizer at a time.':'250 ms analysis context on each side; audio overlap is never played twice. One native Rhubarb process at a time, no alignment cache. These delivery patterns are synthetic and exclude Kokoro startup delay and competing inference.';
+  document.querySelector('.intro').textContent=live?'Kokoro generates the fixed trial text now. Rhubarb aligns arriving audio while prepared regions play. No language model is called.':'Saved Kokoro recordings arrive gradually. Rhubarb prepares each region while the previous audio plays. Kokoro and the language model stay off.';
+  $('length').options[0].textContent=live?'Short · introduction':'Short · 26 seconds';
+  $('length').options[1].textContent=live?'Sustained · conversational passage':'Sustained · 77 seconds';
+  $('provider-timing').textContent=live?'Provider arrival time will be measured during this run.':'Saved delivery excludes speech generation time.';
+  $('start').textContent=live?'Start live speech test':'Start saved-audio test';
+  $('delivery-note').hidden=live;state(false);
+}
 function metrics(current) {
   const s=current.player?.sample();if(!s)return;
   $('first').textContent=s.firstPlaybackSeconds===null?'—':s.firstPlaybackSeconds.toFixed(2)+'s';
@@ -22,7 +35,7 @@ function metrics(current) {
   const actual=viewer.draw(current.player.weights());
   $('motion-status').textContent=s.buffering?`Buffering · waiting ${s.waitingSeconds.toFixed(1)}s`:`Applied mouth: ${actual.peakAppliedMorph.toFixed(2)}`;
   current.actualPeak=Math.max(current.actualPeak,actual.peakAppliedMorph);
-  $('inspection').textContent=JSON.stringify({source:'saved Kokoro audio',...current.config,...s,
+  $('inspection').textContent=JSON.stringify({source:current.live?'live Kokoro':'saved Kokoro audio',...current.config,...s,
     regionCount:current.regions,aligningRegion:current.analyzing??null,computeSeconds:current.compute,peakRssBytes:current.peak,
     ...actual,peakObservedMorph:current.actualPeak,sourceSha256:current.sourceSha256},null,2);
   return s;
@@ -31,22 +44,24 @@ function tick(){drawId=null;if(!run)return;metrics(run);drawId=requestAnimationF
 async function progress(current) {
   if(run!==current||!current.token||!current.player)return;
   const s=metrics(current);
-  const response=await fetch('/probe/progress',{method:'POST',headers:{'Content-Type':'application/json'},
+  const response=await fetch(current.live?'/probe/live/progress':'/probe/progress',{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({token:current.token,playedFrames:s.playedFrames}),signal:current.controller.signal});
   if(!response.ok)throw new Error('Playback acknowledgement failed');
   if(run===current)current.timer=setTimeout(()=>progress(current).catch(error=>{if(run===current)stop(error.message);}),200);
 }
 async function start() {
   if(run)return;
-  const current={controller:new AbortController(),context:new AudioContext(),player:null,token:null,
-    compute:0,peak:0,regions:0,actualPeak:0,events:[],config:{policy:$('policy').value,profile:$('profile').value,
+  const live=$('source').value==='live';
+  const current={live,controller:new AbortController(),context:new AudioContext(),player:null,token:null,
+    compute:0,peak:0,regions:0,actualPeak:0,events:[],config:{policy:$('policy').value,...(live?{}:{profile:$('profile').value}),
     startupSeconds:Number($('startup').value),repeats:Number($('length').value)}};
-  run=current;report=null;state(true);$('status').textContent='Delivering saved audio; waiting for the first aligned regions…';
+  run=current;report=null;state(true);$('status').textContent=live?'Requesting real Kokoro speech…':'Delivering saved audio; waiting for the first aligned regions…';
+  $('provider-timing').textContent=live?'Measuring provider arrival during this run…':'Saved delivery excludes speech generation time.';
   try {
     await current.context.resume();
     current.player=new PCMPlayer(current.context,{startupSeconds:current.config.startupSeconds});
     drawId=requestAnimationFrame(tick);
-    const response=await fetch('/probe/run',{method:'POST',headers:{'Content-Type':'application/json'},
+    const response=await fetch(live?'/probe/live':'/probe/run',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify(current.config),signal:current.controller.signal});
     if(!response.ok)throw new Error((await response.json()).error);
     const reader=response.body.getReader(),lines=new Lines();
@@ -56,6 +71,7 @@ async function start() {
         current.token=event.token;
         current.events.push(Object.fromEntries(Object.entries(event).filter(([key])=>key!=='pcm'&&key!=='report')));
         if(event.type==='begin') {
+          current.player.rate=event.rate;
           current.sourceSha256=event.sha256;
           progress(current).catch(error=>{if(run===current)stop(error.message);});
         } else if(event.type==='analysis')current.analyzing=event.index;
@@ -72,6 +88,7 @@ async function start() {
             bufferPeakSeconds:current.player.bufferPeak,bufferMinimumSeconds:current.player.bufferMinimum,
             peakObservedMorph:current.actualPeak,audioContextRate:current.context.sampleRate,
             baseLatency:current.context.baseLatency,outputLatency:current.context.outputLatency??null}};
+          if(live)$('provider-timing').textContent=`First Kokoro audio: ${report.firstProviderAudioSeconds?.toFixed(2)}s · provider finished: ${report.providerFinishedSeconds?.toFixed(2)}s · ${report.providerPackets.length} packets · ${(report.rate/1000).toFixed(0)} kHz`;
           $('status').textContent=`Finished. ${s.gapCount} playback gaps; ${s.gapSeconds.toFixed(3)}s total.`;
         }
       }
@@ -93,15 +110,17 @@ async function stop(message='Stopped. Outstanding Rhubarb work was cancelled.') 
   $('inspection').textContent=JSON.stringify({...current.config,stopped:true,
     playedFrames:current.player?.played??0,queuedAudioSeconds:0,peakObservedMorph:current.actualPeak},null,2);
   // Send cancellation independently before aborting the receiving request.
-  if(current.token)try{await fetch('/probe/cancel',{method:'POST',headers:{'Content-Type':'application/json'},
+  if(current.token)try{await fetch(current.live?'/probe/live/cancel':'/probe/cancel',{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({token:current.token}),signal:AbortSignal.timeout(2000),keepalive:true});}catch{}
   current.controller.abort();await cleanup(current);state(false);$('status').textContent=message;
 }
 $('start').addEventListener('click',start);$('stop').addEventListener('click',()=>stop());
+$('source').addEventListener('change',sourceChanged);
 $('download').addEventListener('click',()=>{if(!report)return;const url=URL.createObjectURL(new Blob([JSON.stringify(report,null,2)],{type:'application/json'}));
-  const a=document.createElement('a');a.href=url;a.download='rhubarb-saved-stream-report.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
+  const a=document.createElement('a');a.href=url;a.download=report.fixtureOnly===false?'kokoro-live-stream-report.json':'rhubarb-saved-stream-report.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&run)stop('Stopped because the test page was hidden.');});
-window.addEventListener('pagehide',()=>{if(run){const current=run;if(current.token)fetch('/probe/cancel',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:current.token}),keepalive:true}).catch(()=>{});current.controller.abort();current.player?.stop();current.context.close();}viewer?.dispose();});
+window.addEventListener('pagehide',()=>{if(run){const current=run;if(current.token)fetch(current.live?'/probe/live/cancel':'/probe/cancel',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:current.token}),keepalive:true}).catch(()=>{});current.controller.abort();current.player?.stop();current.context.close();}viewer?.dispose();});
 try {viewer=await createViewer($('stage'));viewer.draw(zero);$('active-method').textContent='Native Rhubarb · corrected mouth mapping';
+  const health=await (await fetch('/probe/health')).json();$('source').options[1].disabled=!health.liveEnabled;
   $('status').textContent='Ready. Press Start to run real analysis on saved recordings.';state(false);
 }catch(error){$('status').textContent=`Test unavailable: ${error.message}`;}

@@ -3,6 +3,7 @@ import { packConversation } from './context_budget.js';
 import { dictionaryVisemes } from './dictionary_visemes.js';
 import { buildExpressionTracks } from './expression_tracks.js';
 import { requestJSON } from './service_client.js';
+import {playSpeechStream} from './speech_stream.js';
 import { loadAudioMetadata, repairWavHeader } from './audio.js';
 import { TurnController } from './turn_controller.js';
 import { avatar as ANI } from './avatar_client.js';
@@ -377,6 +378,25 @@ async function prepareAndPlay(parsedReply, turn) {
     }
     turn.phase('preparing-speech');
     speechWarning('');
+    if(!replay&&runtimeConfig?.speechStreaming&&LIP_SYNC==='rhubarb'){
+        let player=null,words=[],cues={actions:[],emotions:[]},speaking=false;
+        await ANI.preparePerformance(parsedReply.actions.map(cue=>({value:cue.value})),turn.signal);
+        const available=new Set(ANI.getPlaybackState().loadedClips??ANI.getPlaybackState().clips);
+        try{
+            await playSpeechStream({text:parsedReply.text,voice:KOKORO_VOICE,signal:turn.signal,
+                onPlayer:value=>{player=value;ANI.beginPcmPerformance(()=>({...player.sample(),weights:player.weights(),...cues}),player);},
+                onWords:stamps=>{words.push(...stamps);try{cues=EMO.getPartialPerformance(words,parsedReply,available);}catch(error){speechWarning(`Emotion and gesture timing unavailable. ${error.message}`);}},
+                onClock:clock=>{
+                    turn.assertCurrent();
+                    if(clock.playedFrames>0&&!speaking){speaking=true;turn.phase('speaking');}
+                    if(speaking){
+                        document.getElementById('turn-status').textContent=clock.paused?'Paused':clock.buffering?'Waiting for speech':'Speaking';
+                        const pause=document.getElementById('turn-pause');pause.hidden=false;pause.textContent=clock.paused?'Resume':'Pause';
+                    }
+                }});
+        }finally{ANI.stopPerformance();}
+        return;
+    }
     const { audio, timestamps, audioId } = await generateTTS(parsedReply.text, turn);
     turn.assertCurrent();
     let visemes = [], emotions = [], actions = [];

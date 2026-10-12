@@ -39,7 +39,7 @@ function compact(text) {
     return text.normalize('NFKC').replace(/[’‘]/g, "'").replace(/[“”]/g, '"').toLowerCase().replace(/\s/g, '');
 }
 
-export function alignWordAnchors(timestamps, text) {
+export function alignWordAnchors(timestamps, text, partial=false) {
     if (!Array.isArray(timestamps)) throw new Error('Word timings must be an array');
     let offset = 0, previous = 0;
     const words = timestamps.map(stamp => {
@@ -53,22 +53,29 @@ export function alignWordAnchors(timestamps, text) {
         offset = word.limit;
         return word;
     });
-    if (text !== undefined && words.length && compact(text) !== words.map(word => word.token).join('')) {
+    const timedText=words.map(word => word.token).join('');
+    if (text !== undefined && words.length && (partial?!compact(text).startsWith(timedText):compact(text)!==timedText)) {
         throw new Error('Word timings do not match normalized spoken text');
     }
     return words;
 }
 
-function timedCues(timestamps, cues, text, available) {
+function timedCues(timestamps, cues, text, available, partial=false) {
     if (!Array.isArray(timestamps) || !Array.isArray(cues) || !timestamps.length || !cues.length) return [];
     const spoken = text ?? timestamps.map(stamp => stamp.word).join(' ');
-    const words = alignWordAnchors(timestamps, spoken);
+    const words = alignWordAnchors(timestamps, spoken, partial);
     return cues.filter(cue => cue && Number.isInteger(cue.position) && cue.position >= 0 && cue.position <= spoken.length &&
         (!available || available.has(cue.value))).map(cue => {
         const offset = compact(spoken.slice(0, cue.position)).length;
         const word = words.find(word => word.limit > offset);
         return { value: cue.value, start: word?.start ?? words.at(-1).end };
-    }).sort((a, b) => a.start - b.start);
+    }).filter(cue=>!partial||cue.start<words.at(-1).end).sort((a, b) => a.start - b.start);
+}
+
+export function getPartialPerformance(timestamps, parsed, available) {
+    const actions=timedCues(timestamps,parsed.actions,parsed.text,available,true);
+    const emotions=timedCues(timestamps,parsed.emotions,parsed.text,undefined,true);
+    return {actions,emotions:emotions.map((cue,index)=>({...cue,end:emotions[index+1]?.start??180}))};
 }
 
 export function getActions(timestamps, actions, text, available) {

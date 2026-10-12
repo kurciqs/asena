@@ -1,0 +1,86 @@
+[
+  {
+    "wallTime": 1791833249.779254,
+    "stats": {
+      "BlockIO": "775MB / 4.87MB",
+      "CPUPerc": "0.41%",
+      "Container": "asena-replay-audio-20261011",
+      "ID": "9571acbdc1a4",
+      "MemPerc": "64.11%",
+      "MemUsage": "1.282GiB / 2GiB",
+      "Name": "asena-replay-audio-20261011",
+      "NetIO": "17.5kB / 1.96MB",
+      "PIDs": "5"
+    }
+  },
+  {
+    "wallTime": 1791833252.4059799,
+    "stats": {
+      "BlockIO": "775MB / 4.87MB",
+      "CPUPerc": "0.27%",
+      "Container": "asena-replay-audio-20261011",
+      "ID": "9571acbdc1a4",
+      "MemPerc": "64.11%",
+      "MemUsage": "1.282GiB / 2GiB",
+      "Name": "asena-replay-audio-20261011",
+      "NetIO": "17.5kB / 1.96MB",
+      "PIDs": "5"
+    }
+  },
+  {
+    "wallTime": 1791833255.0040681,
+    "stats": {
+      "BlockIO": "775MB / 4.87MB",
+      "CPUPerc": "1.06%",
+      "Container": "asena-replay-audio-20261011",
+      "ID": "9571acbdc1a4",
+      "MemPerc": "64.11%",
+      "MemUsage": "1.282GiB / 2GiB",
+      "Name": "asena-replay-audio-20261011",
+      "NetIO": "17.5kB / 1.96MB",
+      "PIDs": "5"
+    }
+  },
+  {
+    "wallTime": 1791833257.599339,
+    "stats": {
+      "BlockIO": "775MB / 4.87MB",
+      "CPUPerc": "0.41%",
+      "Container": "asena-replay-audio-20261011",
+      "ID": "9571acbdc1a4",
+      "MemPerc": "64.11%",
+      "MemUsage": "1.282GiB / 2GiB",
+      "Name": "asena-replay-audio-20261011",
+      "NetIO": "17.5kB / 1.96MB",
+      "PIDs": "5"
+    }
+  },
+  {
+    "wallTime": 1791833260.613152,
+    "stats": {
+      "BlockIO": "775MB / 4.87MB",
+      "CPUPerc": "0.56%",
+      "Container": "asena-replay-audio-20261011",
+      "ID": "9571acbdc1a4",
+      "MemPerc": "64.11%",
+      "MemUsage": "1.282GiB / 2GiB",
+      "Name": "asena-replay-audio-20261011",
+      "NetIO": "17.5kB / 1.96MB",
+      "PIDs": "5"
+    }
+  },
+  {
+    "wallTime": 1791833263.21998,
+    "stats": {
+      "BlockIO": "775MB / 4.87MB",
+      "CPUPerc": "0.41%",
+      "Container": "asena-replay-audio-20261011",
+      "ID": "9571acbdc1a4",
+      "MemPerc": "64.11%",
+      "MemUsage": "1.282GiB / 2GiB",
+      "Name": "asena-replay-audio-20261011",
+      "NetIO": "17.5kB / 1.96MB",
+      "PIDs": "5"
+    }
+  }
+]

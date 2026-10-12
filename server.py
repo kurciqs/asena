@@ -2,7 +2,7 @@ import mimetypes
 mimetypes.add_type("application/javascript", ".js")
 mimetypes.add_type("text/css", ".css")
 
-from flask import Flask, request, jsonify, send_from_directory, abort
+from flask import Flask, request, jsonify, send_from_directory, abort, Response
 import requests
 import json
 import subprocess
@@ -12,10 +12,12 @@ ALIGNMENT_LOCK = threading.Lock()
 import context_budget as budget
 import private_storage as storage
 from alignment import align_audio
+from kokoro_stream import StreamRegistry
+SPEECH_STREAMS = StreamRegistry()
 from pathlib import Path
 from service_contracts import ServiceError, require_payload, proxy_json, validate_chat_response, validate_tts_response, validate_visemes
 
-from config import STATIC_DIR, RHUBARB, RHUBARB_THREADS, ALIGNMENT_CACHE_ENTRIES, FFMPEG, LMS_API, KOKORO_API, RUNTIME_MODE, HOST, PORT, PROCESS_TIMEOUT, CHAT_MODEL, VOICE, LIP_SYNC, ASSETS
+from config import STATIC_DIR, RHUBARB, RHUBARB_THREADS, ALIGNMENT_CACHE_ENTRIES, FFMPEG, LMS_API, KOKORO_API, RUNTIME_MODE, HOST, PORT, PROCESS_TIMEOUT, CHAT_MODEL, VOICE, LIP_SYNC, ASSETS, SPEECH_STREAMING
 
 app = Flask(__name__, static_folder=None)
 app.config["MAX_CONTENT_LENGTH"] = 24 * 1024 * 1024
@@ -61,7 +63,7 @@ def enforce_replay_boundary():
 
 @app.route("/runtime")
 def runtime():
-    return jsonify({"mode": RUNTIME_MODE, "budget": budget.public_config(), "chatModel": CHAT_MODEL, "voice": VOICE, "lipSync": LIP_SYNC, "assets": ASSETS})
+    return jsonify({"mode": RUNTIME_MODE, "budget": budget.public_config(), "chatModel": CHAT_MODEL, "voice": VOICE, "lipSync": LIP_SYNC, "assets": ASSETS, "speechStreaming": SPEECH_STREAMING})
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -76,6 +78,39 @@ def chat():
 def tts():
     payload = require_payload(request.get_json(silent=True), 'tts')
     return jsonify(validate_tts_response(proxy_json(KOKORO_API, payload, 'Kokoro')))
+
+@app.route('/api/speech/stream', methods=['POST'])
+def streamed_speech():
+    if not SPEECH_STREAMING:
+        raise ServiceError('Streaming speech is disabled in this server configuration.', 403)
+    if not ALIGNMENT_LOCK.acquire(blocking=False):
+        raise ServiceError('Speech alignment is busy. Retry shortly.', 409)
+    try:
+        stream = SPEECH_STREAMS.reserve(request.get_json(silent=True), endpoint=KOKORO_API, binary=RHUBARB)
+    except Exception:
+        ALIGNMENT_LOCK.release(); raise
+    released=threading.Event();release_lock=threading.Lock()
+    def release():
+        with release_lock:
+            if released.is_set():return
+            released.set()
+        stream.cancel()
+        if stream.worker: stream.worker.join()
+        SPEECH_STREAMS.release(stream); ALIGNMENT_LOCK.release()
+    def generate():
+        try:
+            for event in stream.iterate(): yield json.dumps(event, separators=(',', ':'))+'\n'
+        finally:
+            stream.cancel(); threading.Thread(target=release, daemon=True).start()
+    response=Response(generate(), mimetype='application/x-ndjson')
+    response.call_on_close(lambda:threading.Thread(target=release,daemon=True).start())
+    return response
+
+@app.route('/api/speech/progress', methods=['POST'])
+@app.route('/api/speech/cancel', methods=['POST'])
+def speech_stream_control():
+    try: return jsonify(SPEECH_STREAMS.control(request.get_json(silent=True), cancel=request.path.endswith('cancel')))
+    except ValueError as error: raise ServiceError(str(error), 400) from error
 
 @app.route("/")
 def serve_index():

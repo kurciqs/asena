@@ -61,3 +61,10 @@ test('mouth sampling blends across region boundaries on the global audio clock',
   assert.ok(weightsAt(cues,2.02)[0]>0);assert.ok(weightsAt(cues,2.02)[5]>0);
   assert.deepEqual(weightsAt(cues,4),[0,0,0,0,0,0]);
 });
+test('user pause suspends the sample clock without being reported as starvation',async()=>{
+  const context=fakeContext();context.suspend=async()=>{context.suspended=true;};context.resume=async()=>{context.suspended=false;};
+  const player=new PCMPlayer(context,{rate:10,startupSeconds:2});player.add(segment(0,20));context.currentTime=1;
+  const before=player.sample().playedFrames;await player.pause();
+  assert.equal(player.sample().paused,true);assert.equal(player.sample().playedFrames,before);assert.equal(player.sample().buffering,false);
+  await player.resume();assert.equal(player.sample().paused,false);assert.equal(context.suspended,false);
+});

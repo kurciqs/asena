@@ -1,0 +1,2523 @@
+{
+  "fixtureOnly": false,
+  "provider": "Kokoro captioned PCM",
+  "rate": 24000,
+  "policy": "2s",
+  "startupSeconds": 4,
+  "complete": true,
+  "duration": 26.099833333333333,
+  "sourceSha256": "99ef254fd6bd5d6689dca076d3c1bc29c6d1f282c4f82c55ce34167eb1bc803d",
+  "firstProviderAudioSeconds": 8.77870529104257,
+  "providerFinishedSeconds": 17.974427208013367,
+  "providerPackets": [
+    {
+      "index": 0,
+      "wallSeconds": 8.77870529104257,
+      "startFrame": 0,
+      "frames": 327018,
+      "wordCount": 50
+    },
+    {
+      "index": 1,
+      "wallSeconds": 16.738997666048817,
+      "startFrame": 327018,
+      "frames": 299378,
+      "wordCount": 43
+    }
+  ],
+  "analysisSeconds": 17.52450450224569,
+  "peakRssBytes": 162709504,
+  "incomingPeakSeconds": 15.97575,
+  "preparedPeakSeconds": 10.951708333333332,
+  "limits": {
+    "incomingSeconds": 16,
+    "preparedSeconds": 12,
+    "decodedPacketSeconds": 30,
+    "audioSeconds": 180,
+    "deadlineSeconds": 180,
+    "providerReadTimeoutSeconds": 15
+  },
+  "events": [
+    {
+      "type": "begin",
+      "rate": 24000,
+      "startupSeconds": 4,
+      "source": "live Kokoro",
+      "cache": false,
+      "threads": 1,
+      "token": "ed392980b2edac57584f316a07a486ad",
+      "wallSeconds": 0.005110000027343631
+    },
+    {
+      "type": "words",
+      "timestamps": [
+        {
+          "word": "Hi",
+          "start_time": 0.04758333333333331,
+          "end_time": 0.3475833333333333
+        },
+        {
+          "word": ",",
+          "start_time": 0.3475833333333333,
+          "end_time": 0.42258333333333337
+        },
+        {
+          "word": "I'm",
+          "start_time": 0.42258333333333337,
+          "end_time": 0.6600833333333334
+        },
+        {
+          "word": "Asena",
+          "start_time": 0.6600833333333334,
+          "end_time": 1.4225833333333333
+        },
+        {
+          "word": ".",
+          "start_time": 1.4225833333333333,
+          "end_time": 1.5475833333333333
+        },
+        {
+          "word": "It's",
+          "start_time": 1.5475833333333333,
+          "end_time": 1.8100833333333333
+        },
+        {
+          "word": "lovely",
+          "start_time": 1.8100833333333333,
+          "end_time": 2.1725833333333333
+        },
+        {
+          "word": "to",
+          "start_time": 2.1725833333333333,
+          "end_time": 2.2725833333333334
+        },
+        {
+          "word": "meet",
+          "start_time": 2.2725833333333334,
+          "end_time": 2.4725833333333336
+        },
+        {
+          "word": "you",
+          "start_time": 2.4725833333333336,
+          "end_time": 2.8975833333333334
+        },
+        {
+          "word": ".",
+          "start_time": 2.8975833333333334,
+          "end_time": 3.0600833333333335
+        },
+        {
+          "word": "Tell",
+          "start_time": 3.0600833333333335,
+          "end_time": 3.2850833333333336
+        },
+        {
+          "word": "me",
+          "start_time": 3.2850833333333336,
+          "end_time": 3.3975833333333334
+        },
+        {
+          "word": "a",
+          "start_time": 3.3975833333333334,
+          "end_time": 3.4600833333333334
+        },
+        {
+          "word": "little",
+          "start_time": 3.4600833333333334,
+          "end_time": 3.6600833333333336
+        },
+        {
+          "word": "about",
+          "start_time": 3.6600833333333336,
+          "end_time": 3.9225833333333333
+        },
+        {
+          "word": "yourself",
+          "start_time": 3.9225833333333333,
+          "end_time": 4.872583333333333
+        },
+        {
+          "word": ".",
+          "start_time": 4.872583333333333,
+          "end_time": 5.010083333333333
+        },
+        {
+          "word": "I",
+          "start_time": 5.010083333333333,
+          "end_time": 5.197583333333333
+        },
+        {
+          "word": "like",
+          "start_time": 5.197583333333333,
+          "end_time": 5.385083333333333
+        },
+        {
+          "word": "a",
+          "start_time": 5.385083333333333,
+          "end_time": 5.447583333333333
+        },
+        {
+          "word": "conversation",
+          "start_time": 5.447583333333333,
+          "end_time": 6.197583333333333
+        },
+        {
+          "word": "with",
+          "start_time": 6.197583333333333,
+          "end_time": 6.335083333333333
+        },
+        {
+          "word": "a",
+          "start_time": 6.335083333333333,
+          "end_time": 6.397583333333333
+        },
+        {
+          "word": "little",
+          "start_time": 6.397583333333333,
+          "end_time": 6.660083333333333
+        },
+        {
+          "word": "warmth",
+          "start_time": 6.660083333333333,
+          "end_time": 7.122583333333333
+        },
+        {
+          "word": ",",
+          "start_time": 7.122583333333333,
+          "end_time": 7.197583333333333
+        },
+        {
+          "word": "a",
+          "start_time": 7.197583333333333,
+          "end_time": 7.297583333333333
+        },
+        {
+          "word": "little",
+          "start_time": 7.297583333333333,
+          "end_time": 7.610083333333333
+        },
+        {
+          "word": "wit",
+          "start_time": 7.610083333333333,
+          "end_time": 7.947583333333332
+        },
+        {
+          "word": ",",
+          "start_time": 7.947583333333332,
+          "end_time": 8.022583333333333
+        },
+        {
+          "word": "and",
+          "start_time": 8.022583333333333,
+          "end_time": 8.222583333333333
+        },
+        {
+          "word": "room",
+          "start_time": 8.222583333333333,
+          "end_time": 8.622583333333333
+        },
+        {
+          "word": "for",
+          "start_time": 8.622583333333333,
+          "end_time": 8.747583333333333
+        },
+        {
+          "word": "disagreement",
+          "start_time": 8.747583333333333,
+          "end_time": 9.772583333333333
+        },
+        {
+          "word": ".",
+          "start_time": 9.772583333333333,
+          "end_time": 9.872583333333333
+        },
+        {
+          "word": "If",
+          "start_time": 9.872583333333333,
+          "end_time": 10.022583333333333
+        },
+        {
+          "word": "you",
+          "start_time": 10.022583333333333,
+          "end_time": 10.147583333333333
+        },
+        {
+          "word": "tell",
+          "start_time": 10.147583333333333,
+          "end_time": 10.360083333333334
+        },
+        {
+          "word": "me",
+          "start_time": 10.360083333333334,
+          "end_time": 10.497583333333333
+        },
+        {
+          "word": "something",
+          "start_time": 10.497583333333333,
+          "end_time": 10.797583333333334
+        },
+        {
+          "word": "important",
+          "start_time": 10.797583333333334,
+          "end_time": 11.547583333333334
+        },
+        {
+          "word": ",",
+          "start_time": 11.547583333333334,
+          "end_time": 11.647583333333333
+        },
+        {
+          "word": "I",
+          "start_time": 11.647583333333333,
+          "end_time": 11.797583333333334
+        },
+        {
+          "word": "want",
+          "start_time": 11.797583333333334,
+          "end_time": 11.997583333333333
+        },
+        {
+          "word": "to",
+          "start_time": 11.997583333333333,
+          "end_time": 12.085083333333333
+        },
+        {
+          "word": "remember",
+          "start_time": 12.085083333333333,
+          "end_time": 12.472583333333333
+        },
+        {
+          "word": "it",
+          "start_time": 12.472583333333333,
+          "end_time": 12.635083333333332
+        },
+        {
+          "word": "accurately",
+          "start_time": 12.635083333333332,
+          "end_time": 13.547583333333334
+        },
+        {
+          "word": ".",
+          "start_time": 13.547583333333334,
+          "end_time": 13.697583333333332
+        }
+      ],
+      "token": "ed392980b2edac57584f316a07a486ad",
+      "wallSeconds": 8.779150625050534
+    },
+    {
+      "type": "analysis",
+      "index": 0,
+      "region": {
+        "start": 0,
+        "end": 48000,
+        "inputStart": 0,
+        "inputEnd": 54000
+      },
+      "token": "ed392980b2edac57584f316a07a486ad",
+      "wallSeconds": 8.780453625018708
+    },
+    {
+      "type": "segment",
+      "index": 0,
+      "startFrame": 0,
+      "endFrame": 48000,
+      "cues": [
+        {
+          "start": 0,
+          "end": 0.04,
+          "value": "X"
+        },
+        {
+          "start": 0.04,
+          "end": 0.25,
+          "value": "D"
+        },
+        {
+          "start": 0.25,
+          "end": 0.29,
+          "value": "C"
+        },
+        {
+          "start": 0.29,
+          "end": 0.44,
+          "value": "B"
+        },
+        {
+          "start": 0.44,
+          "end": 0.52,
+          "value": "C"
+        },
+        {
+          "start": 0.52,
+          "end": 0.59,
+          "value": "B"
+        },
+        {
+          "start": 0.59,
+          "end": 0.67,
+          "value": "A"
+        },
+        {
+          "start": 0.67,
+          "end": 0.73,
+          "value": "C"
+        },
+        {
+          "start": 0.73,
+          "end": 1.21,
+          "value": "B"
+        },
+        {
+          "start": 1.21,
+          "end": 1.63,
+          "value": "X"
+        },
+        {
+          "start": 1.63,
+          "end": 1.84,
+          "value": "B"
+        },
+        {
+          "start": 1.84,
+          "end": 1.91,
+          "value": "H"
+        },
+        {
+          "start": 1.91,
+          "end": 1.98,
+          "value": "C"
+        },
+        {
+          "start": 1.98,
+          "end": 2,
+          "value": "G"
+        }
+      ],
+      "seconds": 1.7788373340154067,
+      "peakRssBytes": 160628736,
+      "pcmSha256": "00028925bc285dd456979fef7424bdf3a91d42f147bc9151829e3f5d0e780f98",
+      "timestamps": [
+        {
+          "word": "Hi",
+          "start_time": 0.04758333333333331,
+          "end_time": 0.3475833333333333
+        },
+        {
+          "word": ",",
+          "start_time": 0.3475833333333333,
+          "end_time": 0.42258333333333337
+        },
+        {
+          "word": "I'm",
+          "start_time": 0.42258333333333337,
+          "end_time": 0.6600833333333334
+        },
+        {
+          "word": "Asena",
+          "start_time": 0.6600833333333334,
+          "end_time": 1.4225833333333333
+        },
+        {
+          "word": ".",
+          "start_time": 1.4225833333333333,
+          "end_time": 1.5475833333333333
+        },
+        {
+          "word": "It's",
+          "start_time": 1.5475833333333333,
+          "end_time": 1.8100833333333333
+        },
+        {
+          "word": "lovely",
+          "start_time": 1.8100833333333333,
+          "end_time": 2.1725833333333333
+        },
+        {
+          "word": "to",
+          "start_time": 2.1725833333333333,
+          "end_time": 2.2725833333333334
+        }
+      ],
+      "token": "ed392980b2edac57584f316a07a486ad",
+      "wallSeconds": 10.561627666000277
+    },
+    {
+      "type": "analysis",
+      "index": 1,
+      "region": {
+        "start": 48000,
+        "end": 96000,
+        "inputStart": 42000,
+        "inputEnd": 102000
+      },
+      "token": "ed392980b2edac57584f316a07a486ad",
+      "wallSeconds": 10.561750416003633
+    },
+    {
+      "type": "segment",
+      "index": 1,
+      "startFrame": 48000,
+      "endFrame": 96000,
+      "cues": [
+        {
+          "start": 2,
+          "end": 2.06,
+          "value": "G"
+        },
+        {
+          "start": 2.06,
+          "end": 2.13,
+          "value": "B"
+        },
+        {
+          "start": 2.13,
+          "end": 2.27,
+          "value": "F"
+        },
+        {
+          "start": 2.27,
+          "end": 2.35,
+          "value": "A"
+        },
+        {
+          "start": 2.35,
+          "end": 2.42,
+          "value": "B"
+        },
+        {
+          "start": 2.42,
+          "end": 2.76,
+          "value": "F"
+        },
+        {
+          "start": 2.76,
+          "end": 3,
+          "value": "X"
+        },
+        {
+          "start": 3,
+          "end": 3.1399999999999997,
+          "value": "B"
+        },
+        {
+          "start": 3.1399999999999997,
+          "end": 3.21,
+          "value": "C"
+        },
+        {
+          "start": 3.21,
+          "end": 3.2800000000000002,
+          "value": "H"
+        },
+        {
+          "start": 3.2800000000000002,
+          "end": 3.3600000000000003,
+          "value": "A"
+        },
+        {
+          "start": 3.3600000000000003,
+          "end": 3.44,
+          "value": "B"
+        },
+        {
+          "start": 3.44,
+          "end": 3.51,
+          "value": "C"
+        },
+        {
+          "start": 3.51,
+          "end": 3.65,
+          "value": "B"
+        },
+        {
+          "start": 3.65,
+          "end": 3.73,
+          "value": "A"
+        },
+        {
+          "start": 3.73,
+          "end": 3.82,
+          "value": "C"
+        },
+        {
+          "start": 3.82,
+          "end": 4,
+          "value": "F"
+        }
+      ],
+      "seconds": 1.6619582500425167,
+      "peakRssBytes": 142245888,
+      "pcmSha256": "7d6a7b29921ba40f3909c07a54bda83dd84c6a7559d0de06be699596ed54af75",
+      "timestamps": [
+        {
+          "word": "It's",
+          "start_time": 1.75,
+          "end_time": 1.8100833333333333
+        },
+        {
+          "word": "lovely",
+          "start_time": 1.8100833333333333,
+          "end_time": 2.1725833333333333
+        },
+        {
+          "word": "to",
+          "start_time": 2.1725833333333333,
+          "end_time": 2.2725833333333334
+        },
+        {
+          "word": "meet",
+          "start_time": 2.2725833333333334,
+          "end_time": 2.4725833333333336
+        },
+        {
+          "word": "you",
+          "start_time": 2.4725833333333336,
+          "end_time": 2.8975833333333334
+        },
+        {
+          "word": ".",
+          "start_time": 2.8975833333333334,
+          "end_time": 3.0600833333333335
+        },
+        {
+          "word": "Tell",
+          "start_time": 3.0600833333333335,
+          "end_time": 3.2850833333333336
+        },
+        {
+          "word": "me",
+          "start_time": 3.2850833333333336,
+          "end_time": 3.3975833333333334
+        },
+        {
+          "word": "a",
+          "start_time": 3.3975833333333334,
+          "end_time": 3.4600833333333334
+        },
+        {
+          "word": "little",
+          "start_time": 3.4600833333333334,
+          "end_time": 3.6600833333333336
+        },
+        {
+          "word": "about",
+          "start_time": 3.6600833333333336,
+          "end_time": 3.9225833333333333
+        },
+        {
+          "word": "yourself",
+          "start_time": 3.9225833333333333,
+          "end_time": 4.872583333333333
+        }
+      ],
+      "token": "ed392980b2edac57584f316a07a486ad",
+      "wallSeconds": 12.224089000024833
+    },
+    {
+      "type": "analysis",
+      "index": 2,
+      "region": {
+        "start": 96000,
+        "end": 144000,
+        "inputStart": 90000,
+        "inputEnd": 150000
+      },
+      "token": "ed392980b2edac57584f316a07a486ad",
+      "wallSeconds": 12.224180874996819
+    },
+    {
+      "type": "segment",
+      "index": 2,
+      "startFrame": 96000,
+      "endFrame": 144000,
+      "cues": [
+        {
+          "start": 4,
+          "end": 4.06,
+          "value": "F"
+        },
+        {
+          "start": 4.06,
+          "end": 4.2,
+          "value": "B"
+        },
+        {
+          "start": 4.2,
+          "end": 4.34,
+          "value": "C"
+        },
+        {
+          "start": 4.34,
+          "end": 4.41,
+          "value": "H"
+        },
+        {
+          "start": 4.41,
+          "end": 4.55,
+          "value": "G"
+        },
+        {
+          "start": 4.55,
+          "end": 5.08,
+          "value": "X"
+        },
+        {
+          "start": 5.08,
+          "end": 5.1899999999999995,
+          "value": "C"
+        },
+        {
+          "start": 5.1899999999999995,
+          "end": 5.26,
+          "value": "B"
+        },
+        {
+          "start": 5.26,
+          "end": 5.47,
+          "value": "C"
+        },
+        {
+          "start": 5.47,
+          "end": 5.61,
+          "value": "D"
+        },
+        {
+          "start": 5.61,
+          "end": 5.68,
+          "value": "C"
+        },
+        {
+          "start": 5.68,
+          "end": 5.75,
+          "value": "G"
+        },
+        {
+          "start": 5.75,
+          "end": 5.890000000000001,
+          "value": "B"
+        },
+        {
+          "start": 5.890000000000001,
+          "end": 5.96,
+          "value": "C"
+        },
+        {
+          "start": 5.96,
+          "end": 6,
+          "value": "B"
+        }
+      ],
+      "seconds": 1.3373174170264974,
+      "peakRssBytes": 145145856,
+      "pcmSha256": "c8149fe0ff9bebd16ba8342a4eaa51b71ebdf9c175e5f746996c31af6875a83e",
+      "timestamps": [
+        {
+          "word": "about",
+          "start_time": 3.75,
+          "end_time": 3.9225833333333333
+        },
+        {
+          "word": "yourself",
+          "start_time": 3.9225833333333333,
+          "end_time": 4.872583333333333
+        },
+        {
+          "word": ".",
+          "start_time": 4.872583333333333,
+          "end_time": 5.010083333333333
+        },
+        {
+          "word": "I",
+          "start_time": 5.010083333333333,
+          "end_time": 5.197583333333333
+        },
+        {
+          "word": "like",
+          "start_time": 5.197583333333333,
+          "end_time": 5.385083333333333
+        },
+        {
+          "word": "a",
+          "start_time": 5.385083333333333,
+          "end_time": 5.447583333333333
+        },
+        {
+          "word": "conversation",
+          "start_time": 5.447583333333333,
+          "end_time": 6.197583333333333
+        },
+        {
+          "word": "with",
+          "start_time": 6.197583333333333,
+          "end_time": 6.335083333333333
+        }
+      ],
+      "token": "ed392980b2edac57584f316a07a486ad",
+      "wallSeconds": 13.562010541034397
+    },
+    {
+      "type": "analysis",
+      "index": 3,
+      "region": {
+        "start": 144000,
+        "end": 192000,
+        "inputStart": 138000,
+        "inputEnd": 198000
+      },
+      "token": "ed392980b2edac57584f316a07a486ad",
+      "wallSeconds": 13.562127500015777
+    },
+    {
+      "type": "segment",
+      "index": 3,
+      "startFrame": 144000,
+      "endFrame": 192000,
+      "cues": [
+        {
+          "start": 6,
+          "end": 6.1,
+          "value": "B"
+        },
+        {
+          "start": 6.1,
+          "end": 6.24,
+          "value": "C"
+        },
+        {
+          "start": 6.24,
+          "end": 6.38,
+          "value": "B"
+        },
+        {
+          "start": 6.38,
+          "end": 6.45,
+          "value": "C"
+        },
+        {
+          "start": 6.45,
+          "end": 6.66,
+          "value": "B"
+        },
+        {
+          "start": 6.66,
+          "end": 6.73,
+          "value": "F"
+        },
+        {
+          "start": 6.73,
+          "end": 6.87,
+          "value": "E"
+        },
+        {
+          "start": 6.87,
+          "end": 6.95,
+          "value": "A"
+        },
+        {
+          "start": 6.95,
+          "end": 7.24,
+          "value": "B"
+        },
+        {
+          "start": 7.24,
+          "end": 7.3,
+          "value": "C"
+        },
+        {
+          "start": 7.3,
+          "end": 7.64,
+          "value": "B"
+        },
+        {
+          "start": 7.64,
+          "end": 7.71,
+          "value": "F"
+        },
+        {
+          "start": 7.71,
+          "end": 8,
+          "value": "B"
+        }
+      ],
+      "seconds": 1.6394600000348873,
+      "peakRssBytes": 145539072,
+      "pcmSha256": "2973ccd367ea445fa7b616f79be6c2252ea7a90f1c04eae0fb0f5cfc2bcc0191",
+      "timestamps": [
+        {
+          "word": "conversation",
+          "start_time": 5.75,
+          "end_time": 6.197583333333333
+        },
+        {
+          "word": "with",
+          "start_time": 6.197583333333333,
+          "end_time": 6.335083333333333
+        },
+        {
+          "word": "a",
+          "start_time": 6.335083333333333,
+          "end_time": 6.397583333333333
+        },
+        {
+          "word": "little",
+          "start_time": 6.397583333333333,
+          "end_time": 6.660083333333333
+        },
+        {
+          "word": "warmth",
+          "start_time": 6.660083333333333,
+          "end_time": 7.122583333333333
+        },
+        {
+          "word": ",",
+          "start_time": 7.122583333333333,
+          "end_time": 7.197583333333333
+        },
+        {
+          "word": "a",
+          "start_time": 7.197583333333333,
+          "end_time": 7.297583333333333
+        },
+        {
+          "word": "little",
+          "start_time": 7.297583333333333,
+          "end_time": 7.610083333333333
+        },
+        {
+          "word": "wit",
+          "start_time": 7.610083333333333,
+          "end_time": 7.947583333333332
+        },
+        {
+          "word": ",",
+          "start_time": 7.947583333333332,
+          "end_time": 8.022583333333333
+        },
+        {
+          "word": "and",
+          "start_time": 8.022583333333333,
+          "end_time": 8.222583333333333
+        },
+        {
+          "word": "room",
+          "start_time": 8.222583333333333,
+          "end_time": 8.622583333333333
+        }
+      ],
+      "token": "ed392980b2edac57584f316a07a486ad",
+      "wallSeconds": 15.202015832997859
+    },
+    {
+      "type": "analysis",
+      "index": 4,
+      "region": {
+        "start": 192000,
+        "end": 240000,
+        "inputStart": 186000,
+        "inputEnd": 246000
+      },
+      "token": "ed392980b2edac57584f316a07a486ad",
+      "wallSeconds": 15.202074291009922
+    },
+    {
+      "type": "segment",
+      "index": 4,
+      "startFrame": 192000,
+      "endFrame": 240000,
+      "cues": [
+        {
+          "start": 8,
+          "end": 8.02,
+          "value": "X"
+        },
+        {
+          "start": 8.02,
+          "end": 8.09,
+          "value": "C"
+        },
+        {
+          "start": 8.09,
+          "end": 8.29,
+          "value": "B"
+        },
+        {
+          "start": 8.29,
+          "end": 8.5,
+          "value": "F"
+        },
+        {
+          "start": 8.5,
+          "end": 8.64,
+          "value": "A"
+        },
+        {
+          "start": 8.64,
+          "end": 8.7,
+          "value": "G"
+        },
+        {
+          "start": 8.7,
+          "end": 9.17,
+          "value": "B"
+        },
+        {
+          "start": 9.17,
+          "end": 9.25,
+          "value": "A"
+        },
+        {
+          "start": 9.25,
+          "end": 9.32,
+          "value": "C"
+        },
+        {
+          "start": 9.32,
+          "end": 9.46,
+          "value": "B"
+        },
+        {
+          "start": 9.46,
+          "end": 9.95,
+          "value": "X"
+        },
+        {
+          "start": 9.95,
+          "end": 10,
+          "value": "B"
+        }
+      ],
+      "seconds": 1.501830042048823,
+      "peakRssBytes": 160055296,
+      "pcmSha256": "7d81abf23d6da5dced218e8e6a2460334fa80fc23968cb95e58fa3c6aba5b924",
+      "timestamps": [
+        {
+          "word": "wit",
+          "start_time": 7.75,
+          "end_time": 7.947583333333332
+        },
+        {
+          "word": ",",
+          "start_time": 7.947583333333332,
+          "end_time": 8.022583333333333
+        },
+        {
+          "word": "and",
+          "start_time": 8.022583333333333,
+          "end_time": 8.222583333333333
+        },
+        {
+          "word": "room",
+          "start_time": 8.222583333333333,
+          "end_time": 8.622583333333333
+        },
+        {
+          "word": "for",
+          "start_time": 8.622583333333333,
+          "end_time": 8.747583333333333
+        },
+        {
+          "word": "disagreement",
+          "start_time": 8.747583333333333,
+          "end_time": 9.772583333333333
+        },
+        {
+          "word": ".",
+          "start_time": 9.772583333333333,
+          "end_time": 9.872583333333333
+        },
+        {
+          "word": "If",
+          "start_time": 9.872583333333333,
+          "end_time": 10.022583333333333
+        },
+        {
+          "word": "you",
+          "start_time": 10.022583333333333,
+          "end_time": 10.147583333333333
+        },
+        {
+          "word": "tell",
+          "start_time": 10.147583333333333,
+          "end_time": 10.360083333333334
+        }
+      ],
+      "token": "ed392980b2edac57584f316a07a486ad",
+      "wallSeconds": 16.7042365000234
+    },
+    {
+      "type": "analysis",
+      "index": 5,
+      "region": {
+        "start": 240000,
+        "end": 288000,
+        "inputStart": 234000,
+        "inputEnd": 294000
+      },
+      "token": "ed392980b2edac57584f316a07a486ad",
+      "wallSeconds": 16.704335166024975
+    },
+    {
+      "type": "words",
+      "timestamps": [
+        {
+          "word": "Now",
+          "start_time": 13.672041666666667,
+          "end_time": 13.922041666666667
+        },
+        {
+          "word": "let's",
+          "start_time": 13.922041666666667,
+          "end_time": 14.197041666666667
+        },
+        {
+          "word": "keep",
+          "start_time": 14.197041666666667,
+          "end_time": 14.422041666666667
+        },
+        {
+          "word": "talking",
+          "start_time": 14.422041666666667,
+          "end_time": 14.997041666666666
+        },
+        {
+          "word": "while",
+          "start_time": 14.997041666666666,
+          "end_time": 15.134541666666667
+        },
+        {
+          "word": "the",
+          "start_time": 15.134541666666667,
+          "end_time": 15.222041666666666
+        },
+        {
+          "word": "next",
+          "start_time": 15.222041666666666,
+          "end_time": 15.497041666666666
+        },
+        {
+          "word": "part",
+          "start_time": 15.497041666666666,
+          "end_time": 15.684541666666666
+        },
+        {
+          "word": "of",
+          "start_time": 15.684541666666666,
+          "end_time": 15.759541666666667
+        },
+        {
+          "word": "my",
+          "start_time": 15.759541666666667,
+          "end_time": 15.922041666666667
+        },
+        {
+          "word": "voice",
+          "start_time": 15.922041666666667,
+          "end_time": 16.222041666666666
+        },
+        {
+          "word": "gets",
+          "start_time": 16.222041666666666,
+          "end_time": 16.472041666666666
+        },
+        {
+          "word": "ready",
+          "start_time": 16.472041666666666,
+          "end_time": 17.197041666666667
+        },
+        {
+          "word": ".",
+          "start_time": 17.197041666666667,
+          "end_time": 17.359541666666665
+        },
+        {
+          "word": "A",
+          "start_time": 17.359541666666665,
+          "end_time": 17.497041666666668
+        },
+        {
+          "word": "short",
+          "start_time": 17.497041666666668,
+          "end_time": 17.822041666666667
+        },
+        {
+          "word": "pause",
+          "start_time": 17.822041666666667,
+          "end_time": 18.197041666666667
+        },
+        {
+          "word": "is",
+          "start_time": 18.197041666666667,
+          "end_time": 18.347041666666666
+        },
+        {
+          "word": "fine",
+          "start_time": 18.347041666666666,
+          "end_time": 18.972041666666666
+        },
+        {
+          "word": ",",
+          "start_time": 18.972041666666666,
+          "end_time": 19.047041666666665
+        },
+        {
+          "word": "but",
+          "start_time": 19.047041666666665,
+          "end_time": 19.184541666666668
+        },
+        {
+          "word": "a",
+          "start_time": 19.184541666666668,
+          "end_time": 19.309541666666668
+        },
+        {
+          "word": "smooth",
+          "start_time": 19.309541666666668,
+          "end_time": 19.772041666666667
+        },
+        {
+          "word": "conversation",
+          "start_time": 19.772041666666667,
+          "end_time": 20.509541666666667
+        },
+        {
+          "word": "feels",
+          "start_time": 20.509541666666667,
+          "end_time": 20.884541666666667
+        },
+        {
+          "word": "much",
+          "start_time": 20.884541666666667,
+          "end_time": 21.172041666666665
+        },
+        {
+          "word": "more",
+          "start_time": 21.172041666666665,
+          "end_time": 21.397041666666667
+        },
+        {
+          "word": "natural",
+          "start_time": 21.397041666666667,
+          "end_time": 22.322041666666667
+        },
+        {
+          "word": ".",
+          "start_time": 22.322041666666667,
+          "end_time": 22.459541666666667
+        },
+        {
+          "word": "That",
+          "start_time": 22.459541666666667,
+          "end_time": 22.672041666666665
+        },
+        {
+          "word": "is",
+          "start_time": 22.672041666666665,
+          "end_time": 22.822041666666667
+        },
+        {
+          "word": "why",
+          "start_time": 22.822041666666667,
+          "end_time": 23.022041666666667
+        },
+        {
+          "word": "we",
+          "start_time": 23.022041666666667,
+          "end_time": 23.172041666666665
+        },
+        {
+          "word": "are",
+          "start_time": 23.172041666666665,
+          "end_time": 23.309541666666668
+        },
+        {
+          "word": "checking",
+          "start_time": 23.309541666666668,
+          "end_time": 23.659541666666666
+        },
+        {
+          "word": "the",
+          "start_time": 23.659541666666666,
+          "end_time": 23.747041666666668
+        },
+        {
+          "word": "voice",
+          "start_time": 23.747041666666668,
+          "end_time": 24.322041666666667
+        },
+        {
+          "word": "and",
+          "start_time": 24.322041666666667,
+          "end_time": 24.459541666666667
+        },
+        {
+          "word": "the",
+          "start_time": 24.459541666666667,
+          "end_time": 24.547041666666665
+        },
+        {
+          "word": "mouth",
+          "start_time": 24.547041666666665,
+          "end_time": 24.909541666666666
+        },
+        {
+          "word": "movement",
+          "start_time": 24.909541666666666,
+          "end_time": 25.272041666666667
+        },
+        {
+          "word": "together",
+          "start_time": 25.272041666666667,
+          "end_time": 25.997041666666668
+        },
+        {
+          "word": ".",
+          "start_time": 25.997041666666668,
+          "end_time": 26.147041666666667
+        }
+      ],
+      "token": "ed392980b2edac57584f316a07a486ad",
+      "wallSeconds": 16.739236499997787
+    },
+    {
+      "type": "segment",
+      "index": 5,
+      "startFrame": 240000,
+      "endFrame": 288000,
+      "cues": [
+        {
+          "start": 10,
+          "end": 10.01,
+          "value": "B"
+        },
+        {
+          "start": 10.01,
+          "end": 10.07,
+          "value": "G"
+        },
+        {
+          "start": 10.07,
+          "end": 10.14,
+          "value": "B"
+        },
+        {
+          "start": 10.14,
+          "end": 10.28,
+          "value": "C"
+        },
+        {
+          "start": 10.28,
+          "end": 10.35,
+          "value": "H"
+        },
+        {
+          "start": 10.35,
+          "end": 10.43,
+          "value": "A"
+        },
+        {
+          "start": 10.43,
+          "end": 10.6,
+          "value": "B"
+        },
+        {
+          "start": 10.6,
+          "end": 10.68,
+          "value": "A"
+        },
+        {
+          "start": 10.68,
+          "end": 10.86,
+          "value": "B"
+        },
+        {
+          "start": 10.86,
+          "end": 10.94,
+          "value": "A"
+        },
+        {
+          "start": 10.94,
+          "end": 11.120000000000001,
+          "value": "E"
+        },
+        {
+          "start": 11.120000000000001,
+          "end": 11.19,
+          "value": "B"
+        },
+        {
+          "start": 11.19,
+          "end": 11.33,
+          "value": "C"
+        },
+        {
+          "start": 11.33,
+          "end": 11.61,
+          "value": "B"
+        },
+        {
+          "start": 11.61,
+          "end": 11.75,
+          "value": "C"
+        },
+        {
+          "start": 11.75,
+          "end": 11.82,
+          "value": "B"
+        },
+        {
+          "start": 11.82,
+          "end": 11.89,
+          "value": "F"
+        },
+        {
+          "start": 11.89,
+          "end": 11.96,
+          "value": "D"
+        },
+        {
+          "start": 11.96,
+          "end": 12,
+          "value": "F"
+        }
+      ],
+      "seconds": 1.2689298749901354,
+      "peakRssBytes": 160104448,
+      "pcmSha256": "6790aed5d6886876dd87f885763545d75707ad74ecdc498f0ff188176f683139",
+      "timestamps": [
+        {
+          "word": "disagreement",
+          "start_time": 9.75,
+          "end_time": 9.772583333333333
+        },
+        {
+          "word": ".",
+          "start_time": 9.772583333333333,
+          "end_time": 9.872583333333333
+        },
+        {
+          "word": "If",
+          "start_time": 9.872583333333333,
+          "end_time": 10.022583333333333
+        },
+        {
+          "word": "you",
+          "start_time": 10.022583333333333,
+          "end_time": 10.147583333333333
+        },
+        {
+          "word": "tell",
+          "start_time": 10.147583333333333,
+          "end_time": 10.360083333333334
+        },
+        {
+          "word": "me",
+          "start_time": 10.360083333333334,
+          "end_time": 10.497583333333333
+        },
+        {
+          "word": "something",
+          "start_time": 10.497583333333333,
+          "end_time": 10.797583333333334
+        },
+        {
+          "word": "important",
+          "start_time": 10.797583333333334,
+          "end_time": 11.547583333333334
+        },
+        {
+          "word": ",",
+          "start_time": 11.547583333333334,
+          "end_time": 11.647583333333333
+        },
+        {
+          "word": "I",
+          "start_time": 11.647583333333333,
+          "end_time": 11.797583333333334
+        },
+        {
+          "word": "want",
+          "start_time": 11.797583333333334,
+          "end_time": 11.997583333333333
+        },
+        {
+          "word": "to",
+          "start_time": 11.997583333333333,
+          "end_time": 12.085083333333333
+        },
+        {
+          "word": "remember",
+          "start_time": 12.085083333333333,
+          "end_time": 12.472583333333333
+        }
+      ],
+      "token": "ed392980b2edac57584f316a07a486ad",
+      "wallSeconds": 17.974866291042417
+    },
+    {
+      "type": "analysis",
+      "index": 6,
+      "region": {
+        "start": 288000,
+        "end": 336000,
+        "inputStart": 282000,
+        "inputEnd": 342000
+      },
+      "token": "ed392980b2edac57584f316a07a486ad",
+      "wallSeconds": 17.97493508300977
+    },
+    {
+      "type": "segment",
+      "index": 6,
+      "startFrame": 288000,
+      "endFrame": 336000,
+      "cues": [
+        {
+          "start": 12,
+          "end": 12.08,
+          "value": "F"
+        },
+        {
+          "start": 12.08,
+          "end": 12.15,
+          "value": "B"
+        },
+        {
+          "start": 12.15,
+          "end": 12.23,
+          "value": "A"
+        },
+        {
+          "start": 12.23,
+          "end": 12.31,
+          "value": "C"
+        },
+        {
+          "start": 12.31,
+          "end": 12.39,
+          "value": "A"
+        },
+        {
+          "start": 12.39,
+          "end": 12.5,
+          "value": "E"
+        },
+        {
+          "start": 12.5,
+          "end": 12.57,
+          "value": "B"
+        },
+        {
+          "start": 12.57,
+          "end": 12.78,
+          "value": "C"
+        },
+        {
+          "start": 12.78,
+          "end": 13.27,
+          "value": "B"
+        },
+        {
+          "start": 13.27,
+          "end": 13.68,
+          "value": "X"
+        },
+        {
+          "start": 13.68,
+          "end": 13.85,
+          "value": "C"
+        },
+        {
+          "start": 13.85,
+          "end": 13.92,
+          "value": "E"
+        },
+        {
+          "start": 13.92,
+          "end": 13.99,
+          "value": "H"
+        },
+        {
+          "start": 13.99,
+          "end": 14,
+          "value": "C"
+        }
+      ],
+      "seconds": 1.1488352500018664,
+      "peakRssBytes": 162709504,
+      "pcmSha256": "40172149735f36c6adf67bdd85f32feed76711db0cade3131aebd4bf65811f94",
+      "timestamps": [
+        {
+          "word": "I",
+          "start_time": 11.75,
+          "end_time": 11.797583333333334
+        },
+        {
+          "word": "want",
+          "start_time": 11.797583333333334,
+          "end_time": 11.997583333333333
+        },
+        {
+          "word": "to",
+          "start_time": 11.997583333333333,
+          "end_time": 12.085083333333333
+        },
+        {
+          "word": "remember",
+          "start_time": 12.085083333333333,
+          "end_time": 12.472583333333333
+        },
+        {
+          "word": "it",
+          "start_time": 12.472583333333333,
+          "end_time": 12.635083333333332
+        },
+        {
+          "word": "accurately",
+          "start_time": 12.635083333333332,
+          "end_time": 13.547583333333334
+        },
+        {
+          "word": ".",
+          "start_time": 13.547583333333334,
+          "end_time": 13.697583333333332
+        },
+        {
+          "word": "Now",
+          "start_time": 13.672041666666667,
+          "end_time": 13.922041666666667
+        },
+        {
+          "word": "let's",
+          "start_time": 13.922041666666667,
+          "end_time": 14.197041666666667
+        },
+        {
+          "word": "keep",
+          "start_time": 14.197041666666667,
+          "end_time": 14.422041666666667
+        }
+      ],
+      "token": "ed392980b2edac57584f316a07a486ad",
+      "wallSeconds": 19.12401554104872
+    },
+    {
+      "type": "analysis",
+      "index": 7,
+      "region": {
+        "start": 336000,
+        "end": 384000,
+        "inputStart": 330000,
+        "inputEnd": 390000
+      },
+      "token": "ed392980b2edac57584f316a07a486ad",
+      "wallSeconds": 19.12407991604414
+    },
+    {
+      "type": "segment",
+      "index": 7,
+      "startFrame": 336000,
+      "endFrame": 384000,
+      "cues": [
+        {
+          "start": 14,
+          "end": 14.03,
+          "value": "H"
+        },
+        {
+          "start": 14.03,
+          "end": 14.31,
+          "value": "B"
+        },
+        {
+          "start": 14.31,
+          "end": 14.39,
+          "value": "A"
+        },
+        {
+          "start": 14.39,
+          "end": 14.45,
+          "value": "B"
+        },
+        {
+          "start": 14.45,
+          "end": 14.57,
+          "value": "E"
+        },
+        {
+          "start": 14.57,
+          "end": 15.02,
+          "value": "B"
+        },
+        {
+          "start": 15.02,
+          "end": 15.09,
+          "value": "F"
+        },
+        {
+          "start": 15.09,
+          "end": 15.22,
+          "value": "B"
+        },
+        {
+          "start": 15.22,
+          "end": 15.36,
+          "value": "C"
+        },
+        {
+          "start": 15.36,
+          "end": 15.43,
+          "value": "B"
+        },
+        {
+          "start": 15.43,
+          "end": 15.51,
+          "value": "A"
+        },
+        {
+          "start": 15.51,
+          "end": 15.61,
+          "value": "D"
+        },
+        {
+          "start": 15.61,
+          "end": 15.75,
+          "value": "B"
+        },
+        {
+          "start": 15.75,
+          "end": 15.83,
+          "value": "A"
+        },
+        {
+          "start": 15.83,
+          "end": 15.879999999999999,
+          "value": "C"
+        },
+        {
+          "start": 15.879999999999999,
+          "end": 15.93,
+          "value": "B"
+        },
+        {
+          "start": 15.93,
+          "end": 16,
+          "value": "G"
+        }
+      ],
+      "seconds": 1.357982958026696,
+      "peakRssBytes": 159825920,
+      "pcmSha256": "fa837efc458df37ed256b0e49479c953f541896ed6e08a79df02d4938218a8ec",
+      "timestamps": [
+        {
+          "word": "Now",
+          "start_time": 13.75,
+          "end_time": 13.922041666666667
+        },
+        {
+          "word": "let's",
+          "start_time": 13.922041666666667,
+          "end_time": 14.197041666666667
+        },
+        {
+          "word": "keep",
+          "start_time": 14.197041666666667,
+          "end_time": 14.422041666666667
+        },
+        {
+          "word": "talking",
+          "start_time": 14.422041666666667,
+          "end_time": 14.997041666666666
+        },
+        {
+          "word": "while",
+          "start_time": 14.997041666666666,
+          "end_time": 15.134541666666667
+        },
+        {
+          "word": "the",
+          "start_time": 15.134541666666667,
+          "end_time": 15.222041666666666
+        },
+        {
+          "word": "next",
+          "start_time": 15.222041666666666,
+          "end_time": 15.497041666666666
+        },
+        {
+          "word": "part",
+          "start_time": 15.497041666666666,
+          "end_time": 15.684541666666666
+        },
+        {
+          "word": "of",
+          "start_time": 15.684541666666666,
+          "end_time": 15.759541666666667
+        },
+        {
+          "word": "my",
+          "start_time": 15.759541666666667,
+          "end_time": 15.922041666666667
+        },
+        {
+          "word": "voice",
+          "start_time": 15.922041666666667,
+          "end_time": 16.222041666666666
+        },
+        {
+          "word": "gets",
+          "start_time": 16.222041666666666,
+          "end_time": 16.472041666666666
+        }
+      ],
+      "token": "ed392980b2edac57584f316a07a486ad",
+      "wallSeconds": 20.482291874999646
+    },
+    {
+      "type": "analysis",
+      "index": 8,
+      "region": {
+        "start": 384000,
+        "end": 432000,
+        "inputStart": 378000,
+        "inputEnd": 438000
+      },
+      "token": "ed392980b2edac57584f316a07a486ad",
+      "wallSeconds": 20.4823592909961
+    },
+    {
+      "type": "segment",
+      "index": 8,
+      "startFrame": 384000,
+      "endFrame": 432000,
+      "cues": [
+        {
+          "start": 16,
+          "end": 16.06,
+          "value": "E"
+        },
+        {
+          "start": 16.06,
+          "end": 16.2,
+          "value": "B"
+        },
+        {
+          "start": 16.2,
+          "end": 16.34,
+          "value": "C"
+        },
+        {
+          "start": 16.34,
+          "end": 16.83,
+          "value": "B"
+        },
+        {
+          "start": 16.83,
+          "end": 17.44,
+          "value": "X"
+        },
+        {
+          "start": 17.44,
+          "end": 17.61,
+          "value": "B"
+        },
+        {
+          "start": 17.61,
+          "end": 17.75,
+          "value": "E"
+        },
+        {
+          "start": 17.75,
+          "end": 17.83,
+          "value": "A"
+        },
+        {
+          "start": 17.83,
+          "end": 18,
+          "value": "E"
+        }
+      ],
+      "seconds": 0.9488420000416227,
+      "peakRssBytes": 162578432,
+      "pcmSha256": "b64bcfeb273be4f6e4af9abe07faa8d87a6f8048794a73beea0b16392c694db1",
+      "timestamps": [
+        {
+          "word": "of",
+          "start_time": 15.75,
+          "end_time": 15.759541666666667
+        },
+        {
+          "word": "my",
+          "start_time": 15.759541666666667,
+          "end_time": 15.922041666666667
+        },
+        {
+          "word": "voice",
+          "start_time": 15.922041666666667,
+          "end_time": 16.222041666666666
+        },
+        {
+          "word": "gets",
+          "start_time": 16.222041666666666,
+          "end_time": 16.472041666666666
+        },
+        {
+          "word": "ready",
+          "start_time": 16.472041666666666,
+          "end_time": 17.197041666666667
+        },
+        {
+          "word": ".",
+          "start_time": 17.197041666666667,
+          "end_time": 17.359541666666665
+        },
+        {
+          "word": "A",
+          "start_time": 17.359541666666665,
+          "end_time": 17.497041666666668
+        },
+        {
+          "word": "short",
+          "start_time": 17.497041666666668,
+          "end_time": 17.822041666666667
+        },
+        {
+          "word": "pause",
+          "start_time": 17.822041666666667,
+          "end_time": 18.197041666666667
+        },
+        {
+          "word": "is",
+          "start_time": 18.197041666666667,
+          "end_time": 18.347041666666666
+        }
+      ],
+      "token": "ed392980b2edac57584f316a07a486ad",
+      "wallSeconds": 21.431556250026915
+    },
+    {
+      "type": "analysis",
+      "index": 9,
+      "region": {
+        "start": 432000,
+        "end": 480000,
+        "inputStart": 426000,
+        "inputEnd": 486000
+      },
+      "token": "ed392980b2edac57584f316a07a486ad",
+      "wallSeconds": 21.431609666033182
+    },
+    {
+      "type": "segment",
+      "index": 9,
+      "startFrame": 432000,
+      "endFrame": 480000,
+      "cues": [
+        {
+          "start": 18,
+          "end": 18.13,
+          "value": "E"
+        },
+        {
+          "start": 18.13,
+          "end": 18.41,
+          "value": "B"
+        },
+        {
+          "start": 18.41,
+          "end": 18.48,
+          "value": "G"
+        },
+        {
+          "start": 18.48,
+          "end": 18.55,
+          "value": "D"
+        },
+        {
+          "start": 18.55,
+          "end": 18.83,
+          "value": "B"
+        },
+        {
+          "start": 18.83,
+          "end": 19.14,
+          "value": "X"
+        },
+        {
+          "start": 19.14,
+          "end": 19.44,
+          "value": "B"
+        },
+        {
+          "start": 19.44,
+          "end": 19.52,
+          "value": "A"
+        },
+        {
+          "start": 19.52,
+          "end": 19.75,
+          "value": "F"
+        },
+        {
+          "start": 19.75,
+          "end": 19.89,
+          "value": "D"
+        },
+        {
+          "start": 19.89,
+          "end": 19.96,
+          "value": "C"
+        },
+        {
+          "start": 19.96,
+          "end": 20,
+          "value": "G"
+        }
+      ],
+      "seconds": 1.346068250015378,
+      "peakRssBytes": 162463744,
+      "pcmSha256": "b3270f4f9665ba8a35a43b772a44cfd1f7c328c308ae3648719556a31404a7a0",
+      "timestamps": [
+        {
+          "word": "short",
+          "start_time": 17.75,
+          "end_time": 17.822041666666667
+        },
+        {
+          "word": "pause",
+          "start_time": 17.822041666666667,
+          "end_time": 18.197041666666667
+        },
+        {
+          "word": "is",
+          "start_time": 18.197041666666667,
+          "end_time": 18.347041666666666
+        },
+        {
+          "word": "fine",
+          "start_time": 18.347041666666666,
+          "end_time": 18.972041666666666
+        },
+        {
+          "word": ",",
+          "start_time": 18.972041666666666,
+          "end_time": 19.047041666666665
+        },
+        {
+          "word": "but",
+          "start_time": 19.047041666666665,
+          "end_time": 19.184541666666668
+        },
+        {
+          "word": "a",
+          "start_time": 19.184541666666668,
+          "end_time": 19.309541666666668
+        },
+        {
+          "word": "smooth",
+          "start_time": 19.309541666666668,
+          "end_time": 19.772041666666667
+        },
+        {
+          "word": "conversation",
+          "start_time": 19.772041666666667,
+          "end_time": 20.509541666666667
+        }
+      ],
+      "token": "ed392980b2edac57584f316a07a486ad",
+      "wallSeconds": 22.777972875046544
+    },
+    {
+      "type": "analysis",
+      "index": 10,
+      "region": {
+        "start": 480000,
+        "end": 528000,
+        "inputStart": 474000,
+        "inputEnd": 534000
+      },
+      "token": "ed392980b2edac57584f316a07a486ad",
+      "wallSeconds": 22.778039875032846
+    },
+    {
+      "type": "segment",
+      "index": 10,
+      "startFrame": 480000,
+      "endFrame": 528000,
+      "cues": [
+        {
+          "start": 20,
+          "end": 20.05,
+          "value": "G"
+        },
+        {
+          "start": 20.05,
+          "end": 20.19,
+          "value": "B"
+        },
+        {
+          "start": 20.19,
+          "end": 20.26,
+          "value": "C"
+        },
+        {
+          "start": 20.26,
+          "end": 20.54,
+          "value": "B"
+        },
+        {
+          "start": 20.54,
+          "end": 20.61,
+          "value": "G"
+        },
+        {
+          "start": 20.61,
+          "end": 20.89,
+          "value": "B"
+        },
+        {
+          "start": 20.89,
+          "end": 20.97,
+          "value": "A"
+        },
+        {
+          "start": 20.97,
+          "end": 21.04,
+          "value": "C"
+        },
+        {
+          "start": 21.04,
+          "end": 21.18,
+          "value": "B"
+        },
+        {
+          "start": 21.18,
+          "end": 21.26,
+          "value": "A"
+        },
+        {
+          "start": 21.26,
+          "end": 21.33,
+          "value": "E"
+        },
+        {
+          "start": 21.33,
+          "end": 21.39,
+          "value": "B"
+        },
+        {
+          "start": 21.39,
+          "end": 21.6,
+          "value": "C"
+        },
+        {
+          "start": 21.6,
+          "end": 21.81,
+          "value": "B"
+        },
+        {
+          "start": 21.81,
+          "end": 21.88,
+          "value": "C"
+        },
+        {
+          "start": 21.88,
+          "end": 21.95,
+          "value": "H"
+        },
+        {
+          "start": 21.95,
+          "end": 22,
+          "value": "X"
+        }
+      ],
+      "seconds": 0.9435102500137873,
+      "peakRssBytes": 162250752,
+      "pcmSha256": "b399a89d5d0845e68b3a22d7853b39e74219315fa0ee51565a3fd47f3310c079",
+      "timestamps": [
+        {
+          "word": "smooth",
+          "start_time": 19.75,
+          "end_time": 19.772041666666667
+        },
+        {
+          "word": "conversation",
+          "start_time": 19.772041666666667,
+          "end_time": 20.509541666666667
+        },
+        {
+          "word": "feels",
+          "start_time": 20.509541666666667,
+          "end_time": 20.884541666666667
+        },
+        {
+          "word": "much",
+          "start_time": 20.884541666666667,
+          "end_time": 21.172041666666665
+        },
+        {
+          "word": "more",
+          "start_time": 21.172041666666665,
+          "end_time": 21.397041666666667
+        },
+        {
+          "word": "natural",
+          "start_time": 21.397041666666667,
+          "end_time": 22.322041666666667
+        }
+      ],
+      "token": "ed392980b2edac57584f316a07a486ad",
+      "wallSeconds": 23.721788666036446
+    },
+    {
+      "type": "analysis",
+      "index": 11,
+      "region": {
+        "start": 528000,
+        "end": 576000,
+        "inputStart": 522000,
+        "inputEnd": 582000
+      },
+      "token": "ed392980b2edac57584f316a07a486ad",
+      "wallSeconds": 24.39474512502784
+    },
+    {
+      "type": "segment",
+      "index": 11,
+      "startFrame": 528000,
+      "endFrame": 576000,
+      "cues": [
+        {
+          "start": 22,
+          "end": 22.52,
+          "value": "X"
+        },
+        {
+          "start": 22.52,
+          "end": 22.56,
+          "value": "B"
+        },
+        {
+          "start": 22.56,
+          "end": 22.6,
+          "value": "C"
+        },
+        {
+          "start": 22.6,
+          "end": 22.81,
+          "value": "B"
+        },
+        {
+          "start": 22.81,
+          "end": 22.95,
+          "value": "F"
+        },
+        {
+          "start": 22.95,
+          "end": 23.02,
+          "value": "C"
+        },
+        {
+          "start": 23.02,
+          "end": 23.09,
+          "value": "F"
+        },
+        {
+          "start": 23.09,
+          "end": 23.23,
+          "value": "B"
+        },
+        {
+          "start": 23.23,
+          "end": 23.3,
+          "value": "E"
+        },
+        {
+          "start": 23.3,
+          "end": 23.79,
+          "value": "B"
+        },
+        {
+          "start": 23.79,
+          "end": 23.86,
+          "value": "G"
+        },
+        {
+          "start": 23.86,
+          "end": 23.93,
+          "value": "E"
+        },
+        {
+          "start": 23.93,
+          "end": 24,
+          "value": "B"
+        }
+      ],
+      "seconds": 1.4887718340032734,
+      "peakRssBytes": 162693120,
+      "pcmSha256": "41be67343c12acc4af66d39b3b67b4eee140e37f1cd6d8e4f6298c312a310e2e",
+      "timestamps": [
+        {
+          "word": "natural",
+          "start_time": 21.75,
+          "end_time": 22.322041666666667
+        },
+        {
+          "word": ".",
+          "start_time": 22.322041666666667,
+          "end_time": 22.459541666666667
+        },
+        {
+          "word": "That",
+          "start_time": 22.459541666666667,
+          "end_time": 22.672041666666665
+        },
+        {
+          "word": "is",
+          "start_time": 22.672041666666665,
+          "end_time": 22.822041666666667
+        },
+        {
+          "word": "why",
+          "start_time": 22.822041666666667,
+          "end_time": 23.022041666666667
+        },
+        {
+          "word": "we",
+          "start_time": 23.022041666666667,
+          "end_time": 23.172041666666665
+        },
+        {
+          "word": "are",
+          "start_time": 23.172041666666665,
+          "end_time": 23.309541666666668
+        },
+        {
+          "word": "checking",
+          "start_time": 23.309541666666668,
+          "end_time": 23.659541666666666
+        },
+        {
+          "word": "the",
+          "start_time": 23.659541666666666,
+          "end_time": 23.747041666666668
+        },
+        {
+          "word": "voice",
+          "start_time": 23.747041666666668,
+          "end_time": 24.322041666666667
+        }
+      ],
+      "token": "ed392980b2edac57584f316a07a486ad",
+      "wallSeconds": 25.883869000012055
+    },
+    {
+      "type": "analysis",
+      "index": 12,
+      "region": {
+        "start": 576000,
+        "end": 624000,
+        "inputStart": 570000,
+        "inputEnd": 626396
+      },
+      "token": "ed392980b2edac57584f316a07a486ad",
+      "wallSeconds": 26.453605000046082
+    },
+    {
+      "type": "segment",
+      "index": 12,
+      "startFrame": 576000,
+      "endFrame": 624000,
+      "cues": [
+        {
+          "start": 24,
+          "end": 24.19,
+          "value": "B"
+        },
+        {
+          "start": 24.19,
+          "end": 24.39,
+          "value": "X"
+        },
+        {
+          "start": 24.39,
+          "end": 24.54,
+          "value": "B"
+        },
+        {
+          "start": 24.54,
+          "end": 24.62,
+          "value": "A"
+        },
+        {
+          "start": 24.62,
+          "end": 24.71,
+          "value": "C"
+        },
+        {
+          "start": 24.71,
+          "end": 24.78,
+          "value": "E"
+        },
+        {
+          "start": 24.78,
+          "end": 24.92,
+          "value": "B"
+        },
+        {
+          "start": 24.92,
+          "end": 25,
+          "value": "A"
+        },
+        {
+          "start": 25,
+          "end": 25.06,
+          "value": "F"
+        },
+        {
+          "start": 25.06,
+          "end": 25.11,
+          "value": "G"
+        },
+        {
+          "start": 25.11,
+          "end": 25.19,
+          "value": "A"
+        },
+        {
+          "start": 25.19,
+          "end": 25.26,
+          "value": "B"
+        },
+        {
+          "start": 25.26,
+          "end": 25.54,
+          "value": "C"
+        },
+        {
+          "start": 25.54,
+          "end": 25.61,
+          "value": "B"
+        },
+        {
+          "start": 25.61,
+          "end": 25.75,
+          "value": "E"
+        },
+        {
+          "start": 25.75,
+          "end": 26,
+          "value": "X"
+        }
+      ],
+      "seconds": 1.0284545419854112,
+      "peakRssBytes": 162185216,
+      "pcmSha256": "7977285c9c9516fe9068c6c3659e9336c1cff4e6888f540dee8058a0787a389f",
+      "timestamps": [
+        {
+          "word": "voice",
+          "start_time": 23.75,
+          "end_time": 24.322041666666667
+        },
+        {
+          "word": "and",
+          "start_time": 24.322041666666667,
+          "end_time": 24.459541666666667
+        },
+        {
+          "word": "the",
+          "start_time": 24.459541666666667,
+          "end_time": 24.547041666666665
+        },
+        {
+          "word": "mouth",
+          "start_time": 24.547041666666665,
+          "end_time": 24.909541666666666
+        },
+        {
+          "word": "movement",
+          "start_time": 24.909541666666666,
+          "end_time": 25.272041666666667
+        },
+        {
+          "word": "together",
+          "start_time": 25.272041666666667,
+          "end_time": 25.997041666666668
+        },
+        {
+          "word": ".",
+          "start_time": 25.997041666666668,
+          "end_time": 26.147041666666667
+        }
+      ],
+      "token": "ed392980b2edac57584f316a07a486ad",
+      "wallSeconds": 27.48231200000737
+    },
+    {
+      "type": "analysis",
+      "index": 13,
+      "region": {
+        "start": 624000,
+        "end": 626396,
+        "inputStart": 618000,
+        "inputEnd": 626396
+      },
+      "token": "ed392980b2edac57584f316a07a486ad",
+      "wallSeconds": 27.482343333016615
+    },
+    {
+      "type": "segment",
+      "index": 13,
+      "startFrame": 624000,
+      "endFrame": 626396,
+      "cues": [
+        {
+          "start": 26,
+          "end": 26.09,
+          "value": "X"
+        }
+      ],
+      "seconds": 0.07370649999938905,
+      "peakRssBytes": 0,
+      "pcmSha256": "cdc4ecbf74b34a0be79c64c541ed5715fa58129b89d3d3da0baaed8ae05b2325",
+      "timestamps": [
+        {
+          "word": "together",
+          "start_time": 25.75,
+          "end_time": 25.997041666666668
+        },
+        {
+          "word": ".",
+          "start_time": 25.997041666666668,
+          "end_time": 26.147041666666667
+        }
+      ],
+      "token": "ed392980b2edac57584f316a07a486ad",
+      "wallSeconds": 27.556128625001293
+    },
+    {
+      "type": "eos",
+      "token": "ed392980b2edac57584f316a07a486ad",
+      "wallSeconds": 27.556151458004024
+    }
+  ],
+  "browser": {
+    "playedFrames": 626396,
+    "playedSeconds": 26.099833333333333,
+    "bufferSeconds": 0,
+    "firstPlaybackSeconds": 12.344928333369099,
+    "gapCount": 0,
+    "gapSeconds": 0,
+    "buffering": false,
+    "waitingSeconds": 0,
+    "finished": true,
+    "receiver": "Web Audio sample clock",
+    "gaps": [],
+    "bufferPeakSeconds": 10.869625,
+    "bufferMinimumSeconds": 2.7666666666666666,
+    "peakObservedMorph": 0.75,
+    "audioContextRate": 48000,
+    "baseLatency": 0.005333333333333333,
+    "outputLatency": 0.016
+  }
+}

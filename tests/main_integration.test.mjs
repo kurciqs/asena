@@ -105,7 +105,7 @@ function speechHarness(manager) {
     const rendererContext=vm.createContext({...renderer,animationsLoaded:true,stopPerformance:()=>renderer.performanceScheduler.stop()});
     vm.runInContext(section(animation,'export function talk(data) {','\nexport function pausePerformance').replace('export ',''),rendererContext);
     const context=vm.createContext({
-        setTimeout,clearTimeout,DOMException,buildExpressionTracks,EMO,replay:null,
+        setTimeout,clearTimeout,DOMException,buildExpressionTracks,EMO,replay:null,runtimeConfig:{},LIP_SYNC:'rhubarb',
         generateTTS:async()=>({audio,timestamps:[{word:'Hello',start_time:0,end_time:1}]}),
         getVisemes:async()=>[{value:'A',start:.1,end:.9}],
         speechWarning:message=>warnings.push(message),inspectReplay(){},
@@ -140,4 +140,14 @@ test('supported rigs retain speech movement and actual playback errors retain th
     h.context.ANI.talk=()=>Promise.reject(new Error('Fixture audio permission denied'));
     await assert.rejects(h.run(),/Fixture audio permission denied/);
     assert.throws(()=>prepareVrmExpressionTracks({duration:1,visemes:[{value:'A',start:0,end:2}]},manager),/Invalid expression cue timing/);
+});
+
+test('opt-in live speech streams parsed text and keeps complete/replay paths separate',async()=>{
+    const manager=new VRMExpressionManager();manager.registerExpression(new VRMExpression('aa'));
+    const h=speechHarness(manager);h.context.runtimeConfig.speechStreaming=true;
+    let input=null,cleanups=0;h.context.KOKORO_VOICE='af_heart';
+    h.context.ANI.stopPerformance=()=>{cleanups++;};h.context.ANI.beginPcmPerformance=()=>{};
+    h.context.playSpeechStream=async options=>{input=options.text;options.onPlayer({sample:()=>({}),weights:()=>[]});options.onWords([{word:'Hello',start_time:0,end_time:1}]);options.onClock({playedFrames:100,buffering:false});};
+    h.context.document={getElementById:()=>({})};
+    await h.run();assert.equal(input,'Hello');assert.equal(h.starts(),0);assert.equal(cleanups,1);
 });

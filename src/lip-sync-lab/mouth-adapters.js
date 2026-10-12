@@ -1,10 +1,5 @@
-// Audition-only adapters. The production speech renderer is deliberately unchanged.
-export const CHANNELS = ['aa', 'ih', 'ou', 'ee', 'oh', 'closed'];
-export const RHUBARB = {
-  A: [0, 0, 0, 0, 0, .35], B: [0, .3, 0, 0, 0, 0], C: [.12, 0, 0, .48, 0, 0],
-  D: [.75, 0, 0, 0, 0, 0], E: [0, 0, 0, 0, .55, 0], F: [0, 0, .6, 0, 0, 0],
-  G: [0, .12, 0, 0, 0, 0], H: [.25, .12, 0, 0, 0, 0], X: [0, 0, 0, 0, 0, 0]
-};
+import {CHANNELS,RHUBARB,boundedWeights} from '../rhubarb_mouth.js';
+export {CHANNELS,RHUBARB,boundedWeights};
 export const OCULUS = {
   aa: [.65, 0, 0, 0, 0, 0], E: [0, 0, 0, .6, 0, 0], I: [0, .55, 0, 0, 0, 0],
   O: [0, 0, 0, 0, .55, 0], U: [0, 0, .55, 0, 0, 0], PP: [0, 0, 0, 0, 0, .35],
@@ -17,18 +12,6 @@ export const DICTIONARY = {
   E: OCULUS.I, F: OCULUS.FF, G: OCULUS.kk, H: OCULUS.DD, X: OCULUS.sil
 };
 export const LEGACY = {A:'aa', B:null, C:'oh', D:'ee', E:'ee', F:'ou', G:'aa', H:'aa', X:null};
-
-export function boundedWeights(values) {
-  if (!Array.isArray(values) || values.length !== CHANNELS.length || values.some(v => !Number.isFinite(v))) {
-    throw new Error('Invalid mouth weights');
-  }
-  const bounded = values.map(v => Math.max(0, Math.min(1, v)));
-  const total = bounded.slice(0, 5).reduce((a, b) => a + b, 0);
-  // Closure and opening are competing movements, not additive jaw opening.
-  const openingBudget = 1 - bounded[5];
-  if (total > openingBudget) for (let i = 0; i < 5; i++) bounded[i] *= openingBudget / total;
-  return bounded;
-}
 
 export function sampleFrames(frames, fps, time, duration) {
   if (!Number.isFinite(time) || time < 0 || time >= duration) return CHANNELS.map(() => 0);
