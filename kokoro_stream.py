@@ -222,6 +222,14 @@ class SpeechStream:
         if self.transport:self.transport.cancel()
         with self.condition: self.condition.notify_all()
 
+    def release_buffers(self):
+        # Called only after worker and provider-reader threads have exited.
+        with self.condition:
+            self.pcm.clear();self.words.clear();self.request_ends.clear();self.protocol.clear()
+        while not self.queue.empty():
+            try:self.queue.get_nowait()
+            except queue.Empty:break
+
     def check(self):
         if self.cancelled.is_set(): raise Cancelled()
         if self.failure: raise self.failure
@@ -432,13 +440,15 @@ class StreamRegistry:
             if self.active is not None: raise ServiceError('Streaming speech is busy. Wait for it to finish.', 409)
             self.active = stream
         return stream
-    def release(self, stream):
+    def release(self, stream, on_release=lambda:None):
         # Retain ownership until both alignment and provider-reader threads exit.
         def finish():
             if stream.worker: stream.worker.join()
+            if stream.producer: stream.producer.join()
             with self.lock:
-                if self.active is stream: self.active = None
-        if stream.worker and stream.worker.is_alive():threading.Thread(target=finish, daemon=True).start()
+                if self.active is stream:
+                    stream.release_buffers();self.active = None;on_release()
+        if any(thread and thread.is_alive() for thread in (stream.worker,stream.producer)):threading.Thread(target=finish, daemon=True).start()
         else:finish()
     def control(self, data, cancel=False):
         with self.lock:

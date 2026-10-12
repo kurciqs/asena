@@ -5,10 +5,10 @@ export async function playSpeechStream({text,voice,signal,speechProfile=null,onP
   onEvent=()=>{},onWarning=()=>{},onReport=()=>{},
   fetcher=fetch,createContext=()=>new AudioContext(),requestFrame=requestAnimationFrame,cancelFrame=cancelAnimationFrame}) {
   const controller=new AbortController(),context=createContext();
-  let token=null,player=null,timer=null,frame=null,result=null,reader=null;
+  let token=null,player=null,timer=null,frame=null,result=null,reader=null,cancelSent=false;
   const send=(path,data,options={})=>fetcher(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),...options});
   const cancel=()=>{player?.stop();controller.abort();
-    if(token)send('/api/speech/cancel',{token},{keepalive:true,signal:AbortSignal.timeout(2000)}).catch(()=>{});};
+    if(token&&!cancelSent){cancelSent=true;send('/api/speech/cancel',{token},{keepalive:true,signal:AbortSignal.timeout(2000)}).catch(()=>{});}};
   const aborted=()=>cancel();signal?.addEventListener('abort',aborted,{once:true});
   const deadline=setTimeout(()=>controller.abort(new Error('Streaming speech exceeded its deadline')),185000);
   try {

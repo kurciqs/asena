@@ -218,7 +218,7 @@ async function generateTTS(text, turn) {
             speech, alignment: replay.active.alignment });
         const audio = await loadFixtureAudio(speech.audio, undefined, 8000, turn.signal);
         turn.assertCurrent();
-        turn.own(() => audio.pause());
+        turn.own(() => {audio.pause();audio.removeAttribute('src');audio.load();});
         return { audio, timestamps: speech.timestamps };
     }
     const ttsData = await requestJSON("/tts", {
@@ -247,7 +247,7 @@ async function generateTTS(text, turn) {
     const audioURL = URL.createObjectURL(audioBlob);
 
     const audio = new Audio(audioURL);
-    turn.own(() => { audio.pause(); URL.revokeObjectURL(audioURL); });
+    turn.own(() => { audio.pause(); audio.removeAttribute('src'); audio.load(); URL.revokeObjectURL(audioURL); });
 
     let audioId = null;
     if (LIP_SYNC === 'rhubarb') {

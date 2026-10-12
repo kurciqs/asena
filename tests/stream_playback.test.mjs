@@ -81,3 +81,19 @@ test('first output timing can include browser preparation before player construc
   const context=fakeContext(),player=new PCMPlayer(context,{rate:10,startupSeconds:.5,createdAt:1000,now:()=>1500});
   player.add(segment(0,5));assert.ok(Math.abs(player.firstPlaybackSeconds-.58)<1e-9);
 });
+
+test('fifty completed/cancelled turns release nodes, buffers and cues without retained growth',()=>{
+  for(let turn=0;turn<50;turn++){
+    const context=fakeContext(),player=new PCMPlayer(context,{rate:100,startupSeconds:2});
+    player.add(segment(0,100,100));player.add(segment(100,300,100));
+    assert.equal(context.nodes.length,2);
+    if(turn%2===0){
+      player.finish();context.currentTime=4;
+      context.nodes.forEach(node=>node.onended());
+      assert.equal(player.sample().finished,true);
+    }
+    player.stop();
+    assert.deepEqual(player.resources(),{blocks:0,buffers:0,nodes:0,cues:0});
+    assert.ok(context.nodes.every(node=>node.buffer===null&&node.onended===null));
+  }
+});

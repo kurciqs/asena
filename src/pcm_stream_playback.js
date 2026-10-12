@@ -73,7 +73,7 @@ export class PCMPlayer {
       }
       const node=this.context.createBufferSource();node.buffer=block.buffer;node.connect(this.context.destination);
       block.node=node;block.at=at;node.start(at);
-      node.onended=()=>{node.disconnect();block.node=null;block.buffer=null;};
+      node.onended=()=>{node.onended=null;node.disconnect();node.buffer=null;block.node=null;block.buffer=null;};
       this.tail=at+(block.endFrame-block.startFrame)/this.rate;
     }
     this.sample();
@@ -116,11 +116,13 @@ export class PCMPlayer {
   async pause(){if(!this.stopped&&!this.paused){await this.context.suspend();this.paused=true;}}
   async resume(){if(!this.stopped&&this.paused){await this.context.resume();this.paused=false;}}
   weights() {return this.audibleBlock()?weightsAt(this.cues,this.position()/this.rate):CHANNELS.map(()=>0);}
+  resources() {return {blocks:this.blocks.length,buffers:this.blocks.filter(b=>b.buffer).length,
+    nodes:this.blocks.filter(b=>b.node).length,cues:this.cues.length};}
   stop() {
     if(this.stopped)return;
     this.played=this.position();this.ready=this.played;
     this.stopped=true;
-    for(const b of this.blocks) {if(b.node){try{b.node.stop();}catch{}b.node.disconnect();}b.buffer=null;}
+    for(const b of this.blocks) {if(b.node){b.node.onended=null;try{b.node.stop();}catch{}b.node.disconnect();b.node.buffer=null;b.node=null;}b.buffer=null;}
     this.blocks=[];this.cues=[];
   }
 }

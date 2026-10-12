@@ -1,0 +1,94 @@
+{
+  "fixtureOnly": true,
+  "nativeRhubarb": true,
+  "synthesis": false,
+  "llm": false,
+  "measurement": "Captured PCM, immediate sample acknowledgements; not audible playback or end-to-end latency.",
+  "profile": {
+    "id": "stable-122",
+    "version": 1,
+    "label": "Stable \u00b7 1 / 2 / 2",
+    "openingSeconds": 1,
+    "policy": "2s",
+    "startupSeconds": 2,
+    "strategy": "sentences"
+  },
+  "strategyOverride": "whole for this fixed captured packet",
+  "parentRssBeforeBytes": 40730624,
+  "parentRssAfterBytes": 28262400,
+  "turns": [
+    {
+      "turn": 1,
+      "seconds": 3.681844957987778,
+      "regions": 3,
+      "rhubarbPeakRssBytes": 161824768,
+      "parentRssBytes": 22462464,
+      "incomingPeakSeconds": 4.291,
+      "preparedPeakSeconds": 2.0,
+      "remainingWorkers": 0,
+      "remainingPcmBytes": 0,
+      "registryReleased": true
+    },
+    {
+      "turn": 2,
+      "seconds": 4.120145124965347,
+      "regions": 3,
+      "rhubarbPeakRssBytes": 162054144,
+      "parentRssBytes": 22298624,
+      "incomingPeakSeconds": 4.291,
+      "preparedPeakSeconds": 2.0,
+      "remainingWorkers": 0,
+      "remainingPcmBytes": 0,
+      "registryReleased": true
+    },
+    {
+      "turn": 3,
+      "seconds": 3.854089208005462,
+      "regions": 3,
+      "rhubarbPeakRssBytes": 162938880,
+      "parentRssBytes": 22298624,
+      "incomingPeakSeconds": 4.291,
+      "preparedPeakSeconds": 2.0,
+      "remainingWorkers": 0,
+      "remainingPcmBytes": 0,
+      "registryReleased": true
+    },
+    {
+      "turn": 4,
+      "seconds": 4.1880334169836715,
+      "regions": 3,
+      "rhubarbPeakRssBytes": 162103296,
+      "parentRssBytes": 18219008,
+      "incomingPeakSeconds": 4.291,
+      "preparedPeakSeconds": 2.0,
+      "remainingWorkers": 0,
+      "remainingPcmBytes": 0,
+      "registryReleased": true
+    },
+    {
+      "turn": 5,
+      "seconds": 4.372311541985255,
+      "regions": 3,
+      "rhubarbPeakRssBytes": 162856960,
+      "parentRssBytes": 18055168,
+      "incomingPeakSeconds": 4.291,
+      "preparedPeakSeconds": 2.0,
+      "remainingWorkers": 0,
+      "remainingPcmBytes": 0,
+      "registryReleased": true
+    },
+    {
+      "turn": 6,
+      "seconds": 3.6162233339855447,
+      "regions": 3,
+      "rhubarbPeakRssBytes": 162447360,
+      "parentRssBytes": 17776640,
+      "incomingPeakSeconds": 4.291,
+      "preparedPeakSeconds": 2.0,
+      "remainingWorkers": 0,
+      "remainingPcmBytes": 0,
+      "registryReleased": true
+    }
+  ],
+  "limitations": "Small serial regression only; combined LLM/TTS capacity and browser heap need a prepared live session."
+}

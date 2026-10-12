@@ -281,6 +281,31 @@ class KokoroStreamTests(unittest.TestCase):
         registry.control({'token':owner.token},cancel=True);self.assertTrue(owner.cancelled.is_set())
         registry.release(owner)
 
+    def test_registry_keeps_ownership_until_provider_exit_then_discards_transient_buffers(self):
+        release=threading.Event();released=[]
+        registry=stream.StreamRegistry();owner=registry.reserve({'input':'Hi','voice':'af_heart'})
+        owner.pcm.extend(b'\0\0'*100);owner.words.append({'word':'Hi'});owner.protocol.append({'audio':'private'})
+        owner.queue.put({'pcm':'private'});owner.producer=threading.Thread(target=lambda:release.wait(2))
+        owner.producer.start();registry.release(owner,on_release=lambda:released.append(True))
+        self.assertIs(registry.active,owner)
+        with self.assertRaises(stream.ServiceError):registry.reserve({'input':'Next','voice':'af_heart'})
+        release.set();owner.producer.join(1)
+        deadline=time.monotonic()+1
+        while registry.active and time.monotonic()<deadline:time.sleep(.005)
+        self.assertIsNone(registry.active);self.assertEqual(released,[True])
+        self.assertEqual(len(owner.pcm),0);self.assertEqual(owner.words,[]);self.assertEqual(owner.protocol,[])
+        self.assertTrue(owner.queue.empty())
+
+    def test_thirty_serial_turns_release_threads_registry_and_pcm_with_isolated_sessions(self):
+        registry=stream.StreamRegistry()
+        for index in range(30):
+            response=Response([packet(.7)])
+            instance=registry.reserve({'input':'Hello.','voice':'af_heart'},post=lambda *a,**k:response,recognizer=recognize)
+            self.consume(instance);registry.release(instance)
+            self.assertIsNone(registry.active)
+            self.assertFalse(instance.producer.is_alive());self.assertFalse(instance.worker.is_alive())
+            self.assertEqual(len(instance.pcm),0);self.assertEqual(instance.words,[]);self.assertTrue(instance.queue.empty())
+
     def test_flask_stream_owns_alignment_and_releases_even_an_unconsumed_response(self):
         registry=stream.StreamRegistry();client=server.app.test_client()
         class Registry(stream.StreamRegistry):

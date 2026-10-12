@@ -100,7 +100,7 @@ def streamed_speech():
             released.set()
         stream.cancel()
         if stream.worker: stream.worker.join()
-        SPEECH_STREAMS.release(stream); ALIGNMENT_LOCK.release()
+        SPEECH_STREAMS.release(stream,on_release=ALIGNMENT_LOCK.release)
     def generate():
         try:
             for event in stream.iterate(): yield json.dumps(event, separators=(',', ':'))+'\n'
