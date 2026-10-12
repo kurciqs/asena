@@ -25,13 +25,25 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from config import default_rhubarb
 from streaming_alignment import Cancelled, trim_cues, recognize as recognize_region
-from kokoro_stream import StreamRegistry, TRIAL_TEXTS
+from kokoro_stream import StreamRegistry, TRIAL_TEXTS, TRIAL_CASES
 from service_contracts import ServiceError
 from rhubarb_benchmark import clips, process_tree_rss
 
 RATE = 44100
 POLICIES = ('1s', '2s', '3s', 'sentences')
 PROFILES = ('steady1x', 'steady2x', 'bursty1x', 'bufferingDemo')
+
+
+def live_trial_text(data):
+    """Resolve fixed diagnostic cases; retain the old repeats-based API."""
+    if 'textCase' not in data and 'repeats' not in data:
+        raise ValueError('Choose a listed trial passage')
+    if 'repeats' in data and (type(data['repeats']) is not int or data['repeats'] not in (1, 3)):
+        raise ValueError('Choose the fixed short or sustained trial')
+    case = data.get('textCase', 'short' if data.get('repeats', 1) == 1 else 'sustained')
+    if not isinstance(case, str) or case not in TRIAL_CASES:
+        raise ValueError('Choose a listed trial passage')
+    return TRIAL_CASES[case]['text']
 
 
 def dataset(repeats=1):
@@ -325,7 +337,7 @@ class Handler(BaseHTTPRequestHandler):
             return self.answer(403, {'error': 'Local same-origin test page only'})
         if self.path == '/probe/health':
             return self.answer(200, {'fixtureOnly': not self.server.allow_kokoro, 'liveEnabled':self.server.allow_kokoro,
-                                    'trialTexts':TRIAL_TEXTS,
+                                    'trialTexts':TRIAL_TEXTS, 'trialCases':TRIAL_CASES,
                                     'running': bool(self.server.active or self.server.live.active)})
         path = self.path.split('?', 1)[0]
         allowed = (path in ('/', '/stream-test.html', '/lip-sync-lab/lab.css',
@@ -360,13 +372,12 @@ class Handler(BaseHTTPRequestHandler):
                     return self.answer(403, {'error':'Live Kokoro trials are disabled'})
                 if self.path in ('/probe/live/progress', '/probe/live/cancel'):
                     return self.answer(200, self.server.live.control(data, cancel=self.path.endswith('cancel')))
-                if self.path != '/probe/live' or not {'policy','startupSeconds','repeats'}<=set(data) or set(data)-{'policy','startupSeconds','repeats','strategy','openingSeconds'}:
+                if self.path != '/probe/live' or not {'policy','startupSeconds'}<=set(data) or set(data)-{'policy','startupSeconds','repeats','strategy','openingSeconds','textCase'}:
                     raise ValueError('Unknown live trial request')
-                if type(data['repeats']) is not int or data['repeats'] not in (1,3):
-                    raise ValueError('Choose the fixed short or sustained trial')
+                text = live_trial_text(data)
                 if self.server.active:
                     return self.answer(409, {'error':'A saved-audio test is running'})
-                stream = self.server.live.reserve({'input':TRIAL_TEXTS['short' if data['repeats']==1 else 'sustained'],
+                stream = self.server.live.reserve({'input':text,
                     'voice':'af_heart', 'policy':data['policy'], 'startupSeconds':data['startupSeconds'],
                     'strategy':data.get('strategy','whole'),'openingSeconds':data.get('openingSeconds',2)})
                 self.send_response(200); self.send_header('Content-Type','application/x-ndjson')

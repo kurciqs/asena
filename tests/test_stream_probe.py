@@ -16,6 +16,19 @@ import rhubarb_stream_probe as probe
 
 
 class StreamProbeTests(unittest.TestCase):
+    def test_fixed_passage_selection_and_legacy_requests(self):
+        self.assertEqual(probe.live_trial_text({'repeats':1}), probe.TRIAL_TEXTS['short'])
+        self.assertEqual(probe.live_trial_text({'repeats':3}), probe.TRIAL_TEXTS['sustained'])
+        for case, passage in probe.TRIAL_CASES.items():
+            with self.subTest(case=case):
+                self.assertEqual(probe.live_trial_text({'textCase':case}), passage['text'])
+                self.assertTrue(passage['label'] and passage['description'])
+                self.assertLess(len(passage['text'].split()), 250)
+        for request in ({}, {'textCase':'arbitrary'}, {'textCase':[]}, {'textCase':None},
+                        {'repeats':True}, {'repeats':2}, {'textCase':'tiny','repeats':0}):
+            with self.subTest(request=request), self.assertRaises(ValueError):
+                probe.live_trial_text(request)
+
     def source(self, seconds=4, rate=100):
         frames=seconds*rate
         return {'frames': frames, 'rate': rate, 'pcm': b'\0\0'*frames,

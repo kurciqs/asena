@@ -79,3 +79,24 @@ One short actual-browser verification used a **0.5-second reserve, one-second fi
 
 - [Component timing report](evidence/kokoro-startup-components-2026-10-12.json)
 - [Component timing panel](evidence/kokoro-startup-components-2026-10-12.png)
+
+## Fixed passages for manual edge testing
+
+The live viewer now has a **Trial passage** selector. Selecting a passage immediately previews its complete text, word/character count, and intended stress case. It preserves generation strategy, first/later analysis regions and startup reserve; speech only starts when **Start live speech test** is pressed. Saved-audio tests retain their original lengths and synthetic delivery choices.
+
+| Passage | Words | What to watch |
+| --- | ---: | --- |
+| Introduction · original | 14 | Original short baseline for comparing earlier reports. |
+| Conversation · original | 80 | Original sustained baseline for comparing earlier reports. |
+| Tiny reply | 4 | Checks completion when the entire reply may be shorter than the startup reserve. |
+| Many short sentences | 50 | Frequent sentence breaks stress request overhead, phrase tails and pauses. |
+| One long sentence | 72 | No internal punctuation: tests splitting at spaces and sustained delivery. |
+| Tiny opening, longer follow-up | 89 | Alternates short and long sentences to expose early starvation and phrase seams. |
+| Numbers and abbreviations | 70 | Tests spoken normalization, abbreviations and punctuation with variable audio lengths. |
+| Long conversation | 186 | More requests and queue turnover: watch for late gaps as well as startup delay. |
+
+Start with **Tiny opening, longer follow-up** and **Many short sentences** at your experimental settings, then try **Long conversation** to check whether a later request exhausts the reserve. **Tiny reply** checks that completed short speech plays even when shorter than the configured reserve. Compare the same passage again after changing only the reserve, for example from 0.5 to 1 second. First analysis region and prepared-audio reserve are separate controls.
+
+Use **Save report** for each completed run: it includes the exact passage, its case ID, selected settings, startup component timings and gap positions/durations. A naturally spoken pause remains queued audio and does not count as starvation. Watch **Playback gaps** for actual prepared-audio exhaustion. Warm/cold provider state and background CPU load can affect repeatability; one gap-free run does not establish a reliable policy.
+
+The six new passages have **not been synthesized as a batch**. Verification used 49 passing Python and 70 passing JavaScript checks, including fixed-case validation, legacy request compatibility and exact bounded phrase reconstruction for every passage, plus browser selection/preview checks without generating speech.

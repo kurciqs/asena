@@ -32,6 +32,17 @@ def recognize(binary,source,region,cancelled,active):
 
 
 class KokoroStreamTests(unittest.TestCase):
+    def test_stress_passages_preserve_every_character_in_bounded_phrases(self):
+        for case, text in stream.TRIAL_TEXTS.items():
+            with self.subTest(case=case):
+                phrases = stream.phrase_requests(text)
+                self.assertEqual(''.join(phrases), text)
+                self.assertLessEqual(len(phrases[0]), 61)
+                self.assertTrue(all(0 < len(phrase) <= 91 for phrase in phrases[1:]))
+        self.assertLess(len(stream.TRIAL_TEXTS['tiny'].split()), 8)
+        self.assertGreater(len(stream.TRIAL_TEXTS['long'].split()), 180)
+        self.assertNotRegex(stream.TRIAL_TEXTS['unpunctuated'][:-1], r'[.!?;,]')
+
     def make(self,response,**options):
         return stream.SpeechStream({'input':'Hello again.','voice':'af_heart'},post=lambda *a,**k:response,recognizer=recognize,**options)
     def consume(self,instance):

@@ -2,15 +2,19 @@ import {PCMPlayer,Lines} from './playback.js';
 import {createViewer} from './viewer.js';
 import {StartupTiming} from './startup-timing.js';
 const $=id=>document.getElementById(id),zero=[0,0,0,0,0,0];
-let viewer,run=null,report=null,drawId=null,trialTexts={};
-const controls=['source','policy','profile','startup','length','strategy','opening'];
-function displayText(text){$('trial-text').textContent=text;$('trial-size').textContent=`${text.trim().split(/\s+/).length} words · ${text.length} characters`;}
-function trialTextChanged(){if($('source').value==='live')displayText(trialTexts[$('length').value==='1'?'short':'sustained']??'');}
+let viewer,run=null,report=null,drawId=null,trialCases={};
+const controls=['source','policy','profile','startup','length','strategy','opening','text-case'];
+function displayText(text){$('trial-text').textContent=text;$('trial-size').textContent=`${text.trim() ? text.trim().split(/\s+/).length : 0} words · ${text.length} characters`;}
+function trialTextChanged(){
+  if($('source').value!=='live')return;
+  const passage=trialCases[$('text-case').value];
+  displayText(passage?.text??'');$('case-description').textContent=passage?.description??'';
+}
 function state(running){controls.forEach(id=>$(id).disabled=running);$('profile').disabled=running||$('source').value==='live';$('start').disabled=running||!viewer;$('stop').disabled=!running;$('download').disabled=!report;}
 function sourceChanged(){
   const live=$('source').value==='live';
   document.title=live?'Asena · Live speech streaming test':'Asena · Saved-audio streaming test';
-  $('live-options').hidden=!live;$('trial-text-section').hidden=!live;
+  $('saved-length').hidden=live;$('live-options').hidden=!live;$('trial-text-section').hidden=!live;
   $('startup-breakdown').hidden=!live;
   for(const option of $('startup').options)option.disabled=!live&&Number(option.value)<2;
   $('startup').value='2';trialTextChanged();
@@ -19,8 +23,6 @@ function sourceChanged(){
   $('policy').options[3].disabled=live;if(live&&$('policy').value==='sentences')$('policy').value='2s';
   $('analysis-note').textContent=live?'The first region can be shorter than later regions. Up to 250 ms context on each side; completed phrases flush immediately. Audio stays at Kokoro’s 24 kHz. One recognizer at a time. A smaller reserve can cause pauses; it does not change speech speed.':'250 ms analysis context on each side; audio overlap is never played twice. One native Rhubarb process at a time, no alignment cache. These delivery patterns are synthetic and exclude Kokoro startup delay and competing inference.';
   document.querySelector('.intro').textContent=live?'Kokoro generates the fixed trial text now. Rhubarb aligns arriving audio while prepared regions play. No language model is called.':'Saved Kokoro recordings arrive gradually. Rhubarb prepares each region while the previous audio plays. Kokoro and the language model stay off.';
-  $('length').options[0].textContent=live?'Short · introduction':'Short · 26 seconds';
-  $('length').options[1].textContent=live?'Sustained · conversational passage':'Sustained · 77 seconds';
   $('provider-timing').textContent=live?'Provider arrival time will be measured during this run.':'Saved delivery excludes speech generation time.';
   $('start').textContent=live?'Start live speech test':'Start saved-audio test';
   $('delivery-note').hidden=live;state(false);
@@ -82,8 +84,8 @@ async function start() {
   const live=$('source').value==='live';
   const current={live,controller:new AbortController(),context:new AudioContext(),player:null,token:null,
     compute:0,peak:0,regions:0,actualPeak:0,events:[],config:{policy:$('policy').value,...(live?{}:{profile:$('profile').value}),
-    startupSeconds:Number($('startup').value),repeats:Number($('length').value),
-    ...(live?{strategy:$('strategy').value,openingSeconds:Number($('opening').value)}:{})},
+    startupSeconds:Number($('startup').value),...(live?{}:{repeats:Number($('length').value)}),
+    ...(live?{textCase:$('text-case').value,strategy:$('strategy').value,openingSeconds:Number($('opening').value)}:{})},
     started,firstProvider:null,requestIndex:null,timing:new StartupTiming()};
   $('startup-stages').replaceChildren();
   run=current;report=null;state(true);$('status').textContent=live?'Requesting real Kokoro speech…':'Delivering saved audio; waiting for the first aligned regions…';
@@ -123,7 +125,7 @@ async function start() {
         else if(event.type==='cancelled')throw new Error('Test cancelled');
         else if(event.type==='result') {
           const s=metrics(current);
-          report={...event.report,startupTiming:live?current.timing.snapshot((performance.now()-current.started)/1000):null,browser:{...s,receiver:'Web Audio sample clock',gaps:current.player.gaps,
+          report={...event.report,config:{...current.config},...(live?{trialPassage:{id:current.config.textCase,...trialCases[current.config.textCase]}}:{}),startupTiming:live?current.timing.snapshot((performance.now()-current.started)/1000):null,browser:{...s,receiver:'Web Audio sample clock',gaps:current.player.gaps,
             bufferPeakSeconds:current.player.bufferPeak,bufferMinimumSeconds:current.player.bufferMinimum,
             peakObservedMorph:current.actualPeak,audioContextRate:current.context.sampleRate,
             baseLatency:current.context.baseLatency,outputLatency:current.context.outputLatency??null}};
@@ -155,13 +157,18 @@ async function stop(message='Stopped. Outstanding Rhubarb work was cancelled.') 
 }
 $('start').addEventListener('click',start);$('stop').addEventListener('click',()=>stop());
 $('source').addEventListener('change',sourceChanged);
-$('length').addEventListener('change',trialTextChanged);
+$('text-case').addEventListener('change',trialTextChanged);
 $('download').addEventListener('click',()=>{if(!report)return;const url=URL.createObjectURL(new Blob([JSON.stringify(report,null,2)],{type:'application/json'}));
   const a=document.createElement('a');a.href=url;a.download=report.fixtureOnly===false?'kokoro-live-stream-report.json':'rhubarb-saved-stream-report.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&run)stop('Stopped because the test page was hidden.');});
 window.addEventListener('pagehide',()=>{if(run){const current=run;if(current.token)fetch(current.live?'/probe/live/cancel':'/probe/cancel',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:current.token}),keepalive:true}).catch(()=>{});current.controller.abort();current.player?.stop();current.context.close();}viewer?.dispose();});
 try {viewer=await createViewer($('stage'));viewer.draw(zero);$('active-method').textContent='Native Rhubarb · corrected mouth mapping';
-  const health=await (await fetch('/probe/health')).json();$('source').options[1].disabled=!health.liveEnabled;trialTexts=health.trialTexts??{};
+  const health=await (await fetch('/probe/health')).json();$('source').options[1].disabled=!health.liveEnabled;trialCases=health.trialCases??{};
+  for(const [id,passage] of Object.entries(trialCases)){
+    const option=document.createElement('option');option.value=id;
+    option.textContent=`${passage.label} · ${passage.text.trim().split(/\s+/).length} words`;
+    $('text-case').append(option);
+  }
   if(health.liveEnabled&&new URLSearchParams(location.search).get('source')==='live')$('source').value='live';
   sourceChanged();$('status').textContent='Ready. Press Start to run the selected test.';state(false);
 }catch(error){$('status').textContent=`Test unavailable: ${error.message}`;}

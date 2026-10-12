@@ -387,3 +387,55 @@ TRIAL_TEXTS = {
         "A short pause is fine, but a smooth conversation feels much more natural. "
         "That is why we are checking the voice and the mouth movement together."
 }
+
+
+# Fixed, bounded diagnostic passages. Selecting one never starts synthesis.
+TRIAL_TEXTS.update({
+    'tiny': "Of course. I'm here.",
+    'staccato': "Hi. Come closer. Not too close. There. Perfect. What a day! Tea? Coffee? "
+        "Neither? Fair enough. Tell me. I'm listening. Wait. Really? That's lovely. "
+        "Go on. Take your time. No rush. I remember. You said that yesterday. "
+        "Yes. I disagree. Just a little. Let's try again. Better? Good. Stay awhile.",
+    'unpunctuated': "Imagine we are walking beside the lake on a quiet evening and you are telling me "
+        "about a strange idea that became a much bigger project than you expected while I keep asking "
+        "small questions and noticing details and the conversation keeps moving without an obvious place "
+        "to stop because every thought leads naturally into another thought and neither of us wants "
+        "to lose the thread before we finally reach the end.",
+    'mixed': "Hey. I was thinking about that little adventure you mentioned yesterday, the one where "
+        "nothing went according to plan but you somehow came home with a better story. "
+        "Really? Tell me the part you left out, especially the moment when you realized you would "
+        "have to improvise instead of following the perfectly sensible plan you had prepared. "
+        "Oh. That explains the grin. I had a feeling there was more to it. "
+        "Now give me a second to be impressed before I start teasing you about your definition of careful.",
+    'numbers': "Dr. Ellis booked a table for 7:30 p.m. on Friday. The address is 24 Maple Street, "
+        "not 42. Bring $12.50 for the tickets and leave a 10% tip if you like. "
+        "The forecast says 18 degrees, then 12 overnight. "
+        "Wait, was the meeting on Oct. 12 or Oct. 13? Let's check before we make another plan. "
+        "If we're late, call me; if we're early, we can walk around the lake.",
+    'long': "I have a question for you before we settle into the evening. What was the most "
+        "interesting part of your day, even if it seemed small at the time? Sometimes it is a "
+        "conversation you almost forgot, a problem that finally made sense, or something funny "
+        "you noticed on the way home. I like hearing those details because they help me "
+        "understand what matters to you. You do not have to make the story impressive. "
+        "An ordinary day can still have a good moment hidden in it. And if the day was "
+        "difficult, you can say that too. I can listen, ask questions, or help you think "
+        "through what happened. Though I reserve the right to gently tease you if your "
+        "grand plan for dinner is another cup of coffee. We could choose something simple "
+        "instead, put on a little music, and talk while you make it. After that, tell me "
+        "one thing you want to try tomorrow. It can be practical or completely silly. "
+        "I will remember the important part, and you can correct me if I get it wrong. "
+        "Now, where should we begin?"
+})
+TRIAL_CASES = {
+    key: {'label': label, 'description': description, 'text': TRIAL_TEXTS[key]}
+    for key, label, description in (
+        ('short', 'Introduction · original', 'Original short baseline for comparing earlier reports.'),
+        ('sustained', 'Conversation · original', 'Original sustained baseline for comparing earlier reports.'),
+        ('tiny', 'Tiny reply', 'Checks completion when the entire reply may be shorter than the startup reserve.'),
+        ('staccato', 'Many short sentences', 'Frequent sentence breaks stress request overhead, phrase tails and pauses.'),
+        ('unpunctuated', 'One long sentence', 'No internal punctuation: tests splitting at spaces and sustained delivery.'),
+        ('mixed', 'Tiny opening, longer follow-up', 'Alternates short and long sentences to expose early starvation and phrase seams.'),
+        ('numbers', 'Numbers and abbreviations', 'Tests spoken normalization, abbreviations and punctuation with variable audio lengths.'),
+        ('long', 'Long conversation', 'More requests and queue turnover: watch for late gaps as well as startup delay.'),
+    )
+}
