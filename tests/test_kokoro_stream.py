@@ -83,7 +83,13 @@ class KokoroStreamTests(unittest.TestCase):
                                    endpoint=f'http://127.0.0.1:{http.server_port}/speech')
         iterator=instance.iterate()
         try:
-            while next(iterator)['type']!='words':pass
+            observed=[]
+            while True:
+                event=next(iterator);observed.append(event)
+                if event['type']=='words':break
+            phases=[e['phase'] for e in observed if e['type']=='provider-stage']
+            self.assertEqual(phases,['connected','headers','first-byte'])
+            self.assertTrue(all(a['wallSeconds']<=b['wallSeconds'] for a,b in zip(observed,observed[1:])))
             before=time.monotonic();instance.cancel();iterator.close();instance.worker.join(timeout=1)
             self.assertFalse(instance.worker.is_alive());self.assertFalse(instance.producer.is_alive())
             self.assertLess(time.monotonic()-before,1)
@@ -98,6 +104,7 @@ class KokoroStreamTests(unittest.TestCase):
         self.assertTrue(all(s['cues'][0]['start']==s['startFrame']/stream.RATE for s in segments))
         self.assertTrue(all(s['cues'][-1]['end']==s['endFrame']/stream.RATE for s in segments))
         report=events[-1]['report'];self.assertTrue(report['complete']);self.assertEqual(report['rate'],24000)
+        self.assertTrue(all(0<=s['analysisStartSeconds']<=s['analysisEndSeconds']<=s['wallSeconds'] for s in segments))
         self.assertEqual([p['startFrame'] for p in report['providerPackets']],[0,72000])
         self.assertLessEqual(len(instance.pcm),stream.RATE//2);self.assertTrue(response.closed)
         self.assertEqual(len(instance.protocol),2)

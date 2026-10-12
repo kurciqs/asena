@@ -18,6 +18,9 @@
 <p id="playback-state" data-state="ready" role="status">Ready</p>
 <dl id="metrics"><div><dt>First playback</dt><dd id="first">—</dd></div><div><dt>Prepared audio remaining</dt><dd id="buffer">0.00s</dd></div><div><dt>Playback gaps</dt><dd id="gaps">0</dd></div><div><dt>Alignment work</dt><dd id="compute">0.00s</dd></div><div><dt>Rhubarb peak memory</dt><dd id="memory">—</dd></div></dl>
 <p class="note" id="provider-timing">Saved delivery excludes speech generation time.</p>
+<section id="startup-breakdown" hidden aria-label="Startup timing"><h3>Time to first playback</h3><p id="startup-total">No test run yet.</p><dl id="startup-stages"></dl>
+<p class="note">Measured from pressing Start. Rows stop at first playback; later Kokoro and Rhubarb work can overlap. Hover a row for details.</p>
+<p class="note">Kokoro service/model boot happens before this test. “Generation” includes text processing, synthesis and first-byte delivery; pure inference time is not separately exposed.</p></section>
 <details><summary>Inspect this test</summary><pre id="inspection">No test run yet.</pre></details>
 <p class="note" id="analysis-note">250 ms analysis context on each side; audio overlap is never played twice. One native Rhubarb process at a time, no alignment cache. These delivery patterns are synthetic and exclude Kokoro startup delay and competing inference.</p>
 </aside></main></body></html>

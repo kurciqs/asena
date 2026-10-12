@@ -77,3 +77,7 @@ test('aggressive startup waits for a complete aligned half-second and keeps star
   player.add(segment(50,100,100));assert.equal(player.gaps.length,1);
   context.currentTime=.8;assert.equal(player.sample().buffering,false);
 });
+test('first output timing can include browser preparation before player construction',()=>{
+  const context=fakeContext(),player=new PCMPlayer(context,{rate:10,startupSeconds:.5,createdAt:1000,now:()=>1500});
+  player.add(segment(0,5));assert.ok(Math.abs(player.firstPlaybackSeconds-.58)<1e-9);
+});

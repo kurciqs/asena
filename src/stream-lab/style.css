@@ -4,6 +4,10 @@
 #start { max-width: 100%; }
 #trial-text-section { border-top: 1px solid #a396bd40; margin-top: 18px; }
 #trial-text { line-height: 1.6; white-space: pre-wrap; }
+#startup-breakdown { border-top: 1px solid #a396bd40; margin-top: 20px; }
+#startup-stages > div { display: flex; justify-content: space-between; gap: 16px; padding: 9px 0; border-bottom: 1px solid #a396bd30; font-size: .85rem; }
+#startup-stages dd { margin: 0; white-space: nowrap; font-variant-numeric: tabular-nums; font-weight: 600; }
+#startup-total { font-weight: 600; font-variant-numeric: tabular-nums; }
 #playback-state { padding: 12px 16px; border-radius: 12px; background: #ffffff70; font-weight: 600; font-variant-numeric: tabular-nums; }
 #playback-state[data-state="buffering"] { background: #f0d89aaa; color: #594216; border: 1px solid #c2a15c80; }
 #playback-state[data-state="playing"] { background: #d2e6d880; color: #284b37; }

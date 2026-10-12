@@ -1,5 +1,6 @@
 import {PCMPlayer,Lines} from './playback.js';
 import {createViewer} from './viewer.js';
+import {StartupTiming} from './startup-timing.js';
 const $=id=>document.getElementById(id),zero=[0,0,0,0,0,0];
 let viewer,run=null,report=null,drawId=null,trialTexts={};
 const controls=['source','policy','profile','startup','length','strategy','opening'];
@@ -10,6 +11,7 @@ function sourceChanged(){
   const live=$('source').value==='live';
   document.title=live?'Asena · Live speech streaming test':'Asena · Saved-audio streaming test';
   $('live-options').hidden=!live;$('trial-text-section').hidden=!live;
+  $('startup-breakdown').hidden=!live;
   for(const option of $('startup').options)option.disabled=!live&&Number(option.value)<2;
   $('startup').value='2';trialTextChanged();
   document.querySelector('aside > .eyebrow').textContent=live?'Stage 2 / live speech':'Stage 1 / saved audio only';
@@ -26,6 +28,17 @@ function sourceChanged(){
 function metrics(current) {
   const s=current.player?.sample();if(!s)return;
   const elapsed=(performance.now()-current.started)/1000;
+  const startupTiming=current.timing.snapshot(elapsed);
+  if(current.live){
+    $('startup-total').textContent=`${startupTiming.complete?'First playback':'Waiting'} · ${startupTiming.totalSeconds.toFixed(2)}s`;
+    for(const row of startupTiming.rows){
+      let line=document.getElementById(`timing-${row.id}`);
+      if(!line){line=document.createElement('div');line.id=`timing-${row.id}`;
+        const label=document.createElement('dt'),value=document.createElement('dd');label.textContent=row.label;line.append(label,value);$('startup-stages').append(line);}
+      line.title=row.details;
+      line.querySelector('dd').textContent=row.seconds===null?(row.id==='serviceBoot'?'Not in this test':'—'):`${row.seconds.toFixed(3)}s${row.ongoing?' …':''}`;
+    }
+  }
   $('first').textContent=s.firstPlaybackSeconds===null?'—':s.firstPlaybackSeconds.toFixed(2)+'s';
   $('buffer').textContent=s.bufferSeconds.toFixed(2)+'s';$('gaps').textContent=`${s.gapCount} · ${s.gapSeconds.toFixed(3)}s`;
   $('compute').textContent=current.compute.toFixed(2)+'s';$('memory').textContent=(current.peak/1024**2).toFixed(0)+' MiB';
@@ -50,6 +63,7 @@ function metrics(current) {
   $('inspection').textContent=JSON.stringify({source:current.live?'live Kokoro':'saved Kokoro audio',...current.config,...s,
     regionCount:current.regions,aligningRegion:current.analyzing??null,computeSeconds:current.compute,peakRssBytes:current.peak,
     elapsedSeconds:elapsed,firstProviderAudioSeconds:current.firstProvider,providerRequestIndex:current.requestIndex,
+    startupTiming:current.live?startupTiming:null,
     ...actual,peakObservedMorph:current.actualPeak,sourceSha256:current.sourceSha256},null,2);
   return s;
 }
@@ -64,17 +78,20 @@ async function progress(current) {
 }
 async function start() {
   if(run)return;
+  const started=performance.now();
   const live=$('source').value==='live';
   const current={live,controller:new AbortController(),context:new AudioContext(),player:null,token:null,
     compute:0,peak:0,regions:0,actualPeak:0,events:[],config:{policy:$('policy').value,...(live?{}:{profile:$('profile').value}),
     startupSeconds:Number($('startup').value),repeats:Number($('length').value),
     ...(live?{strategy:$('strategy').value,openingSeconds:Number($('opening').value)}:{})},
-    started:performance.now(),firstProvider:null,requestIndex:null};
+    started,firstProvider:null,requestIndex:null,timing:new StartupTiming()};
+  $('startup-stages').replaceChildren();
   run=current;report=null;state(true);$('status').textContent=live?'Requesting real Kokoro speech…':'Delivering saved audio; waiting for the first aligned regions…';
   $('provider-timing').textContent=live?'Measuring provider arrival during this run…':'Saved delivery excludes speech generation time.';
   try {
     await current.context.resume();
-    current.player=new PCMPlayer(current.context,{startupSeconds:current.config.startupSeconds});
+    current.timing.prepared((performance.now()-current.started)/1000);
+    current.player=new PCMPlayer(current.context,{startupSeconds:current.config.startupSeconds,createdAt:current.started});
     drawId=requestAnimationFrame(tick);
     const response=await fetch(live?'/probe/live':'/probe/run',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify(current.config),signal:current.controller.signal});
@@ -83,6 +100,7 @@ async function start() {
     while(run===current) {
       const {value,done}=await reader.read();
       for(const event of lines.push(value??new Uint8Array(),done)) {
+        current.timing.observe(event,(performance.now()-current.started)/1000);
         current.token=event.token;
         current.events.push(Object.fromEntries(Object.entries(event).filter(([key])=>key!=='pcm'&&key!=='report')));
         if(event.type==='begin') {
@@ -98,13 +116,14 @@ async function start() {
         else if(event.type==='segment') {
           current.analyzing=null;
           current.player.add(event);current.compute+=event.seconds;current.peak=Math.max(current.peak,event.peakRssBytes);current.regions++;
+          current.timing.playback(current.player.firstPlaybackSeconds,event);
           if(current.player.firstPlaybackSeconds===null)$('status').textContent='Preparing the startup buffer…';
-        } else if(event.type==='eos')current.player.finish();
+        } else if(event.type==='eos'){current.player.finish();current.timing.playback(current.player.firstPlaybackSeconds,event);}
         else if(event.type==='error')throw new Error(event.error);
         else if(event.type==='cancelled')throw new Error('Test cancelled');
         else if(event.type==='result') {
           const s=metrics(current);
-          report={...event.report,browser:{...s,receiver:'Web Audio sample clock',gaps:current.player.gaps,
+          report={...event.report,startupTiming:live?current.timing.snapshot((performance.now()-current.started)/1000):null,browser:{...s,receiver:'Web Audio sample clock',gaps:current.player.gaps,
             bufferPeakSeconds:current.player.bufferPeak,bufferMinimumSeconds:current.player.bufferMinimum,
             peakObservedMorph:current.actualPeak,audioContextRate:current.context.sampleRate,
             baseLatency:current.context.baseLatency,outputLatency:current.context.outputLatency??null}};

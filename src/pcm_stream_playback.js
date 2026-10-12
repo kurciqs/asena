@@ -35,10 +35,10 @@ export function weightsAt(cues,time) {
 }
 
 export class PCMPlayer {
-  constructor(context,{startupSeconds=2,rate=44100,now=()=>performance.now()}={}) {
+  constructor(context,{startupSeconds=2,rate=44100,now=()=>performance.now(),createdAt=null}={}) {
     this.context=context;this.startupSeconds=startupSeconds;this.rate=rate;this.now=now;
     this.blocks=[];this.cues=[];this.ready=0;this.played=0;this.tail=null;this.eos=false;this.stopped=false;
-    this.created=now();this.firstPlaybackSeconds=null;this.gaps=[];this.bufferPeak=0;this.bufferMinimum=null;this.waitingSince=null;this.paused=false;
+    this.created=createdAt??now();this.firstPlaybackSeconds=null;this.gaps=[];this.bufferPeak=0;this.bufferMinimum=null;this.waitingSince=null;this.paused=false;
   }
   add(segment) {
     if(this.stopped)throw new Error('Playback stopped');

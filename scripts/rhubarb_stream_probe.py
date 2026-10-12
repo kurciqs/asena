@@ -333,7 +333,7 @@ class Handler(BaseHTTPRequestHandler):
                            '/mixamo_vrm_rig_map.js', '/pcm_stream_playback.js', '/rhubarb_mouth.js',
                            '/vrm_models/asena_sfw.vrm', '/animations/idle.fbx')
                    or path in ('/stream-lab/client.js', '/stream-lab/playback.js',
-                               '/stream-lab/viewer.js', '/stream-lab/style.css'))
+                               '/stream-lab/viewer.js', '/stream-lab/style.css','/stream-lab/startup-timing.js'))
         if not allowed:
             return self.answer(404, {'error': 'Not a probe asset'})
         asset = ROOT/'src'/('stream-test.html' if path == '/' else path.lstrip('/'))

@@ -64,3 +64,18 @@ TODO 13 remains open: this implements its speech-segmentation prototype, but doe
 - [Revised CLI phrase-tail trial](evidence/kokoro-startup-phrases-tail-1s-2026-10-12.json)
 - [Waiting-stage viewer screenshot](evidence/kokoro-startup-text-wait-2026-10-12.png)
 - [Final viewer with text visible before generation](evidence/kokoro-startup-viewer-2026-10-12.png)
+
+## Component timers added after the startup comparison
+
+The viewer now shows a **Time to first playback** breakdown, updating while waiting and freezing when the region that starts playback is scheduled. Saved reports include it as `startupTiming`. First playback now includes browser AudioContext creation/resume from pressing Start, rather than beginning after that preparation.
+
+Transport events record the first request's connection, response headers and first audio-body bytes. Complete-packet receipt is a separate milestone. Each Rhubarb region includes explicit invocation start/end times; only intervals needed before startup are counted. Later Kokoro requests and later Rhubarb work are excluded, avoiding double counting their overlap. The remaining browser duration includes initial response delivery, aligned PCM transfer/decoding and output scheduling; it is a residual, not a network-only measurement. During waiting, the active phase uses an elapsed-time estimate; final rows use completed monotonic milestones.
+
+Kokoro request startup means request send through response headers, including provider readiness/validation. **Pure inference and model-loading duration are not exposed by this endpoint.** The generation row includes text processing, synthesis, encoding and first-byte delivery. Docker/service/model boot occurs before the test and is explicitly marked **Not in this test**, rather than assigned a false zero.
+
+One short actual-browser verification used a **0.5-second reserve, one-second first region, two-second later regions**, and phrase generation. It started at **3.642 seconds**, with one later scheduled gap of approximately **0.124 seconds**. It measured approximately 2.059 s for generation through first bytes, 1.252 s for startup Rhubarb, 0.107 s for request startup, 0.023 s for connection, 0.016 s for server preparation, 0.030 s for browser audio setup, 0.004 s for packet receipt/decoding, 0.001 s for input/region preparation wait, and 0.150 s for remaining browser delivery/scheduling. Unrounded rows sum to the measured first-playback estimate. This is a verification sample, not a new repeatable performance guarantee.
+
+**47 Python and 70 JavaScript checks pass.** Added checks cover transport milestone order, Rhubarb interval bounds, initial browser setup inclusion, changing pre-payload counters, frozen startup totals, overlapping later synthesis, and honest fallback for older captures missing detailed provider milestones. Browser verification confirmed live counters, completed totals, and empty warning/error logs. The service remains available for authorized manual review; no repeated background generation was added.
+
+- [Component timing report](evidence/kokoro-startup-components-2026-10-12.json)
+- [Component timing panel](evidence/kokoro-startup-components-2026-10-12.png)

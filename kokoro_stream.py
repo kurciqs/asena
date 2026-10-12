@@ -34,12 +34,13 @@ class HttpStream:
     Closing a response file from another thread can wait on its read lock.
     Shutdown the owned socket instead, then let the reader close its resources.
     """
-    def __init__(self, endpoint, payload, cancelled):
+    def __init__(self, endpoint, payload, cancelled, timing=lambda phase:None):
         parsed=urlsplit(endpoint)
         cls=http.client.HTTPSConnection if parsed.scheme=='https' else http.client.HTTPConnection
         self.connection=cls(parsed.hostname,parsed.port,timeout=3)
         self.path=(parsed.path or '/')+('?' + parsed.query if parsed.query else '')
         self.payload=payload;self.cancelled=cancelled;self.socket=None;self.response=None
+        self.timing=timing
     def cancel(self):
         if self.socket:
             try:self.socket.shutdown(socket.SHUT_RDWR)
@@ -47,9 +48,11 @@ class HttpStream:
     def __enter__(self):
         try:
             self.connection.connect();self.socket=self.connection.sock;self.socket.settimeout(15)
+            self.timing('connected')
             if self.cancelled.is_set():raise Cancelled()
             self.connection.request('POST',self.path,json.dumps(self.payload).encode(),{'Content-Type':'application/json'})
             self.response=self.connection.getresponse();self.status_code=self.response.status
+            self.timing('headers')
             return self
         except Exception:
             self.connection.close();raise
@@ -225,13 +228,16 @@ class SpeechStream:
                 self.event({'type':'request','index':index,'characters':len(text),'requestCount':len(self.requests)})
                 if self.post:response_context=self.post(self.endpoint,json=payload,stream=True,timeout=(3,15))
                 else:
-                    self.transport=HttpStream(self.endpoint,payload,self.cancelled)
+                    self.transport=HttpStream(self.endpoint,payload,self.cancelled,
+                        timing=lambda phase:self.event({'type':'provider-stage','index':index,'phase':phase}))
                     response_context=self.transport
                 with response_context as response:
                     if response.status_code != 200:raise RuntimeError(f'Kokoro returned HTTP {response.status_code}')
-                    parser=JsonLines()
+                    parser=JsonLines();first_byte=False
                     for chunk in response.iter_content(4096):
                         self.check()
+                        if chunk and not first_byte:
+                            first_byte=True;self.event({'type':'provider-stage','index':index,'phase':'first-byte'})
                         for value in parser.push(chunk):self.ingest(value,offset,index)
                     for value in parser.push(b'',final=True):self.ingest(value,offset,index)
                 if self.frames==before:raise ValueError('Kokoro returned no speech audio for a phrase')
@@ -297,8 +303,10 @@ class SpeechStream:
                 local = {'start':start-left, 'end':end-left, 'inputStart':0, 'inputEnd':right-left}
                 self.event({'type':'analysis', 'index':index, 'region':{'start':start, 'end':end,
                             'inputStart':left, 'inputEnd':right}})
+                analysis_start=time.monotonic()-self.started
                 result = self.recognizer(self.binary, {'rate':RATE, 'pcm':audio, 'timestamps':stamps},
                                          local, self.cancelled, lambda pid:setattr(self,'child_pid',pid))
+                analysis_end=time.monotonic()-self.started
                 self.check()
                 cues = [{**c, 'start':c['start']+left/RATE, 'end':c['end']+left/RATE} for c in result['cues']]
                 retained = audio[(start-left)*2:(end-left)*2]
@@ -310,6 +318,7 @@ class SpeechStream:
                     self.prepared_peak = max(self.prepared_peak, self.emitted-self.played)
                     self.condition.notify_all()
                 self.event({'type':'segment', 'index':index, 'startFrame':start, 'endFrame':end,
+                            'analysisStartSeconds':analysis_start,'analysisEndSeconds':analysis_end,
                             **result, 'cues':cues, 'pcm':base64.b64encode(retained).decode(),
                             'pcmSha256':hashlib.sha256(retained).hexdigest(), 'timestamps':[
                                 {**w,'start_time':w['start_time']+left/RATE,'end_time':w['end_time']+left/RATE} for w in stamps]})
