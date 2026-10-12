@@ -10,8 +10,17 @@ function metrics(current) {
   $('buffer').textContent=s.bufferSeconds.toFixed(2)+'s';$('gaps').textContent=`${s.gapCount} · ${s.gapSeconds.toFixed(3)}s`;
   $('compute').textContent=current.compute.toFixed(2)+'s';$('memory').textContent=(current.peak/1024**2).toFixed(0)+' MiB';
   $('position').textContent=s.playedSeconds.toFixed(2)+'s';
+  const phase=s.finished?'finished':s.buffering?'buffering':s.playedFrames>0?'playing':'preparing';
+  $('playback-state').dataset.state=phase;
+  $('playback-state').textContent=s.buffering?`Buffering · waiting ${s.waitingSeconds.toFixed(1)}s`:
+    s.finished?'Playback complete':phase==='playing'?'Playing':`Preparing · ${s.bufferSeconds.toFixed(1)} / ${current.config.startupSeconds}s ready`;
+  if(phase!==current.phase){
+    current.phase=phase;
+    if(phase==='buffering')$('status').textContent='Prepared audio ran out. Waiting for the next aligned region…';
+    else if(phase==='playing')$('status').textContent='Playing while later regions are being aligned.';
+  }
   const actual=viewer.draw(current.player.weights());
-  $('motion-status').textContent=`Applied mouth: ${actual.peakAppliedMorph.toFixed(2)}`;
+  $('motion-status').textContent=s.buffering?`Buffering · waiting ${s.waitingSeconds.toFixed(1)}s`:`Applied mouth: ${actual.peakAppliedMorph.toFixed(2)}`;
   current.actualPeak=Math.max(current.actualPeak,actual.peakAppliedMorph);
   $('inspection').textContent=JSON.stringify({source:'saved Kokoro audio',...current.config,...s,
     regionCount:current.regions,aligningRegion:current.analyzing??null,computeSeconds:current.compute,peakRssBytes:current.peak,
@@ -53,7 +62,7 @@ async function start() {
         else if(event.type==='segment') {
           current.analyzing=null;
           current.player.add(event);current.compute+=event.seconds;current.peak=Math.max(current.peak,event.peakRssBytes);current.regions++;
-          $('status').textContent=current.player.firstPlaybackSeconds===null?'Preparing the startup buffer…':'Playing while later regions are being aligned.';
+          if(current.player.firstPlaybackSeconds===null)$('status').textContent='Preparing the startup buffer…';
         } else if(event.type==='eos')current.player.finish();
         else if(event.type==='error')throw new Error(event.error);
         else if(event.type==='cancelled')throw new Error('Test cancelled');
@@ -80,6 +89,7 @@ async function stop(message='Stopped. Outstanding Rhubarb work was cancelled.') 
   const current=run;if(!current)return;
   run=null;clearTimeout(current.timer);current.player?.stop();viewer.draw(zero);
   $('buffer').textContent='0.00s';$('motion-status').textContent='Applied mouth: 0.00';
+  $('playback-state').dataset.state='ready';$('playback-state').textContent='Stopped';
   $('inspection').textContent=JSON.stringify({...current.config,stopped:true,
     playedFrames:current.player?.played??0,queuedAudioSeconds:0,peakObservedMorph:current.actualPeak},null,2);
   // Send cancellation independently before aborting the receiving request.

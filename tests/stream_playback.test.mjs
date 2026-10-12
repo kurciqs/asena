@@ -31,6 +31,22 @@ test('stop silences all scheduled nodes and refuses stale new segments',()=>{
   player.add(segment(0,20));player.stop();assert.ok(context.nodes.every(node=>node.stopped));
   assert.deepEqual(player.weights(),[0,0,0,0,0,0]);assert.throws(()=>player.add(segment(20,40)),/stopped/);
 });
+test('starvation displays waiting, keeps the mouth neutral, and clears when audio resumes',()=>{
+  const context=fakeContext();let now=0;
+  const player=new PCMPlayer(context,{rate:100,startupSeconds:2,now:()=>now});
+  player.add(segment(0,200,100));assert.equal(player.sample().buffering,false);
+  context.currentTime=1;now=1000;assert.ok(player.weights()[0]>0);
+  context.currentTime=3;now=3000;
+  assert.equal(player.sample().buffering,true);assert.deepEqual(player.weights(),[0,0,0,0,0,0]);
+  now=4500;assert.equal(player.sample().waitingSeconds,1.5);
+  player.add(segment(200,400,100));
+  // Receiving a region does not open the mouth ahead of its scheduled output.
+  assert.equal(player.sample().buffering,true);assert.deepEqual(player.weights(),[0,0,0,0,0,0]);
+  context.currentTime=3.1;now=4600;
+  assert.equal(player.sample().buffering,false);assert.equal(player.sample().waitingSeconds,0);
+  assert.ok(player.weights()[0]>0);assert.equal(player.gaps.length,1);
+  player.finish();context.currentTime=6;assert.equal(player.sample().finished,true);assert.equal(player.sample().buffering,false);
+});
 test('mouth and completion follow output timestamps rather than the ahead-of-output rendering clock',()=>{
   const context=fakeContext();let now=1000;
   context.getOutputTimestamp=()=>({contextTime:.1,performanceTime:1000});

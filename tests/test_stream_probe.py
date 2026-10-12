@@ -57,6 +57,9 @@ class StreamProbeTests(unittest.TestCase):
         self.assertAlmostEqual(steady[-1][1],2*fast[-1][1])
         burst=probe.delivery_schedule(source,'bursty1x')
         self.assertGreater(max(b[1]-a[1] for a,b in zip(burst,burst[1:])),2)
+        demo=probe.delivery_schedule(source,'bufferingDemo')
+        self.assertAlmostEqual(demo[-1][1],steady[-1][1]+8)
+        self.assertGreater(max(b[1]-a[1] for a,b in zip(demo,demo[1:])),8)
 
     def test_bounded_preparation_waits_for_playback_and_cancels_without_late_segments(self):
         source=self.source(seconds=20)

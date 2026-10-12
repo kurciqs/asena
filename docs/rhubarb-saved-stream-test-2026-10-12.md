@@ -14,6 +14,14 @@ The probe delivers saved PCM gradually, invokes actual native Rhubarb/PocketSphi
 - A CLI receiver uses the real wall clock to account for playback and starvation, without producing sound. The browser receiver schedules actual PCM buffers on Web Audio's clock and drives Asena's corrected Rhubarb adapter from the audio output position. Browser/device timings are kept separate from CLI results.
 - A test report can be downloaded from the page. It includes input provenance, actual alignment timings/cues, queue peaks, starvation gaps, and browser playback/binding diagnostics.
 
+## Watching the buffer run out
+
+Select **Audio delivery → Show buffering · eight-second delivery pause**, then Start. This profile delivers audio at playback speed but holds delivery for eight seconds near the ten-second source position, then resumes at playback speed. It deliberately exhausts the two- or four-second startup reserve. It is a demonstration of starvation, not a measured Kokoro delivery pattern, and is excluded from the normal benchmark matrix.
+
+The live playback indicator changes from Preparing to Playing to **Buffering · waiting …s**, and returns to Playing once aligned audio resumes. During a gap the audio position stops and the mouth rests; the prepared-audio reading shows the remaining ready samples. Completed gaps are counted when the next region is scheduled, so the waiting timer shows an ongoing gap before its final duration enters the gap total. The mouth also remains neutral between receipt of a new region and its actual scheduled output.
+
+Browser verification with two-second regions and a two-second reserve observed the audio position held at **8.00 seconds**, mouth movement **0.00**, and **5.3 seconds of ongoing waiting**. Playback subsequently resumed and completed all 25.74 seconds; that run recorded three gaps totalling 8.26 seconds, including smaller gaps outside the deliberate delivery pause. These figures belong to the artificial demonstration. [Waiting screenshot](evidence/rhubarb-buffering-demo-2026-10-12.png). The updated checks pass: **35 Python and 60 JavaScript tests**, including neutral mouth output during starvation and scheduled recovery.
+
 ## Resource and ownership limits
 
 Only one recognizer is allowed across saved-audio probes; a cross-process lock prevents a browser test from competing with a CLI test. Each recognition job requests one worker, has a 15-second deadline and a 384 MiB process-tree RSS limit. These are test-harness limits, not a claim about total laptop memory or CPU usage. Decoder/model resources exit with every region; no recognizer is resident between jobs.

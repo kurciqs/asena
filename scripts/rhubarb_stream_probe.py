@@ -29,7 +29,7 @@ from rhubarb_benchmark import clips, process_tree_rss
 
 RATE = 44100
 POLICIES = ('1s', '2s', '3s', 'sentences')
-PROFILES = ('steady1x', 'steady2x', 'bursty1x')
+PROFILES = ('steady1x', 'steady2x', 'bursty1x', 'bufferingDemo')
 
 
 class Cancelled(Exception):
@@ -94,6 +94,10 @@ def delivery_schedule(source, profile):
     previous_due = 0
     for end in list(range(hop, total, hop)) + [total]:
         due = end / rate / (2 if profile == 'steady2x' else 1)
+        if profile == 'bufferingDemo' and end / rate >= 10:
+            # Hold the incoming stream for eight seconds, then resume at 1x.
+            # This deliberately drains the startup buffer; it is not a Kokoro measurement.
+            due += 8
         if profile == 'bursty1x':
             # Deliberate two-second delivery stall, then catch-up bursts.
             if 10 <= end / rate < 12:
@@ -489,7 +493,7 @@ def main():
     configurations = [(args.policy, args.profile, args.startup, args.repeats)]
     if args.matrix:
         configurations = [(p, 'steady1x', 2, 1) for p in POLICIES]
-        configurations += [('2s', p, 4, 3) for p in PROFILES]
+        configurations += [('2s', p, 4, 3) for p in PROFILES if p != 'bufferingDemo']
     results = []
     args.output.parent.mkdir(parents=True, exist_ok=True)
     for config in configurations:
