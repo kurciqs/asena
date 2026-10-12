@@ -1,7 +1,7 @@
 import {PCMPlayer,Lines} from './pcm_stream_playback.js';
 
 // One ownership scope for streamed audio, acknowledgements and provider cancellation.
-export async function playSpeechStream({text,voice,signal,onPlayer=()=>{},onClock=()=>{},onWords=()=>{},
+export async function playSpeechStream({text,voice,signal,speechProfile=null,onPlayer=()=>{},onClock=()=>{},onWords=()=>{},
   fetcher=fetch,createContext=()=>new AudioContext(),requestFrame=requestAnimationFrame,cancelFrame=cancelAnimationFrame}) {
   const controller=new AbortController(),context=createContext();
   let token=null,player=null,timer=null,frame=null,result=null;
@@ -13,7 +13,7 @@ export async function playSpeechStream({text,voice,signal,onPlayer=()=>{},onCloc
   try {
     if(signal?.aborted)throw new DOMException('Turn stopped','AbortError');
     await context.resume();
-    const response=await send('/api/speech/stream',{input:text,voice,policy:'2s',startupSeconds:2},{signal:controller.signal});
+    const response=await send('/api/speech/stream',{input:text,voice,...(speechProfile?{strategy:speechProfile.strategy,policy:speechProfile.policy,openingSeconds:speechProfile.openingSeconds,startupSeconds:speechProfile.startupSeconds}:{})},{signal:controller.signal});
     if(!response.ok)throw new Error((await response.json()).error??'Speech streaming unavailable');
     const tick=()=>{if(player){onClock(player.sample());frame=requestFrame(tick);}};
     const ack=async()=>{

@@ -383,7 +383,7 @@ async function prepareAndPlay(parsedReply, turn) {
         await ANI.preparePerformance(parsedReply.actions.map(cue=>({value:cue.value})),turn.signal);
         const available=new Set(ANI.getPlaybackState().loadedClips??ANI.getPlaybackState().clips);
         try{
-            await playSpeechStream({text:parsedReply.text,voice:KOKORO_VOICE,signal:turn.signal,
+            await playSpeechStream({text:parsedReply.text,voice:KOKORO_VOICE,signal:turn.signal,speechProfile:runtimeConfig.speechProfile,
                 onPlayer:value=>{player=value;ANI.beginPcmPerformance(()=>({...player.sample(),weights:player.weights(),...cues}),player);},
                 onWords:stamps=>{words.push(...stamps);try{cues=EMO.getPartialPerformance(words,parsedReply,available);}catch(error){speechWarning(`Emotion and gesture timing unavailable. ${error.message}`);}},
                 onClock:clock=>{

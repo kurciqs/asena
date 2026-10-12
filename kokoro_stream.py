@@ -18,7 +18,7 @@ import threading
 import time
 from urllib.parse import urlsplit
 
-from config import ROOT, RHUBARB, KOKORO_API
+from config import ROOT, RHUBARB, KOKORO_API, SPEECH_PROFILE
 from service_contracts import ServiceError, require_payload, normalize_timestamps
 from streaming_alignment import Cancelled, recognize
 
@@ -88,10 +88,10 @@ def speech_payload(data):
     if not isinstance(data, dict) or set(data)-{'input', 'voice', 'speed', 'policy', 'startupSeconds', 'strategy', 'openingSeconds'}:
         raise ServiceError('Expected speech text, voice and streaming buffer options.', 400)
     payload = require_payload({k: v for k, v in data.items() if k in ('input', 'voice', 'speed')}, 'tts')
-    policy, startup = data.get('policy', '2s'), data.get('startupSeconds', 2)
+    policy, startup = data.get('policy', SPEECH_PROFILE['policy']), data.get('startupSeconds', SPEECH_PROFILE['startupSeconds'])
     if policy not in ('1s', '2s', '3s') or type(startup) not in (int,float) or startup not in (.5,1,2,4):
         raise ServiceError('Choose 1–3 second regions and a 0.5, 1, 2 or 4 second startup buffer.', 400)
-    if data.get('strategy','whole') not in ('whole','phrases','sentences') or type(data.get('openingSeconds',2)) not in (int,float) or data.get('openingSeconds',2) not in (.5,1,2):
+    if data.get('strategy',SPEECH_PROFILE['strategy']) not in ('whole','phrases','sentences') or type(data.get('openingSeconds',SPEECH_PROFILE['openingSeconds'])) not in (int,float) or data.get('openingSeconds',SPEECH_PROFILE['openingSeconds']) not in (.5,1,2):
         raise ServiceError('Choose whole-text, phrase or sentence generation and a 0.5, 1 or 2 second opening region.',400)
     return {**payload, 'stream': True, 'response_format': 'pcm', 'return_timestamps': True}, policy, startup
 
@@ -201,7 +201,7 @@ class SpeechStream:
     def __init__(self, data, *, endpoint=KOKORO_API, post=None, recognizer=recognize,
                  binary=RHUBARB, capture=False):
         self.payload, self.policy, self.startup = speech_payload(data)
-        self.strategy=data.get('strategy','whole');self.opening=data.get('openingSeconds',2)
+        self.strategy=data.get('strategy',SPEECH_PROFILE['strategy']);self.opening=data.get('openingSeconds',SPEECH_PROFILE['openingSeconds'])
         self.requests=({'phrases':phrase_requests,'sentences':sentence_requests}.get(self.strategy,lambda text:[text]))(self.payload['input'])
         self.request_ends=[]
         self.endpoint, self.post, self.recognizer, self.binary = endpoint, post, recognizer, binary
@@ -318,11 +318,17 @@ class SpeechStream:
             if not self.cancelled.is_set():
                 with self.condition:self.failure = error;self.condition.notify_all()
 
+    def timing_profile(self):
+        matches=(self.policy==SPEECH_PROFILE['policy'] and self.opening==SPEECH_PROFILE['openingSeconds']
+                 and self.startup==SPEECH_PROFILE['startupSeconds'] and self.strategy==SPEECH_PROFILE['strategy'])
+        return {'id':SPEECH_PROFILE['id'] if matches else 'custom', 'version':SPEECH_PROFILE['version'],
+                'policy':self.policy,'openingSeconds':self.opening,'startupSeconds':self.startup,'strategy':self.strategy}
+
     def report(self, complete):
         segments = [e for e in self.events if e['type'] == 'segment']
         return {'fixtureOnly': False, 'provider': 'Kokoro captioned PCM', 'rate': RATE,
                 'policy': self.policy, 'startupSeconds': self.startup, 'complete': complete,
-                'strategy':self.strategy,'openingSeconds':self.opening,'requestCount':len(self.requests),
+                'strategy':self.strategy,'openingSeconds':self.opening,'timingProfile':self.timing_profile(),'requestCount':len(self.requests),
                 'textCharacters':len(self.payload['input']),'textWords':len(self.payload['input'].split()),
                 'duration': self.frames/RATE, 'sourceSha256': self.digest.hexdigest(),
                 'firstProviderAudioSeconds': self.first_packet, 'providerFinishedSeconds': self.provider_finished,
@@ -343,7 +349,7 @@ class SpeechStream:
             except BlockingIOError as error: raise RuntimeError('Another Rhubarb stream is running') from error
             self.event({'type':'begin', 'rate':RATE, 'startupSeconds':self.startup,
                         'source':'live Kokoro', 'cache':False, 'threads':1,
-                        'text':self.payload['input'],'strategy':self.strategy,'openingSeconds':self.opening})
+                        'text':self.payload['input'],'strategy':self.strategy,'openingSeconds':self.opening,'timingProfile':self.timing_profile()})
             self.producer = threading.Thread(target=self.produce, daemon=True); self.producer.start()
             hop, context, start, index = int(self.policy[0])*RATE, RATE//4, 0, 0
             while True:

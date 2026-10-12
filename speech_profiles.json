@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "default": "stable-122",
+  "profiles": {
+    "stable-122": {
+      "label": "Stable · 1 / 2 / 2",
+      "openingSeconds": 1,
+      "policy": "2s",
+      "startupSeconds": 2,
+      "strategy": "sentences"
+    }
+  }
+}

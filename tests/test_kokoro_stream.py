@@ -32,6 +32,23 @@ def recognize(binary,source,region,cancelled,active):
 
 
 class KokoroStreamTests(unittest.TestCase):
+    def setUp(self):
+        # Mock stream tests must not contend with a user's live recognizer lock.
+        import tempfile
+        self.folder=tempfile.TemporaryDirectory();self.addCleanup(self.folder.cleanup)
+        root=patch.object(stream,'ROOT',Path(self.folder.name));root.start();self.addCleanup(root.stop)
+
+    def test_shared_timing_defaults_and_custom_overrides_are_reported(self):
+        instance=self.make(Response([packet(2)]))
+        events=self.consume(instance)
+        begin=next(e for e in events if e['type']=='begin')
+        self.assertEqual(begin['openingSeconds'],1);self.assertEqual(begin['startupSeconds'],2)
+        self.assertEqual(begin['timingProfile']['id'],'stable-122')
+        report=next(e for e in events if e['type']=='result')['report']
+        self.assertEqual(report['timingProfile'],begin['timingProfile'])
+        custom=stream.SpeechStream({'input':'Hi','voice':'af_heart','openingSeconds':.5,'startupSeconds':4})
+        self.assertEqual(custom.timing_profile()['id'],'custom');self.assertEqual(custom.startup,4)
+
     def test_stress_passages_preserve_every_character_in_bounded_phrases(self):
         for case, text in stream.TRIAL_TEXTS.items():
             with self.subTest(case=case):
@@ -176,7 +193,7 @@ class KokoroStreamTests(unittest.TestCase):
     def test_dynamic_regions_preserve_samples_context_offsets_and_final_tail(self):
         response=Response([packet(3),packet(2.3,start=3,word='again')]);instance=self.make(response,capture=True)
         events=self.consume(instance);segments=[e for e in events if e['type']=='segment']
-        self.assertEqual([(s['startFrame'],s['endFrame']) for s in segments],[(0,48000),(48000,96000),(96000,127200)])
+        self.assertEqual([(s['startFrame'],s['endFrame']) for s in segments],[(0,24000),(24000,72000),(72000,120000),(120000,127200)])
         self.assertEqual(b''.join(base64.b64decode(s['pcm']) for s in segments),b'\0\0'*127200)
         self.assertTrue(all(s['cues'][0]['start']==s['startFrame']/stream.RATE for s in segments))
         self.assertTrue(all(s['cues'][-1]['end']==s['endFrame']/stream.RATE for s in segments))

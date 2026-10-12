@@ -144,10 +144,10 @@ test('supported rigs retain speech movement and actual playback errors retain th
 
 test('opt-in live speech streams parsed text and keeps complete/replay paths separate',async()=>{
     const manager=new VRMExpressionManager();manager.registerExpression(new VRMExpression('aa'));
-    const h=speechHarness(manager);h.context.runtimeConfig.speechStreaming=true;
+    const h=speechHarness(manager);h.context.runtimeConfig.speechStreaming=true;h.context.runtimeConfig.speechProfile={policy:'2s',openingSeconds:1,startupSeconds:2,strategy:'sentences'};
     let input=null,cleanups=0;h.context.KOKORO_VOICE='af_heart';
     h.context.ANI.stopPerformance=()=>{cleanups++;};h.context.ANI.beginPcmPerformance=()=>{};
-    h.context.playSpeechStream=async options=>{input=options.text;options.onPlayer({sample:()=>({}),weights:()=>[]});options.onWords([{word:'Hello',start_time:0,end_time:1}]);options.onClock({playedFrames:100,buffering:false});};
+    h.context.playSpeechStream=async options=>{input=options.text;assert.equal(options.speechProfile,h.context.runtimeConfig.speechProfile);options.onPlayer({sample:()=>({}),weights:()=>[]});options.onWords([{word:'Hello',start_time:0,end_time:1}]);options.onClock({playedFrames:100,buffering:false});};
     h.context.document={getElementById:()=>({})};
     await h.run();assert.equal(input,'Hello');assert.equal(h.starts(),0);assert.equal(cleanups,1);
 });

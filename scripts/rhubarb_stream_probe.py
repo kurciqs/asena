@@ -23,7 +23,7 @@ import wave
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from config import default_rhubarb
+from config import default_rhubarb, SPEECH_PROFILE
 from streaming_alignment import Cancelled, trim_cues, recognize as recognize_region
 from kokoro_stream import StreamRegistry, TRIAL_TEXTS, TRIAL_CASES, sentence_requests
 from service_contracts import ServiceError
@@ -358,7 +358,7 @@ class Handler(BaseHTTPRequestHandler):
             return self.answer(200, {'recordings':self.server.recordings})
         if self.path == '/probe/health':
             return self.answer(200, {'fixtureOnly': not self.server.allow_kokoro, 'liveEnabled':self.server.allow_kokoro,
-                                    'trialTexts':TRIAL_TEXTS, 'trialCases':TRIAL_CASES,
+                                    'speechProfile':SPEECH_PROFILE, 'trialTexts':TRIAL_TEXTS, 'trialCases':TRIAL_CASES,
                                     'running': bool(self.server.active or self.server.live.active)})
         path = self.path.split('?', 1)[0]
         allowed = (path in ('/', '/stream-test.html', '/lip-sync-lab/lab.css',
@@ -403,7 +403,7 @@ class Handler(BaseHTTPRequestHandler):
                     return self.answer(409, {'error':'A saved-audio test is running'})
                 stream = self.server.live.reserve({'input':text,
                     'voice':'af_heart', 'policy':data['policy'], 'startupSeconds':data['startupSeconds'],
-                    'strategy':data.get('strategy','sentences'),'openingSeconds':data.get('openingSeconds',2)})
+                    'strategy':data.get('strategy',SPEECH_PROFILE['strategy']),'openingSeconds':data.get('openingSeconds',SPEECH_PROFILE['openingSeconds'])})
                 self.send_response(200); self.send_header('Content-Type','application/x-ndjson')
                 self.send_header('Cache-Control','no-store'); self.end_headers()
                 try:

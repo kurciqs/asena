@@ -17,7 +17,7 @@ SPEECH_STREAMS = StreamRegistry()
 from pathlib import Path
 from service_contracts import ServiceError, require_payload, proxy_json, validate_chat_response, validate_tts_response, validate_visemes
 
-from config import STATIC_DIR, RHUBARB, RHUBARB_THREADS, ALIGNMENT_CACHE_ENTRIES, FFMPEG, LMS_API, KOKORO_API, RUNTIME_MODE, HOST, PORT, PROCESS_TIMEOUT, CHAT_MODEL, VOICE, LIP_SYNC, ASSETS, SPEECH_STREAMING
+from config import STATIC_DIR, RHUBARB, RHUBARB_THREADS, ALIGNMENT_CACHE_ENTRIES, FFMPEG, LMS_API, KOKORO_API, RUNTIME_MODE, HOST, PORT, PROCESS_TIMEOUT, CHAT_MODEL, VOICE, LIP_SYNC, ASSETS, SPEECH_STREAMING, SPEECH_PROFILE
 
 app = Flask(__name__, static_folder=None)
 app.config["MAX_CONTENT_LENGTH"] = 24 * 1024 * 1024
@@ -63,7 +63,7 @@ def enforce_replay_boundary():
 
 @app.route("/runtime")
 def runtime():
-    return jsonify({"mode": RUNTIME_MODE, "budget": budget.public_config(), "chatModel": CHAT_MODEL, "voice": VOICE, "lipSync": LIP_SYNC, "assets": ASSETS, "speechStreaming": SPEECH_STREAMING})
+    return jsonify({"mode": RUNTIME_MODE, "budget": budget.public_config(), "chatModel": CHAT_MODEL, "voice": VOICE, "lipSync": LIP_SYNC, "assets": ASSETS, "speechStreaming": SPEECH_STREAMING, "speechProfile": SPEECH_PROFILE})
 
 @app.errorhandler(404)
 def page_not_found(e):
