@@ -55,6 +55,7 @@ SPEECH_STREAMING = os.environ.get('ASENA_SPEECH_STREAMING','1' if RUNTIME_MODE==
 SPEECH_SOURCE = os.environ.get('ASENA_SPEECH_SOURCE','recorded' if RUNTIME_MODE=='preview' else 'kokoro')
 if SPEECH_SOURCE not in ('recorded','kokoro') or (RUNTIME_MODE=='live' and SPEECH_SOURCE!='kokoro'):
     raise RuntimeError('Recorded speech is only supported with scripted preview; choose kokoro for live dialogue')
+PREVIEW_SPEECH_SOURCES=['recorded','kokoro'] if os.environ.get('ASENA_PREVIEW_KOKORO','0')=='1' or SPEECH_SOURCE=='kokoro' else ['recorded']
 SPEECH_PROFILE = load_speech_profile(ROOT/'speech_profiles.json',os.environ.get('ASENA_SPEECH_PROFILE'))
 if not CHAT_MODEL or len(CHAT_MODEL)>200: raise RuntimeError('Invalid ASENA_CHAT_MODEL')
 if not VOICE or not all(c.isalnum() or c in '_-+' for c in VOICE): raise RuntimeError('Invalid ASENA_VOICE')

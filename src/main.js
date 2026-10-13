@@ -14,8 +14,10 @@ import { REPLAY_MEMORY_KEY, ReplaySession, loadFixtureAudio, loadReplayMemories,
 import { createToolPanel, wireChatLayout } from './ui_panels.js';
 import { createJsonViewer } from './json_viewer.js';
 import {MemoryWork, MEMORY_INSTRUCTION, mergeMemories} from './memory_work.js';
+import {TurnMetrics} from './turn_metrics.js';
 
 let replay = null;
+let previewSpeechSource = null;
 let startupReady = false;
 let profileEditedDuringStartup = false;
 let profileStorage = {getItem:()=>null, setItem:()=>{throw new Error('Configuration still loading');}};
@@ -52,16 +54,29 @@ const replayStatus = document.getElementById('replay-status');
 const replayInspector = document.getElementById('replay-inspector');
 const replayJsonViewer = createJsonViewer(replayInspector);
 let replayInspection = {};
+let turnMetrics = null;
+let inspectionTimer = null;
 
 function inspectReplay(update) {
     replayInspection = { ...replayInspection, ...update };
+    if(inspectionTimer!==null)return;
+    inspectionTimer=setTimeout(()=>{
+    inspectionTimer=null;
     replayJsonViewer.update({
         ...replayInspection,
+        timing:turnMetrics?.snapshot()??null,
         animation: ANI.getPlaybackState(),
         testMemories: memories,
         activeMemoryPrompt: dialogueBudgetStats?.memoryPrompt ?? message_history[1].content,
         context: { ...dialogueBudgetStats, dialogueUsage:lastDialogueUsage, extractionUsage:lastExtractionUsage }
     });
+    const summary=document.getElementById('turn-timing-summary'),data=turnMetrics?.snapshot();
+    if(data){
+        const first=data.milestones.firstAudio;
+        summary.textContent=`Reply: ${data.durations.reply?.toFixed(2)??'—'}s · first voice: ${first?.toFixed(2)??'—'}s · prepared: ${data.clock?.bufferSeconds?.toFixed(1)??'—'}s.`;
+        document.getElementById('turn-report-download').disabled=false;
+    }
+    },150);
 }
 
 function replayMessage(message) {
@@ -228,7 +243,7 @@ async function generateTTS(text, turn) {
         body: JSON.stringify({
             model: "kokoro",
             input: text,
-            voice: KOKORO_VOICE,
+            voice: turn.speech?.voice??KOKORO_VOICE,
             speed: 1.0,
             response_format: "wav",
             stream: false
@@ -295,6 +310,7 @@ const memoryWork = new MemoryWork();
 async function extractPendingMemories(turn) {
     if (!memoryWork.pending) return;
     turn.phase('remembering');
+    turnMetrics?.mark('memoryStart');
     try {
         await memoryWork.drain(turn, async (job, owner) => {
             if (replay) {
@@ -305,6 +321,7 @@ async function extractPendingMemories(turn) {
             const data = await requestJSON('/chat', {signal:owner.signal, method:'POST',
                 headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:runtimeConfig.chatModel,
                     messages:packed.messages, max_tokens:Math.min(128,packed.maxTokens), temperature:0.2})});
+            owner.assertCurrent();
             lastExtractionUsage = data.usage ?? null;
             return data.choices?.[0]?.message?.content;
         }, result => {
@@ -317,9 +334,13 @@ async function extractPendingMemories(turn) {
         if (turn.signal.aborted) throw error;
         document.getElementById('memory-save-status').textContent=`Memory extraction postponed: ${error.message}`;
         inspectReplay({memoryPhase:'postponed', memoryError:error.message});
-    }
+    } finally { if(turnMetrics?.id===turn.id)turnMetrics.mark('memoryEnd'); }
 }
 const turnController = new TurnController(state => {
+    if(turnMetrics?.id===state.id){
+        turnMetrics.status=state.phase;
+        if(['completed','stopped','failed'].includes(state.phase))turnMetrics.finish(state.phase);
+    }
     const labels = { idle: 'Ready', requesting: 'Getting a reply', 'preparing-speech': 'Preparing speech',
         speaking: 'Speaking', remembering: 'Updating memory', completed: 'Finished', stopped: 'Stopped', failed: 'Failed' };
     document.getElementById('turn-status').textContent = state.error || labels[state.phase];
@@ -341,6 +362,7 @@ async function handleTextResponse({ reuseUser = false } = {}) {
     lastRetry = { message };
     document.getElementById('turn-retry').hidden = true;
     await turnController.run(async turn => {
+        beginTurnMetrics(turn);
         turn.own(() => ANI.stopPerformance());
         if (!reuseUser || message_history.at(-1)?.role !== 'user' || message_history.at(-1)?.content !== message) {
             message_history.push({ role: 'user', content: message });
@@ -351,7 +373,9 @@ async function handleTextResponse({ reuseUser = false } = {}) {
         try {
             const rawReply = await chat(message_history, 'dialogue', turn);
             turn.assertCurrent();
+            turnMetrics?.mark('firstText');
             const parsedReply = EMO.decodeTaggedMessage(rawReply);
+            turnMetrics?.mark('parsed');
             inspectReplay({ parsedReply });
             message_history.push({ role: 'assistant', content: rawReply });
             ind++;
@@ -397,15 +421,22 @@ async function prepareAndPlay(parsedReply, turn) {
     speechWarning('');
     if((!replay||RUNTIME_MODE==='preview')&&runtimeConfig?.speechStreaming&&LIP_SYNC==='rhubarb'){
         let player=null,words=[],cues={actions:[],emotions:[]},speaking=false;
+        turnMetrics?.mark('gesturePreparation');
         await ANI.preparePerformance(parsedReply.actions.map(cue=>({value:cue.value})),turn.signal);
+        turnMetrics?.mark('gesturesReady');
         const available=new Set(ANI.getPlaybackState().loadedClips??ANI.getPlaybackState().clips);
         try{
-            await playSpeechStream({text:parsedReply.text,voice:KOKORO_VOICE,signal:turn.signal,speechProfile:runtimeConfig.speechProfile,
+            turnMetrics?.mark('speechRequested');
+            await playSpeechStream({text:parsedReply.text,voice:turn.speech?.voice??KOKORO_VOICE,signal:turn.signal,speechProfile:turn.speech?.profile??runtimeConfig.speechProfile,
+                source:RUNTIME_MODE==='preview'?turn.speech?.source:null,
                 onPlayer:value=>{player=value;ANI.beginPcmPerformance(()=>({...player.sample(),weights:player.weights(),...cues}),player);},
-                onWarning:speechWarning,onReport:report=>inspectReplay({speechReport:report}),
+                onWarning:speechWarning,onReport:report=>{if(turnMetrics?.id===turn.id){turnMetrics.observeSpeech(report);inspectReplay({speechReport:turnMetrics.speech});}},
+                onEvent:event=>{turn.assertCurrent();inspectReplay({speechPhase:event.type==='provider-stage'?event.phase:event.type});},
                 onWords:stamps=>{words.push(...stamps);try{cues=EMO.getPartialPerformance(words,parsedReply,available);}catch(error){speechWarning(`Emotion and gesture timing unavailable. ${error.message}`);}},
                 onClock:clock=>{
                     turn.assertCurrent();
+                    turnMetrics?.observeClock(clock);
+                    inspectReplay({});
                     if(clock.playedFrames>0&&!speaking){speaking=true;turn.phase('speaking');}
                     if(speaking){
                         document.getElementById('turn-status').textContent=clock.paused?'Paused':clock.buffering?'Waiting for speech':'Speaking';
@@ -416,10 +447,10 @@ async function prepareAndPlay(parsedReply, turn) {
             if(!turn.signal.aborted){
                 const heard=error.report?.browser?.playedSeconds??0;
                 speechWarning(`Voice stopped${heard>0?` after ${heard.toFixed(1)} seconds`:''}. The reply remains above. Retry restarts the voice from the beginning. ${error.message}`);
-                inspectReplay({fallback:'text only',speechReport:error.report});
+                inspectReplay({fallback:'text only'});
             }
             throw error;
-        }finally{ANI.stopPerformance();}
+        }finally{if(!turn.signal.aborted)ANI.stopPerformance();}
         return;
     }
     const { audio, timestamps, audioId } = await generateTTS(parsedReply.text, turn);
@@ -453,6 +484,9 @@ async function prepareAndPlay(parsedReply, turn) {
 async function playPerformance(data, turn) {
     turn.assertCurrent();
     inspectReplay({phase:'playing',duration:data.audio.duration});
+    const playing=()=>{if(turnMetrics?.id===turn.id)turnMetrics.mark('firstAudio');};
+    data.audio.addEventListener('playing',playing,{once:true});
+    turn.own(()=>data.audio.removeEventListener('playing',playing));
     await ANI.talk({...data,signal:turn.signal,onWarning:speechWarning});
     turn.assertCurrent();
 }
@@ -472,6 +506,7 @@ document.getElementById('turn-retry').addEventListener('click', async () => {
         return;
     }
     await turnController.run(async turn => {
+        beginTurnMetrics(turn,true);
         turn.own(() => ANI.stopPerformance());
         try {
             await prepareAndPlay(retry.parsedReply, turn);
@@ -574,6 +609,18 @@ function setupReplayUI() {
     replayMessage('Starting scripted replay. Text will be available when startup finishes.');
     inspectReplay({ phase: 'ready', fixture: replay.fixture.description });
     if (RUNTIME_MODE==='preview') {
+        const sourceSelect=document.getElementById('preview-speech-source');
+        previewSpeechSource=runtimeConfig.speechSource;
+        document.getElementById('preview-speech-controls').hidden=false;
+        for(const source of runtimeConfig.previewSpeechSources)sourceSelect.add(new Option(source==='kokoro'?'Live Kokoro + Rhubarb':'Saved voice · no generation',source));
+        sourceSelect.value=previewSpeechSource;
+        const updateSource=()=>{
+            previewSpeechSource=sourceSelect.value;
+            document.getElementById('debug-source').textContent=previewSpeechSource==='kokoro'?'Live Kokoro · no LLM':'Saved voice · AI services off';
+            document.getElementById('voice-note').textContent=previewSpeechSource==='kokoro'?'Used for the next scripted spoken reply.':'Saved scenes use their recorded voice.';
+            voiceSelect.disabled=previewSpeechSource!=='kokoro';
+        };
+        sourceSelect.addEventListener('change',updateSource);updateSource();
         document.getElementById('debug-mode').textContent='Scripted preview';
         document.getElementById('debug-source').textContent=runtimeConfig.speechSource==='kokoro'?'Live Kokoro · no LLM':'Saved voice · AI services off';
         document.getElementById('chat-mode').textContent='Preview';
@@ -587,6 +634,12 @@ function setupReplayUI() {
 function setupDebugUI() {
     toolPanel.enableDebug();
     document.getElementById('replay-collapse').addEventListener('click',()=>replayJsonViewer.collapseAll());
+    document.getElementById('turn-report-download').addEventListener('click',()=>{
+        if(!turnMetrics)return;
+        const url=URL.createObjectURL(new Blob([JSON.stringify(turnMetrics.snapshot(),null,2)],{type:'application/json'}));
+        const link=document.createElement('a');link.href=url;link.download=`asena-turn-${turnMetrics.id}.json`;link.click();
+        setTimeout(()=>URL.revokeObjectURL(url),1000);
+    });
     const profile=runtimeConfig.speechProfile;
     document.getElementById('speech-policy-note').textContent=runtimeConfig.speechStreaming?
         `Speech: ${profile.label} · ${profile.strategy}.`:'Speech: complete recording.';
@@ -599,6 +652,12 @@ function setupDebugUI() {
         document.getElementById('replay-reset').hidden=true;
     }
 }
+function beginTurnMetrics(turn,retry=false){
+    turn.speech={voice:KOKORO_VOICE,profile:structuredClone(runtimeConfig?.speechProfile??null),source:previewSpeechSource??runtimeConfig?.speechSource};
+    turnMetrics=new TurnMetrics(turn.id,{mode:RUNTIME_MODE,speechSource:turn.speech.source,
+        speechProfile:turn.speech.profile,voice:turn.speech.voice,chatModel:runtimeConfig?.chatModel,retry});
+}
+window.addEventListener('pagehide',()=>turnController.stop());
 renderCompanionProfile();
 document.getElementById('customize-companion').addEventListener('click', () => {
     fillCompanionForm();

@@ -248,12 +248,16 @@ class SpeechStream:
                 self.check(); self.condition.wait(.05)
             self.check()
 
-    def event(self, value):
+    def event(self, value, terminal=False):
         value = dict(value, token=self.token, wallSeconds=time.monotonic()-self.started)
         # PCM is transient. Diagnostics contain timings and hashes, not private speech audio.
         self.events.append({k: v for k, v in value.items() if k not in ('pcm', 'report')})
+        send_started=time.monotonic()
         while True:
-            self.check()
+            if terminal:
+                if self.cancelled.is_set():raise Cancelled()
+                if time.monotonic()-send_started>1:return
+            else:self.check()
             try: self.queue.put(value, timeout=.05); return
             except queue.Full: pass
 
@@ -334,7 +338,7 @@ class SpeechStream:
 
     def report(self, complete):
         segments = [e for e in self.events if e['type'] == 'segment']
-        return {'fixtureOnly': False, 'provider': 'Kokoro captioned PCM', 'rate': RATE,
+        return {'fixtureOnly': False, 'provider': 'Kokoro captioned PCM', 'rate': RATE,'voice':self.payload['voice'],
                 'policy': self.policy, 'startupSeconds': self.startup, 'complete': complete,
                 'strategy':self.strategy,'openingSeconds':self.opening,'timingProfile':self.timing_profile(),'requestCount':len(self.requests),
                 'textCharacters':len(self.payload['input']),'textWords':len(self.payload['input'].split()),
@@ -411,7 +415,7 @@ class SpeechStream:
             # Do not expose provider response bodies or paths to the browser.
             try:
                 message = str(error) if isinstance(error,(ValueError,RuntimeError)) else 'Kokoro stream unavailable or interrupted. Retry when ready.'
-                self.failure = None; self.event({'type':'error', 'error':message, 'report':self.report(False)})
+                self.failure = None; self.event({'type':'error', 'error':message, 'report':self.report(False)},terminal=True)
             except Cancelled: pass
         finally:
             self.cancel()
@@ -434,8 +438,8 @@ class SpeechStream:
 
 class StreamRegistry:
     def __init__(self, factory=SpeechStream): self.lock = threading.Lock(); self.active = None;self.factory=factory
-    def reserve(self, data, **options):
-        stream = self.factory(data, **options)
+    def reserve(self, data, factory=None, **options):
+        stream = (factory or self.factory)(data, **options)
         with self.lock:
             if self.active is not None: raise ServiceError('Streaming speech is busy. Wait for it to finish.', 409)
             self.active = stream

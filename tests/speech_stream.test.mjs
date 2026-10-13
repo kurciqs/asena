@@ -32,6 +32,8 @@ test('stream consumer uses 24 kHz PCM, forwards timings, completes and releases 
     requestFrame:()=>1,cancelFrame:()=>{},onPlayer:p=>player=p,onWords:w=>words=w});
   assert.equal(player.rate,24000);assert.equal(words[0].word,'Hi');assert.equal(result.browser.finished,true);
   assert.equal(audio.closed,true);assert.ok(calls.some(([url])=>url==='/api/speech/cancel'));
+  assert.deepEqual(result.cleanup,{blocks:0,buffers:0,nodes:0,cues:0,contextClosed:true});
+  assert.ok(result.startupTiming.complete);
   assert.deepEqual(calls[0][1],{input:'Hi',voice:'af_heart',strategy:'sentences',policy:'2s',openingSeconds:1,startupSeconds:2});
 });
 test('abort while waiting closes the audio context and cancels the provider token',async()=>{
@@ -63,4 +65,14 @@ test('failure after partial playback preserves diagnostics and never starts a ba
   assert.equal(report.complete,false);assert.ok(report.browser.playedSeconds>0);
   assert.equal(audio.closed,true);assert.ok(audio.nodes.every(node=>node.stopped));
   assert.ok(!calls.includes('/tts'));
+});
+
+test('stop during a blocked browser audio resume releases the context without requesting speech',async()=>{
+  const audio=context(),owner=new AbortController();let called=false;
+  audio.resume=()=>new Promise(()=>{});
+  const run=playSpeechStream({text:'Hello',voice:'af_heart',signal:owner.signal,
+    fetcher:async()=>{called=true;throw new Error('Must not request speech');},createContext:()=>audio,
+    requestFrame:()=>1,cancelFrame:()=>{}});
+  owner.abort();await assert.rejects(run,/abort/i);
+  assert.equal(audio.closed,true);assert.equal(called,false);
 });

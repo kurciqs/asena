@@ -15,7 +15,7 @@ sys.path.insert(0,str(ROOT))
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--mode',choices=('replay','live'),default='replay')
+    parser.add_argument('--mode',choices=('replay','preview','live'),default='replay')
     args=parser.parse_args()
     errors=[]
     def check(condition,message,optional=False):
@@ -60,11 +60,13 @@ def main():
             if not re.fullmatch(r'/replay/[\w-]+\.wav',audio):raise ValueError('Nonlocal fixture audio')
             check((ROOT/'src'/audio.lstrip('/')).is_file(),f'Fixture {audio}')
     except (OSError,ValueError,KeyError,TypeError) as error:check(False,f'Replay fixtures: {error}')
-    if args.mode=='live':
+    check(config.SPEECH_PROFILE['id']=='stable-122',f"Speech profile {config.SPEECH_PROFILE['id']} (1 / 2 / 2 baseline)",optional=True)
+    if args.mode in ('preview','live'):
         check(shutil.which(config.FFMPEG) is not None,'Configured ffmpeg executable',optional=config.LIP_SYNC!='rhubarb')
         check(Path(config.RHUBARB).is_file() and os.access(config.RHUBARB,os.X_OK),'Configured Rhubarb executable',optional=config.LIP_SYNC!='rhubarb')
         if config.LIP_SYNC=='dictionary':check((ROOT/'src/dictionary/cmudict.json').is_file(),'Optional dictionary (missing means neutral mouth)',optional=True)
         print(f'INFO Model key {config.CHAT_MODEL}; services were not contacted or started.')
+        if args.mode=='preview':print('INFO Scripted preview blocks LLM calls and private memories; saved speech is the safe default.')
     print('INFO Pinned browser libraries/font use CDNs; internet or cached copies are needed.')
     print(f'{len(errors)} blocking setup issue(s).')
     return bool(errors)

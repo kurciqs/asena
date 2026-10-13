@@ -30,7 +30,7 @@ function startupHarness() {
     const state = {loading:true, ready:false};
     let submitted = 0;
     const context = vm.createContext({
-        AbortSignal, Promise, startupReady:false, profileEditedDuringStartup:false,
+        AbortSignal, Promise, startupReady:false, profileEditedDuringStartup:false,turnMetrics:null,beginTurnMetrics(){},
         loadRuntimeConfig:async()=>{}, runtimeConfig:{lipSync:'dictionary',voice:'af_heart'}, RUNTIME_MODE:'live',
         LIP_SYNC:null, KOKORO_VOICE:null, replay:null, profileStorage:null, companionProfile:{},
         localStorage:{}, loadCompanionProfile:()=>({}), renderCompanionProfile(){},setupDebugUI(){},
@@ -106,14 +106,14 @@ function speechHarness(manager) {
     const rendererContext=vm.createContext({...renderer,animationsLoaded:true,stopPerformance:()=>renderer.performanceScheduler.stop()});
     vm.runInContext(section(animation,'export function talk(data) {','\nexport function pausePerformance').replace('export ',''),rendererContext);
     const context=vm.createContext({
-        setTimeout,clearTimeout,DOMException,buildExpressionTracks,EMO,replay:null,runtimeConfig:{},LIP_SYNC:'rhubarb',
+        setTimeout,clearTimeout,DOMException,buildExpressionTracks,EMO,replay:null,RUNTIME_MODE:'live',runtimeConfig:{},LIP_SYNC:'rhubarb',turnMetrics:null,
         generateTTS:async()=>({audio,timestamps:[{word:'Hello',start_time:0,end_time:1}]}),
         getVisemes:async()=>[{value:'A',start:.1,end:.9}],
         speechWarning:message=>warnings.push(message),inspectReplay(){},
         ANI:{getPlaybackState:()=>({ready:true,clips:[]}),preparePerformance:async a=>a,talk:data=>rendererContext.talk(data)}
     });
     vm.runInContext(section(main,'async function prepareAndPlay(', '// ------- UI FIDDLING -------'),context);
-    const turn={signal:new AbortController().signal,assertCurrent(){},phase(){}};
+    const turn={signal:new AbortController().signal,assertCurrent(){},phase(){},own(){}};
     return {context,renderer,warnings,starts:()=>starts,run:()=>context.prepareAndPlay({text:'Hello',emotions:[{value:'happy',position:0}],actions:[]},turn)};
 }
 
@@ -155,7 +155,7 @@ test('opt-in live speech streams parsed text and keeps complete/replay paths sep
 
 test('the fifth production reply is displayed and spoken before fact extraction',async()=>{
     const events=[],work=new MemoryWork();
-    const context=vm.createContext({startupReady:true,ANI:{getPlaybackState:()=>({loading:false}),stopPerformance(){}},
+    const context=vm.createContext({startupReady:true,turnMetrics:null,beginTurnMetrics(){},ANI:{getPlaybackState:()=>({loading:false}),stopPerformance(){}},
         replay:null,textInput:{value:'Remember my tea.'},lastRetry:null,document:{getElementById:()=>({})},
         message_history:[{role:'system',content:''},{role:'system',content:''}],ind:4,memoryWork:work,
         turnController:{run:async fn=>fn({own(){},assertCurrent(){},signal:new AbortController().signal})},
@@ -166,4 +166,18 @@ test('the fifth production reply is displayed and spoken before fact extraction'
     await context.handleTextResponse();
     assert.deepEqual(events.slice(-3),['display','speech','extract']);
     assert.equal(work.pending.dialogue.at(-1).role,'assistant');
+});
+
+test('late cleanup from a stopped speech turn cannot stop its replacement',async()=>{
+    const manager=new VRMExpressionManager(),h=speechHarness(manager),pending=[];
+    h.context.runtimeConfig.speechStreaming=true;h.context.KOKORO_VOICE='af_heart';
+    let stops=0;h.context.ANI.stopPerformance=()=>stops++;
+    h.context.playSpeechStream=()=>new Promise(resolve=>pending.push(resolve));
+    const first=new AbortController(),second=new AbortController();
+    const turn=signal=>({signal,assertCurrent(){},phase(){},own(){}});
+    const parsed={text:'Hello',actions:[],emotions:[]};
+    const old=h.context.prepareAndPlay(parsed,turn(first.signal));await flush();first.abort();
+    const replacement=h.context.prepareAndPlay(parsed,turn(second.signal));await flush();
+    pending[0]();await old;assert.equal(stops,0);
+    pending[1]();await replacement;assert.equal(stops,1);
 });

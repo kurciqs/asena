@@ -29,3 +29,23 @@ New regressions cover 30 serial backend turns, a deliberately delayed provider e
 Additionally, six serial **native Rhubarb** turns analyzed the same already captured 4.29-second PCM clip (18 regions) with unchanged sample hashes. Each exited with zero retained worker threads, PCM queue bytes or stream owners. [Measured evidence](evidence/speech-lifetimes-native-2026-10-13.json). Immediate sample acknowledgements deliberately isolate worker/resource lifecycle; these times are not audible or live-generation latency. The small test does not establish combined LLM/TTS capacity or a long-session browser heap plateau.
 
 The browser main-chat introduction, teasing, disagreement and emote showcase ran through saved PCM/cues. Pause visibly changed the emote scene to Paused/Resume without restarting the turn. Placeholder gesture quality and the happy-mouth visual issue remain P2 tuning.
+
+## Step 16: diagnostics in the intended interface
+
+The main-chat inspector now exposes a per-turn report: immutable mode/source/profile/voice/model settings, first complete text, parsing, gesture preparation, speech request, estimated first audible output, memory extraction, queue state, completion/failure and resource cleanup. It uses the viewer's shared startup-breakdown component for Kokoro connection/headers/generation, packet receipt, regional Rhubarb, buffer wait and browser scheduling. Reports remain local and downloadable; PCM and control tokens are omitted.
+
+The stream player's first-output timer now starts **before browser audio setup and the HTTP request**, rather than when the first format frame arrives. This matters in the main adapter: the earlier constructor-relative timer omitted most of the initial Kokoro wait. The diagnostic viewer already included that earlier interval. Reports explicitly leave service/model boot, isolated Kokoro inference and combined LLM/TTS peak memory unmeasured.
+
+The final saved-PCM introduction completed with a short pause/resume cycle and a downloaded report: [main-interface evidence](evidence/main-preview-turn-2026-10-13.json). It estimated first voice at **0.292 seconds** after submission, including approximately **0.158 seconds** for a first-use gesture. Cleanup reported zero blocks, buffers, nodes and cues, with the audio context closed. This is direct saved playback, **not a new live latency improvement**.
+
+A deliberately long pause in an earlier preview hit the three-minute stream lifetime. The backend originally could not send its timeout event because sending that event checked the expired deadline again. Terminal error delivery now has its own bounded one-second delivery attempt and preserves the timeout reason/report. A regression covers that path. The three-minute lifetime continues while paused; it is a bounded-turn policy, not an indefinitely resumable session.
+
+Additional cancellation fixes prevent a delayed stopped turn's final cleanup from stopping its replacement, cancel frame/ack callbacks immediately, and make a blocked browser-audio resume abortable. Current verification: **63 Python and 82 JavaScript tests passed**, plus a read-only preview preflight with zero blocking issues. No LLM or new Kokoro synthesis was run for these changes. Native Rhubarb tests used saved PCM only.
+
+The preview's **Voice for the next scene** selector offers saved voice by default. The live Kokoro option appears only when explicitly enabled in server configuration (`ASENA_PREVIEW_KOKORO=1` or Kokoro as the configured preview source), and starts generation only when a scene is played. The backend rejects a browser attempt to enable a disabled source. Voice/source/profile choices are captured at turn start; changing a selector cannot alter a running turn.
+
+## Remaining deliberately coordinated work
+
+The selected speech architecture and speech-side P1 implementation are complete. Original LLM text-streaming and combined model/speech acceptance are explicitly retained as follow-ups, rather than claimed by fixture tests. Comparison cleanup remains deferred under 11b. Resident Rhubarb decoder reuse, provider token tuning and native MPS remain isolated optimizations with quality/memory gates; none is required to use the accepted baseline and none was silently deployed.
+
+**Move to a fresh chat before live LLM integration.** Use the [handoff](llm-integration-handoff-2026-10-13.md) for configuration, preparation and acceptance. Qwen's existing model file was checked against the locked 1,280,835,840-byte download and SHA-256; it matches. [Read-only file evidence](evidence/llm-preparation-file-check-2026-10-13.json). The check read the file; it did not load a model or call inference.

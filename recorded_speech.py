@@ -28,7 +28,7 @@ class RecordedSpeechStream(SpeechStream):
         self.audio=STATIC_DIR/path.lstrip('/')
 
     def report(self, complete):
-        return {'fixtureOnly':True,'provider':'Saved Kokoro PCM and Rhubarb cues','complete':complete,
+        return {'fixtureOnly':True,'provider':'Saved Kokoro PCM and Rhubarb cues','complete':complete,'voice':self.recording['speech']['voice'],
                 'rate':self.rate,'duration':self.frames/self.rate,'sourceSha256':self.digest.hexdigest(),
                 'timingProfile':self.timing_profile(),'analysisSeconds':0,'peakRssBytes':0,
                 'preparedPeakSeconds':self.prepared_peak/self.rate,'events':self.events[:],
@@ -61,7 +61,8 @@ class RecordedSpeechStream(SpeechStream):
             self.event({'type':'eos'});self.wait(lambda:self.played==self.frames)
             self.complete=True;self.event({'type':'result','report':self.report(True)})
         except Cancelled:pass
-        except Exception:
-            try:self.event({'type':'error','error':'Saved speech unavailable. The reply remains as text.', 'report':self.report(False)})
+        except Exception as error:
+            message=str(error) if isinstance(error,RuntimeError) else 'Saved speech unavailable. The reply remains as text.'
+            try:self.event({'type':'error','error':message, 'report':self.report(False)},terminal=True)
             except Cancelled:pass
         finally:self.cancel()

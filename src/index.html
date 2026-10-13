@@ -65,6 +65,7 @@
                 <p id="speech-policy-note" class="field-hint"></p>
                 <p class="field-hint"><a href="/lip-sync-samples.html">Compare lip-sync methods</a></p>
                 <div id="replay-controls">
+                <div id="preview-speech-controls" hidden><label for="preview-speech-source">Voice for the next scene</label><select id="preview-speech-source"></select></div>
                 <label for="replay-case">Replay scene</label><select id="replay-case"></select>
                 <p id="replay-status" class="field-status" role="status" aria-live="polite"></p>
                 <div class="replay-buttons">
@@ -75,6 +76,8 @@
                 <details id="turn-inspection">
                     <summary>Inspect this turn</summary>
                     <div class="json-tools"><button id="replay-collapse" type="button">Collapse all JSON</button></div>
+                    <p id="turn-timing-summary" class="field-hint">Timing appears after a reply.</p>
+                    <button id="turn-report-download" type="button" disabled>Download turn report</button>
                     <div id="replay-inspector" aria-label="Turn data"></div>
                 </details>
                 <details id="replay-reset" class="reset-section"><summary>Reset test memories</summary>

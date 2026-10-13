@@ -16,7 +16,7 @@ from kokoro_stream import StreamRegistry, SpeechStream
 from pathlib import Path
 from service_contracts import ServiceError, require_payload, proxy_json, validate_chat_response, validate_tts_response, validate_visemes
 
-from config import STATIC_DIR, RHUBARB, RHUBARB_THREADS, ALIGNMENT_CACHE_ENTRIES, FFMPEG, LMS_API, KOKORO_API, RUNTIME_MODE, HOST, PORT, PROCESS_TIMEOUT, CHAT_MODEL, VOICE, LIP_SYNC, ASSETS, SPEECH_STREAMING, SPEECH_PROFILE, SPEECH_SOURCE
+from config import STATIC_DIR, RHUBARB, RHUBARB_THREADS, ALIGNMENT_CACHE_ENTRIES, FFMPEG, LMS_API, KOKORO_API, RUNTIME_MODE, HOST, PORT, PROCESS_TIMEOUT, CHAT_MODEL, VOICE, LIP_SYNC, ASSETS, SPEECH_STREAMING, SPEECH_PROFILE, SPEECH_SOURCE, PREVIEW_SPEECH_SOURCES
 from recorded_speech import RecordedSpeechStream
 SPEECH_STREAMS = StreamRegistry(RecordedSpeechStream if SPEECH_SOURCE=='recorded' else SpeechStream)
 
@@ -67,7 +67,8 @@ def enforce_replay_boundary():
 
 @app.route("/runtime")
 def runtime():
-    return jsonify({"mode": RUNTIME_MODE, "budget": budget.public_config(), "chatModel": CHAT_MODEL, "voice": VOICE, "lipSync": LIP_SYNC, "assets": ASSETS, "speechStreaming": SPEECH_STREAMING, "speechProfile": SPEECH_PROFILE,"speechSource":SPEECH_SOURCE})
+    return jsonify({"mode": RUNTIME_MODE, "budget": budget.public_config(), "chatModel": CHAT_MODEL, "voice": VOICE, "lipSync": LIP_SYNC, "assets": ASSETS, "speechStreaming": SPEECH_STREAMING, "speechProfile": SPEECH_PROFILE,"speechSource":SPEECH_SOURCE,
+                    'previewSpeechSources':PREVIEW_SPEECH_SOURCES if RUNTIME_MODE=='preview' else []})
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -87,10 +88,16 @@ def tts():
 def streamed_speech():
     if not SPEECH_STREAMING:
         raise ServiceError('Streaming speech is disabled in this server configuration.', 403)
+    data=request.get_json(silent=True);factory=None
+    if RUNTIME_MODE=='preview' and isinstance(data,dict):
+        data=dict(data);source=data.pop('source',SPEECH_SOURCE)
+        if source not in PREVIEW_SPEECH_SOURCES:
+            raise ServiceError('This speech source is not enabled for preview.',403)
+        factory=RecordedSpeechStream if source=='recorded' else SpeechStream
     if not ALIGNMENT_LOCK.acquire(blocking=False):
         raise ServiceError('Speech alignment is busy. Retry shortly.', 409)
     try:
-        stream = SPEECH_STREAMS.reserve(request.get_json(silent=True), endpoint=KOKORO_API, binary=RHUBARB)
+        stream = SPEECH_STREAMS.reserve(data,**({'factory':factory} if factory else {}), endpoint=KOKORO_API, binary=RHUBARB)
     except Exception:
         ALIGNMENT_LOCK.release(); raise
     released=threading.Event();release_lock=threading.Lock()

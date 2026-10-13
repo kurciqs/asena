@@ -74,7 +74,7 @@ class KokoroStreamTests(unittest.TestCase):
             self.assertTrue(next(e for e in events if e['type']=='result')['report']['complete'])
 
     def make(self,response,**options):
-        return stream.SpeechStream({'input':'Hello again.','voice':'af_heart'},post=lambda *a,**k:response,recognizer=recognize,**options)
+        return stream.SpeechStream({'input':'Hello again.','voice':'af_heart'},post=lambda *a,**k:response,recognizer=options.pop('recognizer',recognize),**options)
     def consume(self,instance):
         events=[]
         for event in instance.iterate():
@@ -209,6 +209,15 @@ class KokoroStreamTests(unittest.TestCase):
         for response in (Response([]),Response([good],suffix=b'{'),Response([{**good,'audio_format':'audio/mp3'}])):
             events=self.consume(self.make(response));self.assertEqual(events[-1]['type'],'error')
             self.assertFalse(any(e['type']=='result' for e in events));self.assertTrue(response.closed)
+
+    def test_expired_deadline_still_delivers_its_specific_failure_report(self):
+        def slow(*args):
+            time.sleep(.03);return recognize(*args)
+        with patch.object(stream,'DEADLINE',.01):
+            instance=self.make(Response([packet(.7)]),recognizer=slow)
+            events=self.consume(instance)
+        self.assertEqual(events[-1]['type'],'error');self.assertIn('deadline',events[-1]['error'])
+        self.assertFalse(events[-1]['report']['complete'])
 
     def test_phrase_tail_plays_before_next_request_and_timestamps_are_global(self):
         release=threading.Event();calls=[]

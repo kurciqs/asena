@@ -1,0 +1,429 @@
+{
+  "turnId": 1,
+  "status": "completed",
+  "config": {
+    "mode": "preview",
+    "speechSource": "recorded",
+    "speechProfile": {
+      "id": "stable-122",
+      "label": "Stable \u00b7 1 / 2 / 2",
+      "openingSeconds": 1,
+      "policy": "2s",
+      "startupSeconds": 2,
+      "strategy": "sentences",
+      "version": 1
+    },
+    "voice": "af_heart",
+    "chatModel": "qwen3.5-2b",
+    "retry": false
+  },
+  "elapsedSeconds": 8.864,
+  "milestones": {
+    "submitted": 0,
+    "firstText": 0.0019000000357627868,
+    "parsed": 0.0025,
+    "gesturePreparation": 0.0032000000476837156,
+    "gesturesReady": 0.16130000001192094,
+    "speechRequested": 0.16130000001192094,
+    "firstAudio": 0.2923000000119209
+  },
+  "durations": {
+    "reply": 0.0019000000357627868,
+    "parsing": 0.0005999999642372132,
+    "gesturePreparation": 0.1580999999642372,
+    "speechStartup": 0.13099999999999998,
+    "memoryExtraction": null
+  },
+  "speech": {
+    "fixtureOnly": true,
+    "provider": "Saved Kokoro PCM and Rhubarb cues",
+    "complete": true,
+    "rate": 44100,
+    "duration": 3.862766439909297,
+    "sourceSha256": "1458da9f040aa6875d92055f96ab1d5750a939e01f17c95f55af3fba8b33c36f",
+    "timingProfile": {
+      "id": "stable-122",
+      "version": 1,
+      "policy": "2s",
+      "openingSeconds": 1,
+      "startupSeconds": 2,
+      "strategy": "sentences"
+    },
+    "analysisSeconds": 0,
+    "peakRssBytes": 0,
+    "preparedPeakSeconds": 3.862766439909297,
+    "events": [
+      {
+        "type": "begin",
+        "rate": 44100,
+        "startupSeconds": 2,
+        "fixtureOnly": true,
+        "source": "saved recording",
+        "text": "I'm Asena. Nice to meet you, Alex\u2014excellent choice of company.",
+        "timingProfile": {
+          "id": "stable-122",
+          "version": 1,
+          "policy": "2s",
+          "openingSeconds": 1,
+          "startupSeconds": 2,
+          "strategy": "sentences"
+        },
+        "wallSeconds": 0.0005910000181756914
+      },
+      {
+        "type": "words",
+        "timestamps": [
+          {
+            "word": "I'm",
+            "start_time": 0,
+            "end_time": 0.14699999999999996
+          },
+          {
+            "word": "Asena",
+            "start_time": 0.14699999999999996,
+            "end_time": 0.7969999999999999
+          },
+          {
+            "word": ".",
+            "start_time": 0.7969999999999999,
+            "end_time": 0.9595
+          },
+          {
+            "word": "Nice",
+            "start_time": 0.9595,
+            "end_time": 1.222
+          },
+          {
+            "word": "to",
+            "start_time": 1.222,
+            "end_time": 1.3094999999999999
+          },
+          {
+            "word": "meet",
+            "start_time": 1.3094999999999999,
+            "end_time": 1.4969999999999999
+          },
+          {
+            "word": "you",
+            "start_time": 1.4969999999999999,
+            "end_time": 1.6219999999999999
+          },
+          {
+            "word": ",",
+            "start_time": 1.6219999999999999,
+            "end_time": 1.672
+          },
+          {
+            "word": "Alex",
+            "start_time": 1.672,
+            "end_time": 2.172
+          },
+          {
+            "word": "\u2014",
+            "start_time": 2.172,
+            "end_time": 2.247
+          },
+          {
+            "word": "excellent",
+            "start_time": 2.247,
+            "end_time": 2.622
+          },
+          {
+            "word": "choice",
+            "start_time": 2.622,
+            "end_time": 2.9095
+          },
+          {
+            "word": "of",
+            "start_time": 2.9095,
+            "end_time": 2.997
+          },
+          {
+            "word": "company",
+            "start_time": 2.997,
+            "end_time": 3.7470000000000003
+          },
+          {
+            "word": ".",
+            "start_time": 3.7470000000000003,
+            "end_time": 3.862766439909297
+          }
+        ],
+        "wallSeconds": 0.0006100420141592622
+      },
+      {
+        "type": "segment",
+        "index": 0,
+        "startFrame": 0,
+        "endFrame": 44100,
+        "cues": [
+          {
+            "start": 0,
+            "end": 0.04,
+            "value": "X"
+          },
+          {
+            "start": 0.04,
+            "end": 0.09,
+            "value": "B"
+          },
+          {
+            "start": 0.09,
+            "end": 0.17,
+            "value": "A"
+          },
+          {
+            "start": 0.17,
+            "end": 0.45,
+            "value": "B"
+          },
+          {
+            "start": 0.45,
+            "end": 0.66,
+            "value": "C"
+          },
+          {
+            "start": 0.66,
+            "end": 1,
+            "value": "B"
+          }
+        ],
+        "wallSeconds": 0.0007712499937042594
+      },
+      {
+        "type": "segment",
+        "index": 1,
+        "startFrame": 44100,
+        "endFrame": 132300,
+        "cues": [
+          {
+            "start": 1,
+            "end": 1.09,
+            "value": "C"
+          },
+          {
+            "start": 1.09,
+            "end": 1.16,
+            "value": "B"
+          },
+          {
+            "start": 1.16,
+            "end": 1.3,
+            "value": "F"
+          },
+          {
+            "start": 1.3,
+            "end": 1.38,
+            "value": "A"
+          },
+          {
+            "start": 1.38,
+            "end": 1.43,
+            "value": "B"
+          },
+          {
+            "start": 1.43,
+            "end": 1.68,
+            "value": "F"
+          },
+          {
+            "start": 1.68,
+            "end": 1.82,
+            "value": "C"
+          },
+          {
+            "start": 1.82,
+            "end": 1.89,
+            "value": "H"
+          },
+          {
+            "start": 1.89,
+            "end": 1.96,
+            "value": "C"
+          },
+          {
+            "start": 1.96,
+            "end": 2.24,
+            "value": "B"
+          },
+          {
+            "start": 2.24,
+            "end": 2.38,
+            "value": "C"
+          },
+          {
+            "start": 2.38,
+            "end": 2.73,
+            "value": "B"
+          },
+          {
+            "start": 2.73,
+            "end": 2.8,
+            "value": "E"
+          },
+          {
+            "start": 2.8,
+            "end": 3,
+            "value": "B"
+          }
+        ],
+        "wallSeconds": 0.0010294170351698995
+      },
+      {
+        "type": "segment",
+        "index": 2,
+        "startFrame": 132300,
+        "endFrame": 170348,
+        "cues": [
+          {
+            "start": 3,
+            "end": 3.01,
+            "value": "B"
+          },
+          {
+            "start": 3.01,
+            "end": 3.15,
+            "value": "C"
+          },
+          {
+            "start": 3.15,
+            "end": 3.23,
+            "value": "A"
+          },
+          {
+            "start": 3.23,
+            "end": 3.51,
+            "value": "B"
+          },
+          {
+            "start": 3.51,
+            "end": 3.86,
+            "value": "X"
+          }
+        ],
+        "wallSeconds": 0.0011465420247986913
+      },
+      {
+        "type": "eos",
+        "wallSeconds": 0.0011486670118756592
+      }
+    ],
+    "measurement": "Stored audio/cues through the PCM player; no generation or simulated latency.",
+    "browser": {
+      "playedFrames": 170348,
+      "playedSeconds": 3.862766439909297,
+      "bufferSeconds": 0,
+      "firstPlaybackSeconds": 0.131,
+      "gapCount": 0,
+      "gapSeconds": 0,
+      "buffering": false,
+      "paused": false,
+      "waitingSeconds": 0,
+      "finished": true
+    },
+    "startupTiming": {
+      "totalSeconds": 0.131,
+      "complete": true,
+      "rows": [
+        {
+          "id": "browserPreparation",
+          "label": "Browser audio setup",
+          "seconds": 0.023900000035762786,
+          "details": "Audio context creation and resume after pressing Start.",
+          "ongoing": false
+        },
+        {
+          "id": "serviceBoot",
+          "label": "Kokoro service boot",
+          "seconds": null,
+          "details": "Outside this test. Docker/model boot is not started or timed by the page.",
+          "ongoing": false
+        },
+        {
+          "id": "serverSetup",
+          "label": "Server preparation",
+          "seconds": 0.0010294170351698995,
+          "details": "Streaming worker, ownership lock and opening request preparation.",
+          "ongoing": true
+        },
+        {
+          "id": "connection",
+          "label": "Kokoro connection",
+          "seconds": null,
+          "details": "Loopback connection setup.",
+          "ongoing": false
+        },
+        {
+          "id": "requestStartup",
+          "label": "Kokoro request startup",
+          "seconds": null,
+          "details": "Waiting for response headers; provider setup and validation can occur here.",
+          "ongoing": false
+        },
+        {
+          "id": "generation",
+          "label": "Kokoro generation \u2192 first bytes",
+          "seconds": null,
+          "details": "Waiting for response headers.",
+          "ongoing": false
+        },
+        {
+          "id": "packet",
+          "label": "First packet receipt & decoding",
+          "seconds": null,
+          "details": "Waiting for first audio bytes.",
+          "ongoing": false
+        },
+        {
+          "id": "rhubarb",
+          "label": "Rhubarb before first playback",
+          "seconds": null,
+          "details": "Region WAV/transcript preparation, recognizer process and cue parsing. Stops counting at the region that releases playback.",
+          "ongoing": false
+        },
+        {
+          "id": "buffer",
+          "label": "Waiting for enough aligned audio",
+          "seconds": null,
+          "details": "Waiting for more input/context, preparing regions and assembling results, excluding Rhubarb intervals.",
+          "ongoing": false
+        },
+        {
+          "id": "browserDelivery",
+          "label": "Browser delivery & scheduling",
+          "seconds": 0.10607058292906732,
+          "details": "Initial response delivery, aligned-region transfer/decoding and audio output scheduling. Residual, not a network-only measurement.",
+          "ongoing": false
+        }
+      ],
+      "accountedSeconds": 0.131,
+      "measurement": "Click to estimated first Web Audio output. Active stage timers are estimates; completed durations use monotonic milestones.",
+      "overlap": "Only the startup path is counted. Kokoro continues generating while Rhubarb works; later work is excluded."
+    },
+    "cleanup": {
+      "blocks": 0,
+      "buffers": 0,
+      "nodes": 0,
+      "cues": 0,
+      "contextClosed": true
+    }
+  },
+  "clock": {
+    "playedFrames": 170348,
+    "playedSeconds": 3.862766439909297,
+    "bufferSeconds": 0,
+    "firstPlaybackSeconds": 0.131,
+    "gapCount": 0,
+    "gapSeconds": 0,
+    "buffering": false,
+    "paused": false,
+    "waitingSeconds": 0,
+    "finished": true
+  },
+  "measurement": "Local monotonic timings. Scripted replies are not LLM latency. First audio uses the estimated audible output clock.",
+  "unmeasured": [
+    "service/model boot",
+    "pure Kokoro inference",
+    "combined LLM/TTS peak memory"
+  ]
+}

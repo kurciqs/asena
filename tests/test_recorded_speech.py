@@ -37,3 +37,12 @@ class RecordedSpeechTests(unittest.TestCase):
             self.assertEqual(client.get('/api/memories').status_code,403)
             self.assertEqual(client.get('/runtime').json['mode'],'preview')
             self.assertEqual(client.post('/api/speech/cancel',json={}).status_code,409)
+
+    def test_preview_cannot_enable_live_speech_from_a_browser_override(self):
+        client=server.app.test_client()
+        with patch.object(server,'RUNTIME_MODE','preview'),patch.object(server,'SPEECH_STREAMING',True), \
+                patch.object(server,'PREVIEW_SPEECH_SOURCES',['recorded']),patch.object(server.SPEECH_STREAMS,'reserve') as reserve:
+            for source in ('kokoro','arbitrary'):
+                result=client.post('/api/speech/stream',json={'input':'Hi','voice':'af_heart','source':source})
+                self.assertEqual(result.status_code,403)
+            reserve.assert_not_called()
