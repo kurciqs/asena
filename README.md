@@ -2,7 +2,7 @@
 
 Asena is a customizable local companion: LM Studio dialogue → Kokoro speech → Rhubarb mouth cues → a Three.js/VRM avatar. Choose a name, personality, relationship notes, preferences and friendly / affectionate / intimate closeness in **customize**. Those settings become model instructions; the selected model determines their quality.
 
-The current milestone stabilizes the existing companion loop. Recorded replay works without loading AI models. Live Qwen dialogue and the combined workload still need a separately prepared test on the laptop. Streaming, natural motion and long-term memory improvements remain in [TODO.md](TODO.md); the audio-clock scheduler is implemented. See the [stabilization review](docs/stabilization-02-09.md) for changes and limitations.
+The speech-side P1 work is implemented: Kokoro streaming, regional Rhubarb, the shared 1 / 2 / 2 profile, cancellation/resource ownership and main-chat timing reports. Recorded replay works without loading AI models. Live Qwen dialogue and combined-workload acceptance need a separately coordinated test in a **fresh chat**. See the [P1 report](docs/p1-main-companion-2026-10-13.md), [LLM handoff](docs/llm-integration-handoff-2026-10-13.md) and [backlog](TODO.md).
 
 ## Start safely
 
@@ -19,11 +19,21 @@ Open [Asena](http://127.0.0.1:3001/). This starts only the website. The replay b
 
 During speech, **Pause / Resume** holds or continues the voice and its mouth, emotion and gesture timeline together. Stop also works while paused. The [audio-clock scheduler report](docs/audio-clock-11.md) explains the bounded segment queue and verification; captioned Kokoro streaming is now available as an opt-in path, with [live measurements and limitations](docs/kokoro-streaming-2026-10-12.md).
 
-Drag the chat by its header, or hide it and use **Open chat** to restore it. Settings and Debug share a switchable tools panel; Debug is available in replay mode. **S** opens settings, **C** shows/hides chat, and **Esc** closes tools. Expand **Context estimate** to see instructions, memories, conversation and padding. See the [UI cleanup review](docs/ui-cleanup-10a.md) for screenshots and manual checks.
+Drag the chat by its header, or hide it and use **Open chat** to restore it. Settings and Debug share a switchable tools panel; Debug is available in replay, preview and live modes; turn reports are downloadable from its inspector. **S** opens settings, **C** shows/hides chat, and **Esc** closes tools. Expand **Context estimate** to see instructions, memories, conversation and padding. See the [UI cleanup review](docs/ui-cleanup-10a.md) for screenshots and manual checks.
 
 Use **Settings → Display → Rendering quality** for Balanced, Low power or High detail. High detail is the default; saved choices take precedence. Low power caps the avatar at 30 fps and pixel ratio 1. Idle is the only startup gesture; others load/cache when needed. Hidden tabs stop drawing. Text input opens after avatar and data startup settle. Settings remain available during startup; avatar failure permits text-only use afterward.
 
 Three.js and VRM libraries currently use CDN resources, so the avatar needs internet or previously cached resources. The UI uses system fonts. “Offline replay” means no AI-service calls, not a fully disconnected browser. Frontend package URLs are exactly pinned; full vendoring has not been selected. The [full TODO 02–10 report](docs/implementation-report-02-10.md) records changes, regression fixes, verification and review steps.
+
+## Main-chat speech preview
+
+Use the original chat without loading an LLM:
+
+```sh
+ASENA_MODE=preview ASENA_SPEECH_SOURCE=recorded ASENA_PORT=3001 python3 server.py
+```
+
+Open [the main benchmark](http://localhost:3001/?replay-case=benchmark). Play introduction, teasing, disagreement, emotes and memory scenes using saved PCM/cues through the current player. For an already authorized/prepared Kokoro, set `ASENA_PREVIEW_KOKORO=1` and its endpoint at launch; **Debug → Voice for the next scene → Live Kokoro + Rhubarb** enables generation when you press Play scene. Preview blocks model calls and private memories. See the [handoff](docs/llm-integration-handoff-2026-10-13.md) for exact launch examples and the later live-model gate.
 
 ## Setup and development
 
