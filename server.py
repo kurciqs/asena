@@ -88,12 +88,14 @@ def tts():
 def streamed_speech():
     if not SPEECH_STREAMING:
         raise ServiceError('Streaming speech is disabled in this server configuration.', 403)
-    data=request.get_json(silent=True);factory=None
+    data=request.get_json(silent=True);factory=None;source=SPEECH_SOURCE
     if RUNTIME_MODE=='preview' and isinstance(data,dict):
         data=dict(data);source=data.pop('source',SPEECH_SOURCE)
         if source not in PREVIEW_SPEECH_SOURCES:
             raise ServiceError('This speech source is not enabled for preview.',403)
         factory=RecordedSpeechStream if source=='recorded' else SpeechStream
+    if source!='recorded' and isinstance(data,dict) and data.get('strategy',SPEECH_PROFILE['strategy'])=='whole' and isinstance(data.get('input'),str) and len(data['input'])>180:
+        raise ServiceError('Long whole-text requests exceed the prepared memory budget. Choose sentences / long clauses.',400)
     if not ALIGNMENT_LOCK.acquire(blocking=False):
         raise ServiceError('Speech alignment is busy. Retry shortly.', 409)
     try:

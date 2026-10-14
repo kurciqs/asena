@@ -35,7 +35,7 @@ export class TurnMetrics {
             milestones:{...m},durations:{reply:span('submitted','firstText'),parsing:span('firstText','parsed'),
                 gesturePreparation:span('gesturePreparation','gesturesReady'),speechStartup:span('speechRequested','firstAudio'),
                 memoryExtraction:span('memoryStart','memoryEnd')},speech:this.speech,clock:this.clock,
-            expressionEdits:this.expressionEdits.slice(),measurement:'Local monotonic timings. Scripted replies are not LLM latency. First audio uses the estimated audible output clock.',
+            speechStartup:this.liveStartup??null,expressionEdits:this.expressionEdits.slice(),measurement:'Local monotonic timings. Scripted replies are not LLM latency. First audio uses the estimated audible output clock.',
             unmeasured:['service/model boot','pure Kokoro inference','combined LLM/TTS peak memory']};
     }
 }

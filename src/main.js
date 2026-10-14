@@ -17,10 +17,12 @@ import {MemoryWork, MEMORY_INSTRUCTION, mergeMemories} from './memory_work.js';
 import {TurnMetrics} from './turn_metrics.js';
 import {setupExpressionControls} from './expression_controls.js';
 import {expressionPreferences} from './emotion_envelope.js';
+import {setupSpeechTrials} from './speech_trial_controls.js';
 
 let replay = null;
 let previewSpeechSource = null;
 let expressionConfig=expressionPreferences();
+let speechTrials=null;
 let startupReady = false;
 let profileEditedDuringStartup = false;
 let profileStorage = {getItem:()=>null, setItem:()=>{throw new Error('Configuration still loading');}};
@@ -78,6 +80,7 @@ function inspectReplay(update) {
         const first=data.milestones.firstAudio;
         summary.textContent=`Reply: ${data.durations.reply?.toFixed(2)??'—'}s · first voice: ${first?.toFixed(2)??'—'}s · prepared: ${data.clock?.bufferSeconds?.toFixed(1)??'—'}s.`;
         document.getElementById('turn-report-download').disabled=false;
+        renderSpeechTiming(data);
     }
     },150);
 }
@@ -440,9 +443,11 @@ async function prepareAndPlay(parsedReply, turn) {
         try{
             turnMetrics?.mark('speechRequested');
             await playSpeechStream({text:parsedReply.text,voice:turn.speech?.voice??KOKORO_VOICE,signal:turn.signal,speechProfile:turn.speech?.profile??runtimeConfig.speechProfile,
+                speed:turn.speech?.speed??1,
                 source:RUNTIME_MODE==='preview'?turn.speech?.source:null,
                 onPlayer:value=>{player=value;ANI.beginPcmPerformance(()=>({...player.sample(),weights:player.weights(),...cues}),player);},
                 onWarning:speechWarning,onReport:report=>{if(turnMetrics?.id===turn.id){turnMetrics.observeSpeech(report);inspectReplay({speechReport:turnMetrics.speech});}},
+                onTiming:timing=>{if(turnMetrics?.id===turn.id){turnMetrics.liveStartup=timing;inspectReplay({});}},
                 onEvent:event=>{turn.assertCurrent();inspectReplay({speechPhase:event.type==='provider-stage'?event.phase:event.type});},
                 onWords:stamps=>{words.push(...stamps);refreshCues();},
                 onClock:clock=>{
@@ -631,6 +636,7 @@ function setupReplayUI() {
             document.getElementById('debug-source').textContent=previewSpeechSource==='kokoro'?'Live Kokoro · no LLM':'Saved voice · AI services off';
             document.getElementById('voice-note').textContent=previewSpeechSource==='kokoro'?'Used for the next scripted spoken reply.':'Saved scenes use their recorded voice.';
             voiceSelect.disabled=previewSpeechSource!=='kokoro';
+            speechTrials?.setSource(previewSpeechSource);
         };
         sourceSelect.addEventListener('change',updateSource);updateSource();
         document.getElementById('debug-mode').textContent='Scripted preview';
@@ -645,6 +651,8 @@ function setupReplayUI() {
 }
 function setupDebugUI() {
     toolPanel.enableDebug();
+    speechTrials=setupSpeechTrials(document,localStorage,runtimeConfig.speechProfile);
+    speechTrials.setSource(RUNTIME_MODE==='replay'?'replay':runtimeConfig.speechSource);
     setupExpressionControls(document,localStorage,settings=>{
         expressionConfig=settings;ANI.setExpressionPreferences(settings);
         turnMetrics?.recordExpressionChange(settings);
@@ -670,9 +678,28 @@ function setupDebugUI() {
     }
 }
 function beginTurnMetrics(turn,retry=false){
-    turn.speech={voice:KOKORO_VOICE,profile:structuredClone(runtimeConfig?.speechProfile??null),source:previewSpeechSource??runtimeConfig?.speechSource};
+    document.getElementById('speech-startup-rows').replaceChildren();
+    document.getElementById('speech-startup-total').textContent='Waiting for speech…';
+    const trial=speechTrials?.snapshot()??{profile:runtimeConfig?.speechProfile,speed:1};
+    const source=previewSpeechSource??runtimeConfig?.speechSource;
+    turn.speech={voice:KOKORO_VOICE,profile:structuredClone(trial.profile??null),source,speed:source==='recorded'?1:trial.speed};
     turnMetrics=new TurnMetrics(turn.id,{mode:RUNTIME_MODE,speechSource:turn.speech.source,
-        speechProfile:turn.speech.profile,voice:turn.speech.voice,chatModel:runtimeConfig?.chatModel,retry,expressionSettings:expressionConfig});
+        speechProfile:turn.speech.profile,voice:turn.speech.voice,speed:turn.speech.speed,chatModel:runtimeConfig?.chatModel,retry,expressionSettings:expressionConfig});
+}
+function renderSpeechTiming(report){
+    const timing=report.speech?.startupTiming??report.speechStartup;
+    if(!timing)return;
+    document.getElementById('speech-startup-total').textContent=`${timing.complete?'First voice':'Waiting'} · ${timing.totalSeconds.toFixed(2)}s after speech request`;
+    const saved=report.config.speechSource==='recorded',root=document.getElementById('speech-startup-rows');
+    document.getElementById('speech-timing-note').textContent=saved?'Saved playback: generation and Rhubarb are bypassed.':
+        'Only work before first playback is counted. Later Kokoro and Rhubarb overlap; service boot and pure inference are not measured.';
+    for(const row of timing.rows){
+        if(saved&&!['browserPreparation','serverSetup','browserDelivery'].includes(row.id))continue;
+        let entry=root.querySelector(`[data-stage="${row.id}"]`);
+        if(!entry){entry=document.createElement('div');entry.dataset.stage=row.id;entry.append(document.createElement('dt'),document.createElement('dd'));root.append(entry);}
+        entry.querySelector('dt').textContent=row.label;entry.title=row.details;
+        entry.querySelector('dd').textContent=row.seconds===null?'Unmeasured':`${row.seconds.toFixed(2)}s${row.ongoing?'…':''}`;
+    }
 }
 window.addEventListener('pagehide',()=>turnController.stop());
 renderCompanionProfile();

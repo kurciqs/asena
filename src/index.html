@@ -83,6 +83,20 @@
                     <label for="expression-release">Fade out <output id="expression-release-value"></output></label><input id="expression-release" type="range" min=".1" max="3" step=".1">
                     <label for="expression-talkingSmile">Smile while talking <output id="expression-talkingSmile-value"></output></label><input id="expression-talkingSmile" type="range" min="0" max="1" step=".05">
                 </details>
+                <details class="debug-section" id="speech-trials">
+                    <summary>Streaming speech settings</summary>
+                    <p id="speech-trial-note" class="field-hint"></p>
+                    <label for="speech-strategy">Text requests</label><select id="speech-strategy"><option value="sentences">Complete sentences / long clauses</option><option value="phrases">Short fragments · comparison</option><option value="whole">One request · short text only</option></select>
+                    <label for="speech-opening">First mouth-analysis region</label><select id="speech-opening"><option value="0.5">0.5 seconds</option><option value="1">1 second</option><option value="2">2 seconds</option></select>
+                    <label for="speech-regions">Later analysis regions</label><select id="speech-regions"><option value="1s">1 second</option><option value="2s">2 seconds</option><option value="3s">3 seconds</option></select>
+                    <label for="speech-reserve">Prepared audio before playback</label><select id="speech-reserve"><option value="0.5">0.5 seconds</option><option value="1">1 second</option><option value="2">2 seconds</option><option value="4">4 seconds</option></select>
+                    <label for="speech-speed">Kokoro speed <output id="speech-speed-value"></output></label><input id="speech-speed" type="range" min=".5" max="2" step=".05">
+                    <button id="speech-reset" type="button">Reset to accepted 1 / 2 / 2</button>
+                </details>
+                <details class="debug-section" id="speech-timing" open><summary>Speech timing</summary>
+                    <p id="speech-startup-total" class="field-hint">Timing appears when speech starts.</p>
+                    <p id="speech-timing-note" class="field-hint"></p><dl id="speech-startup-rows" class="context-breakdown"></dl>
+                </details>
                 <details id="turn-inspection">
                     <summary>Inspect this turn</summary>
                     <div class="json-tools"><button id="replay-collapse" type="button">Collapse all JSON</button></div>

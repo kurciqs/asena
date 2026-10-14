@@ -12,15 +12,15 @@ function abortable(promise,signal){
 }
 
 // One ownership scope for streamed audio, acknowledgements and provider cancellation.
-export async function playSpeechStream({text,voice,signal,speechProfile=null,source=null,onPlayer=()=>{},onClock=()=>{},onWords=()=>{},
-  onEvent=()=>{},onWarning=()=>{},onReport=()=>{},
+export async function playSpeechStream({text,voice,signal,speechProfile=null,source=null,speed=1,onPlayer=()=>{},onClock=()=>{},onWords=()=>{},
+  onEvent=()=>{},onWarning=()=>{},onReport=()=>{},onTiming=()=>{},
   fetcher=fetch,createContext=()=>new AudioContext(),requestFrame=requestAnimationFrame,cancelFrame=cancelAnimationFrame}) {
   const started=performance.now(),timing=new StartupTiming();
   const controller=new AbortController(),context=createContext();
-  let token=null,player=null,timer=null,frame=null,result=null,reader=null,cancelSent=false,lastSegment=null;
+  let token=null,player=null,timer=null,frame=null,result=null,reader=null,cancelSent=false,lastSegment=null,timingTimer=null;
   const send=(path,data,options={})=>fetcher(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),...options});
   const cancel=()=>{player?.stop();controller.abort();
-    clearTimeout(timer);if(frame!==null){cancelFrame(frame);frame=null;}
+    clearTimeout(timer);clearInterval(timingTimer);if(frame!==null){cancelFrame(frame);frame=null;}
     if(token&&!cancelSent){cancelSent=true;send('/api/speech/cancel',{token},{keepalive:true,signal:AbortSignal.timeout(2000)}).catch(()=>{});}};
   const aborted=()=>cancel();signal?.addEventListener('abort',aborted,{once:true});
   const deadline=setTimeout(()=>controller.abort(new Error('Streaming speech exceeded its deadline')),185000);
@@ -28,7 +28,8 @@ export async function playSpeechStream({text,voice,signal,speechProfile=null,sou
     if(signal?.aborted)throw new DOMException('Turn stopped','AbortError');
     await abortable(context.resume(),controller.signal);
     timing.prepared((performance.now()-started)/1000);
-    const response=await send('/api/speech/stream',{input:text,voice,...(source?{source}:{}),...(speechProfile?{strategy:speechProfile.strategy,policy:speechProfile.policy,openingSeconds:speechProfile.openingSeconds,startupSeconds:speechProfile.startupSeconds}:{})},{signal:controller.signal});
+    timingTimer=setInterval(()=>onTiming(timing.snapshot((performance.now()-started)/1000)),150);
+    const response=await send('/api/speech/stream',{input:text,voice,...(speed!==1?{speed}:{}),...(source?{source}:{}),...(speechProfile?{strategy:speechProfile.strategy,policy:speechProfile.policy,openingSeconds:speechProfile.openingSeconds,startupSeconds:speechProfile.startupSeconds}:{})},{signal:controller.signal});
     if(!response.ok)throw new Error((await response.json()).error??'Speech streaming unavailable');
     const tick=()=>{if(player&&!controller.signal.aborted){onClock(player.sample());frame=requestFrame(tick);}};
     const ack=async()=>{
@@ -76,6 +77,7 @@ export async function playSpeechStream({text,voice,signal,speechProfile=null,sou
     reader?.releaseLock?.();await context.close().catch(()=>{});
     if(result){result.startupTiming=timing.snapshot((performance.now()-started)/1000);
       result.cleanup={...player?.resources(),contextClosed:context.state==='closed'||context.closed===true};
+      onTiming(result.startupTiming);
       onReport(result);}
   }
 }

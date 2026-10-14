@@ -28,13 +28,13 @@ test('stream consumer uses 24 kHz PCM, forwards timings, completes and releases 
       return {value:enc.encode(JSON.stringify(events[index++])+'\n'),done:false};
     }})}};
   };
-  const result=await playSpeechStream({text:'Hi',voice:'af_heart',speechProfile:{policy:'2s',openingSeconds:1,startupSeconds:2,strategy:'sentences'},fetcher,createContext:()=>audio,
+  const result=await playSpeechStream({text:'Hi',voice:'af_heart',speed:1.15,speechProfile:{policy:'2s',openingSeconds:1,startupSeconds:2,strategy:'sentences'},fetcher,createContext:()=>audio,
     requestFrame:()=>1,cancelFrame:()=>{},onPlayer:p=>player=p,onWords:w=>words=w});
   assert.equal(player.rate,24000);assert.equal(words[0].word,'Hi');assert.equal(result.browser.finished,true);
   assert.equal(audio.closed,true);assert.ok(calls.some(([url])=>url==='/api/speech/cancel'));
   assert.deepEqual(result.cleanup,{blocks:0,buffers:0,nodes:0,cues:0,contextClosed:true});
   assert.ok(result.startupTiming.complete);
-  assert.deepEqual(calls[0][1],{input:'Hi',voice:'af_heart',strategy:'sentences',policy:'2s',openingSeconds:1,startupSeconds:2});
+  assert.deepEqual(calls[0][1],{input:'Hi',voice:'af_heart',speed:1.15,strategy:'sentences',policy:'2s',openingSeconds:1,startupSeconds:2});
 });
 test('abort while waiting closes the audio context and cancels the provider token',async()=>{
   const audio=context(),owner=new AbortController(),calls=[];let reads=0;

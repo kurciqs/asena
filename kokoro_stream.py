@@ -338,7 +338,7 @@ class SpeechStream:
 
     def report(self, complete):
         segments = [e for e in self.events if e['type'] == 'segment']
-        return {'fixtureOnly': False, 'provider': 'Kokoro captioned PCM', 'rate': RATE,'voice':self.payload['voice'],
+        return {'fixtureOnly': False, 'provider': 'Kokoro captioned PCM', 'rate': RATE,'voice':self.payload['voice'],'speed':self.payload['speed'],
                 'policy': self.policy, 'startupSeconds': self.startup, 'complete': complete,
                 'strategy':self.strategy,'openingSeconds':self.opening,'timingProfile':self.timing_profile(),'requestCount':len(self.requests),
                 'textCharacters':len(self.payload['input']),'textWords':len(self.payload['input'].split()),

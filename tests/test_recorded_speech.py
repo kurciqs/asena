@@ -46,3 +46,10 @@ class RecordedSpeechTests(unittest.TestCase):
                 result=client.post('/api/speech/stream',json={'input':'Hi','voice':'af_heart','source':source})
                 self.assertEqual(result.status_code,403)
             reserve.assert_not_called()
+
+    def test_long_whole_request_is_blocked_before_reserving_real_provider_work(self):
+        client=server.app.test_client()
+        with patch.object(server,'RUNTIME_MODE','live'),patch.object(server,'SPEECH_STREAMING',True), \
+                patch.object(server,'SPEECH_SOURCE','kokoro'),patch.object(server.SPEECH_STREAMS,'reserve') as reserve:
+            result=client.post('/api/speech/stream',json={'input':'Long sentence '*30,'voice':'af_heart','strategy':'whole'})
+            self.assertEqual(result.status_code,400);self.assertIn('memory budget',result.json['error']);reserve.assert_not_called()
