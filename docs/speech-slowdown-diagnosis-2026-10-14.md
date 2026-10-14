@@ -1,0 +1,35 @@
+# Speech slowdown diagnosis — 14 October 2026
+
+The reported slowdown is real in the speech provider, not just the browser's timer. Host memory pressure is the strongest supported cause. Recovery has **not** been validated in a new live trial; this is a diagnosis, not a claim that the incident is fixed.
+
+## Observations
+
+- The Mac has 8 GiB RAM. Swap occupied roughly 6.5 GiB. Crucially, a five-second `vm_stat` sample recorded **10,444 pages swapped out (163.2 MiB)** and **2,393 pages swapped in (37.4 MiB)**. This is current paging activity, not a conclusion drawn merely from old swap occupancy. A later two-second sample showed no swap traffic: pressure fluctuates.
+- Kokoro's own logs show individual synthesis times of **17.60 s**, **14.41 s**, and **19.92 s**. The last produced 90,000 samples at 24 kHz: **3.75 s of audio**. That request alone consumed more than five times its output duration. A 2 s startup reserve cannot maintain uninterrupted playback when sustained preparation is slower than consumption.
+- Even the same short request varied from **5.77–5.99 s to 3.16 s** during the session. Settings and text length do not account for that variation by themselves. Later requests also ran slowly, so the first cold request is not the entire explanation.
+- Only one Docker container was running. It is the existing `v0.9.0` CPU Kokoro container, with its original **2 CPU / 2 GiB** budget and OMP/MKL threads set to 2. No OOM kill was recorded. The Docker VM has roughly 2.85 GiB available RAM in total.
+- The container has reached its memory ceiling and reclaimed pages (`memory.events max=388`), but its sampled memory-pressure averages were zero. This is historical limit pressure, not proof of active container thrashing. Its sampled anonymous memory was about 1.21 GiB and file cache 649 MiB. Host swapping is independently confirmed.
+- No thermal or CPU performance warning was recorded by macOS. This does not measure every possible power-management limit.
+- The running main server's profile remains `stable-122`: 1 s opening region, 2 s later regions, 2 s startup minimum, complete-sentence generation. The browser can still override these through its persisted trial settings.
+- The main app resolves the verified **native ARM64 Rhubarb 1.14.0** binary, not the older translated executable. Streaming continues to use one recognizer thread and the shared ownership lock. Only one stream can own that lock.
+- A bounded check of L01's first 1.25 s of **saved** audio took **2.17 s** to recognize, with **147.3 MiB peak RSS**. This does not measure live overlapping synthesis, and is not a controlled before/after benchmark. It confirms that the native recognizer still works without a new Kokoro request.
+
+## Interpretation and limits
+
+The accepted S06 baseline reached playback at 9.25 s: approximately 5.81 s until Kokoro's first bytes and 3.17 s of startup Rhubarb work, with no playback gaps. The current provider logs demonstrate a much slower workload. The user also reports both startup components above 5 s.
+
+The accepted profile relies on later generation and alignment keeping up with playback. With slow synthesis, prepared audio drains and the player correctly waits for another aligned region. Cutting the startup reserve makes this worse. Increasing it can conceal some finite stalls but cannot repair throughput.
+
+Memory pressure plausibly affects both the Docker guest's model pages and the native recognizer's model/assets. The observed page traffic, variable synthesis times, unchanged container settings and correct binary make this the leading explanation. They do **not** establish that all slowdown comes from memory: a controlled live retest under a prepared host is still necessary. Rendering, debug redraws and optional first-use gesture loading add competing work; their precise contribution has not been measured in this incident. The recent parallel gesture preparation removes a compulsory wait but can overlap first-use loading with generation.
+
+## Recovery and next validation
+
+1. Keep **1 / 2 / 2, sentences, speed 1.00×** for the comparison. Change neither the provider budget nor the buffer policy during the recovery test.
+2. Free host memory by quitting unused applications/tabs. If paging persists, restart the Mac when convenient, then bring up only the required app and Kokoro. The agent did not quit applications, restart Docker, purge memory, or reboot the machine.
+3. For immediate uninterrupted UI review, select **Saved recordings** in Debug. These bypass generation and new Rhubarb work. A separate failure there would require a player/rendering diagnosis.
+4. On a prepared host, compare the same short benchmark and L01 against their previous results. Capture a first warm-up separately, then warm timings, provider duration/audio duration, Rhubarb segment timings, startup reserve and gaps, with host swap deltas during playback. An isolated region or fixture test cannot certify recovery.
+5. If timings remain poor with negligible paging, compare the diagnostic viewer and main chat using identical text/settings; isolate rendering, inspector expansion and first-use gestures one at a time. Do not change provider, alignment algorithm and buffering simultaneously.
+
+Do not raise the container memory limit blindly on an 8 GiB host. LLM integration remains deferred to its coordinated fresh chat, and a combined laptop resource budget must be validated before adding resident inference.
+
+No LLM or new TTS inference was started for this investigation. One bounded saved-audio Rhubarb region was analyzed. Existing accepted settings and runtime services were left intact.

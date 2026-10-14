@@ -117,6 +117,8 @@ New schemas, retrieval, and session architecture in this section are deferred un
 
 - [ ] **31 — Define supported deployment/resource profiles.** Origin: then H09/H14. Document constrained-laptop and stronger-desktop configurations, explicit service lifecycle, memory limits, and a private remote connection if chosen. **Done when:** users can select a known configuration without source edits, opening the site loads no models, and concurrency limits account for resident model memory as well as active compute. Native Apple acceleration is a candidate to verify, not an assumed speedup.
 
+  **Urgent acceptance follow-up, 14 October:** live speech slowed and buffered under confirmed host swapping; Kokoro took 19.92 s to produce one 3.75 s packet. Revalidate the existing 1 / 2 / 2 profile on a prepared host before adding resident LLM inference. Capture swap deltas and distinguish cold/warm runs; if the slowdown persists without paging, isolate main-chat rendering/debug/gesture work against the viewer. [Diagnosis and recovery steps](docs/speech-slowdown-diagnosis-2026-10-14.md). Recovery remains unverified.
+
 ## P5 — Approach Ani's presentation and richer companionship
 
 - [ ] **32 — Curate appearance, scene, camera, and optional recording.** Origin: Ani target / original visual goals. Build an Ani-inspired adult companion preset, polished framing/lighting, user-selected outfits/backgrounds, optional quiet ambience, and later clip export. **Done when:** one cohesive scene looks and moves intentionally, selections persist, and ambience/recording have clear controls. Keep the current customizable VRM architecture.
