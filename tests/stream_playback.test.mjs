@@ -55,6 +55,20 @@ test('mouth and completion follow output timestamps rather than the ahead-of-out
   assert.equal(player.sample().finished,false);assert.equal(player.sample().playedFrames,2);
   now=3000;assert.equal(player.sample().finished,true);
 });
+test('a long underrun is resumable and never marks the player stopped or complete',()=>{
+  const context=fakeContext();let now=0;
+  const player=new PCMPlayer(context,{rate:100,startupSeconds:2,now:()=>now});
+  player.add(segment(0,200,100));
+  context.currentTime=3;now=3000;player.sample();
+  context.currentTime=23;now=23000;
+  const waiting=player.sample();
+  assert.equal(waiting.buffering,true);assert.equal(waiting.waitingSeconds,20);
+  assert.equal(waiting.finished,false);assert.equal(player.stopped,false);
+  player.add(segment(200,400,100));context.currentTime=23.1;now=23100;
+  assert.equal(player.sample().buffering,false);assert.ok(player.weights()[0]>0);
+  player.finish();context.currentTime=26;
+  assert.equal(player.sample().finished,true);
+});
 test('mouth sampling blends across region boundaries on the global audio clock',()=>{
   const cues=[{start:0,end:2,value:'A'},{start:2,end:4,value:'D'}];
   assert.ok(weightsAt(cues,1)[5]>0);assert.equal(weightsAt(cues,2)[0],0);

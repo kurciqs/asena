@@ -38,6 +38,32 @@ class KokoroStreamTests(unittest.TestCase):
         self.folder=tempfile.TemporaryDirectory();self.addCleanup(self.folder.cleanup)
         root=patch.object(stream,'ROOT',Path(self.folder.name));root.start();self.addCleanup(root.stop)
 
+    def test_http_stream_uses_shared_read_budget_instead_of_a_shorter_hidden_limit(self):
+        with patch.object(stream.http.client,'HTTPConnection') as connection:
+            transport=stream.HttpStream('http://127.0.0.1:8881/speech',{},threading.Event())
+            with transport:
+                pass
+            connection.assert_called_once_with('127.0.0.1',8881,timeout=stream.NETWORK_TIMEOUT[0])
+            connection.return_value.sock.settimeout.assert_called_once_with(stream.NETWORK_TIMEOUT[1])
+            self.assertEqual(stream.NETWORK_TIMEOUT[1],30)
+
+    def test_provider_timeout_is_terminal_specific_and_retains_its_budget(self):
+        class Stalled(Response):
+            def iter_content(self,size):
+                yield from super().iter_content(size)
+                raise TimeoutError('timed out')
+        response=Stalled([packet(.7)])
+        events=self.consume(self.make(response))
+        self.assertEqual(events[-1]['type'],'error')
+        self.assertIn('provider timeout',events[-1]['error'])
+        self.assertIn('no-data limit 30s',events[-1]['error'])
+        report=events[-1]['report']
+        self.assertFalse(report['complete'])
+        self.assertIsNotNone(report['firstProviderAudioSeconds'])
+        self.assertEqual(report['limits']['providerReadTimeoutSeconds'],30)
+        self.assertEqual(report['limits']['deadlineSeconds'],180)
+        self.assertTrue(response.closed)
+
     def test_shared_timing_defaults_and_custom_overrides_are_reported(self):
         instance=self.make(Response([packet(2)]))
         events=self.consume(instance)
@@ -187,6 +213,31 @@ class KokoroStreamTests(unittest.TestCase):
             before=time.monotonic();instance.cancel();iterator.close();instance.worker.join(timeout=1)
             self.assertFalse(instance.worker.is_alive());self.assertFalse(instance.producer.is_alive())
             self.assertLess(time.monotonic()-before,1)
+        finally:
+            instance.cancel();release.set();http.shutdown();http.server_close();serving.join(timeout=1)
+
+    def test_actual_provider_socket_timeout_reports_failure_and_releases_reader(self):
+        release=threading.Event()
+        class Handler(BaseHTTPRequestHandler):
+            def log_message(self,*_):pass
+            def do_POST(self):
+                self.rfile.read(int(self.headers['Content-Length']))
+                self.send_response(200);self.send_header('Transfer-Encoding','chunked');self.end_headers()
+                body=json.dumps(packet(.7)).encode()+b'\n'
+                self.wfile.write(f'{len(body):x}\r\n'.encode()+body+b'\r\n');self.wfile.flush()
+                release.wait(2)
+        http=ThreadingHTTPServer(('127.0.0.1',0),Handler);http.daemon_threads=True
+        serving=threading.Thread(target=http.serve_forever,daemon=True);serving.start()
+        instance=stream.SpeechStream({'input':'Hi','voice':'af_heart'},recognizer=recognize,
+                                   endpoint=f'http://127.0.0.1:{http.server_port}/speech')
+        try:
+            with patch.object(stream,'NETWORK_TIMEOUT',(3,.1)):
+                events=self.consume(instance)
+            self.assertEqual(events[-1]['type'],'error')
+            self.assertIn('no-data limit 0.1s',events[-1]['error'])
+            self.assertIn('provider timeout',events[-1]['error'])
+            self.assertIsNotNone(events[-1]['report']['firstProviderAudioSeconds'])
+            self.assertFalse(instance.producer.is_alive())
         finally:
             instance.cancel();release.set();http.shutdown();http.server_close();serving.join(timeout=1)
 

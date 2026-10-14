@@ -33,3 +33,13 @@ Memory pressure plausibly affects both the Docker guest's model pages and the na
 Do not raise the container memory limit blindly on an 8 GiB host. LLM integration remains deferred to its coordinated fresh chat, and a combined laptop resource budget must be validated before adding resident inference.
 
 No LLM or new TTS inference was started for this investigation. One bounded saved-audio Rhubarb region was analyzed. Existing accepted settings and runtime services were left intact.
+
+## Follow-up: why a buffer stall became a permanent stop
+
+The user subsequently reported: “Voice stopped after 5.9 seconds” followed by the generic “Kokoro stream unavailable or interrupted” warning. That is the terminal error path, not ordinary starvation: a starved PCM player waits and resumes on the next aligned region.
+
+The HTTP streaming adapter had a hard-coded **15 s no-data read timeout**, shorter than the existing shared service read budget of **30 s**. The latest matching provider sequence took **8.11 s** for its opening request, then **17.03 s** for the next request. The timeout is therefore the leading explanation for termination while the next valid packet was still being generated. The original exception was not retained server-side, so the generic warning alone cannot prove its exact type retroactively.
+
+The transport now uses `NETWORK_TIMEOUT` consistently (default 3 s connection / 30 s read). Reports expose both limits. A socket timeout has a specific message identifying the connection/read limits and distinguishing it from a buffer underrun. Producer cleanup uses the same read budget; socket shutdown still interrupts Stop immediately. The three-minute overall deadline, Rhubarb's separate 15 s region deadline, memory limits and 1 / 2 / 2 settings remain unchanged. This makes slow generation less likely to be discarded; it does not improve generation throughput or guarantee gap-free playback under memory pressure.
+
+Regression checks cover a real stalled local HTTP socket delivering a specific terminal timeout, immediate cancellation of a blocked socket, and playback resuming after a simulated 20 s buffer gap. They use fake providers and saved/mock data, with no new Kokoro generation. Live recovery still needs validation on a prepared machine.

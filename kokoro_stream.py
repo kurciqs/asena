@@ -18,7 +18,7 @@ import threading
 import time
 from urllib.parse import urlsplit
 
-from config import ROOT, RHUBARB, KOKORO_API, SPEECH_PROFILE
+from config import ROOT, RHUBARB, KOKORO_API, SPEECH_PROFILE, NETWORK_TIMEOUT
 from service_contracts import ServiceError, require_payload, normalize_timestamps
 from streaming_alignment import Cancelled, recognize
 
@@ -37,7 +37,7 @@ class HttpStream:
     def __init__(self, endpoint, payload, cancelled, timing=lambda phase:None):
         parsed=urlsplit(endpoint)
         cls=http.client.HTTPSConnection if parsed.scheme=='https' else http.client.HTTPConnection
-        self.connection=cls(parsed.hostname,parsed.port,timeout=3)
+        self.connection=cls(parsed.hostname,parsed.port,timeout=NETWORK_TIMEOUT[0])
         self.path=(parsed.path or '/')+('?' + parsed.query if parsed.query else '')
         self.payload=payload;self.cancelled=cancelled;self.socket=None;self.response=None
         self.timing=timing
@@ -47,7 +47,7 @@ class HttpStream:
             except OSError:pass
     def __enter__(self):
         try:
-            self.connection.connect();self.socket=self.connection.sock;self.socket.settimeout(15)
+            self.connection.connect();self.socket=self.connection.sock;self.socket.settimeout(NETWORK_TIMEOUT[1])
             self.timing('connected')
             if self.cancelled.is_set():raise Cancelled()
             self.connection.request('POST',self.path,json.dumps(self.payload).encode(),{'Content-Type':'application/json'})
@@ -303,7 +303,7 @@ class SpeechStream:
                 self.check();offset=self.frames/RATE;before=self.frames
                 payload={**self.payload,'input':text}
                 self.event({'type':'request','index':index,'characters':len(text),'requestCount':len(self.requests),'text':text})
-                if self.post:response_context=self.post(self.endpoint,json=payload,stream=True,timeout=(3,15))
+                if self.post:response_context=self.post(self.endpoint,json=payload,stream=True,timeout=NETWORK_TIMEOUT)
                 else:
                     self.transport=HttpStream(self.endpoint,payload,self.cancelled,
                         timing=lambda phase:self.event({'type':'provider-stage','index':index,'phase':phase}))
@@ -326,6 +326,14 @@ class SpeechStream:
                 self.done = True; self.provider_finished = time.monotonic()-self.started
                 self.condition.notify_all()
         except Cancelled: pass
+        except TimeoutError:
+            if not self.cancelled.is_set():
+                with self.condition:
+                    self.failure = RuntimeError(
+                        f'Kokoro connection/read timed out (connection limit {NETWORK_TIMEOUT[0]:g}s; '
+                        f'no-data limit {NETWORK_TIMEOUT[1]:g}s). Voice stopped; this is a provider timeout, '
+                        'not a playback buffer underrun.')
+                    self.condition.notify_all()
         except Exception as error:
             if not self.cancelled.is_set():
                 with self.condition:self.failure = error;self.condition.notify_all()
@@ -348,7 +356,8 @@ class SpeechStream:
                 'peakRssBytes': max([0]+[e['peakRssBytes'] for e in segments]),
                 'incomingPeakSeconds': self.incoming_peak/RATE, 'preparedPeakSeconds': self.prepared_peak/RATE,
                 'limits': {'incomingSeconds':16, 'preparedSeconds':12, 'decodedPacketSeconds':30,
-                           'audioSeconds':MAX_AUDIO_SECONDS, 'deadlineSeconds':DEADLINE, 'providerReadTimeoutSeconds':15},
+                           'audioSeconds':MAX_AUDIO_SECONDS, 'deadlineSeconds':DEADLINE,
+                           'providerConnectTimeoutSeconds':NETWORK_TIMEOUT[0], 'providerReadTimeoutSeconds':NETWORK_TIMEOUT[1]},
                 'timingWarnings':self.timing_warnings[:], 'events': self.events[:]}
 
     def work(self):
@@ -419,7 +428,7 @@ class SpeechStream:
             except Cancelled: pass
         finally:
             self.cancel()
-            if self.producer: self.producer.join(timeout=16)
+            if self.producer: self.producer.join(timeout=NETWORK_TIMEOUT[1]+1)
             if lock:lock.close()
             self.complete = complete
 
