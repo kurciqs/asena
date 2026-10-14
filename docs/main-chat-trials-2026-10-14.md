@@ -22,6 +22,10 @@ The controls now live in the tools panel's **Expressions** tab, also reachable t
 
 Entering this view temporarily hides chat; **Open chat** remains available for playback controls, and leaving restores the prior visibility. The existing slider bindings, persisted settings and audio-clock behavior are unchanged. **97 JavaScript tests passed**, including five panel tests for modality, chat restoration, movement bounds and keyboard handling. Browser visual review remains unavailable under the earlier browser security restriction. No speech generation or model startup was needed.
 
+The **Currently displayed** readout is available beside the sliders and inside Debug → Expression blending. It lists the active blend (for example, Happy + Sad), its rig weights rounded to percentages, the audio position, playback state and current scripted cue. It reads the VRM expression manager after animation, including full-WAV mixer tracks, so a cue can still say Happy while the face has already faded to Neutral. Missing expression bindings are explicit. These percentages describe rig weights after fades and speech scaling, not perceived emotion intensity or the slider's percentage. Weights below 0.5% display as neutral.
+
+Visible readouts refresh from the existing render loop at up to 10 Hz, with no additional animation loop or inference. Hidden panels skip text updates. Pause/buffering use the held audio clock; stopping reads the cleared rig instead of retaining the preceding blend. Tests cover overlap, fade-to-neutral, pause/buffering, stop, real VRM mixer tracks, missing bindings and hidden/reopened views.
+
 ### E01 emotion stress sample
 
 Choose **E01 · Emotion stress test (28s)** in Debug, then **Saved voice · no generation**, press **Play scene**, and switch to **Expressions**. This is a deliberately exaggerated performance of L01's exact existing narration: its WAV, word timestamps and Rhubarb cues are unchanged. There are twelve emotion cues covering relaxed, sad, angry, happy and surprised. The `sighs` tag also requests the existing optional sigh gesture; the wave and nod from L01 are omitted.

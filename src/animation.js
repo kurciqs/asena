@@ -8,6 +8,7 @@ import { LatestLoad, withAbort, withDeadline } from './asset_loading.js';
 import { LazyAnimations } from './lazy_animations.js';
 import {dueGestures} from './gesture_clock.js';
 import {emotionWeightsAt,expressionPreferences} from './emotion_envelope.js';
+import {sampleExpressionDisplay} from './expression_readout.js';
 import { RENDER_PROFILES, RENDER_STORAGE_KEY, renderPreferences, pixelRatio, RenderLoop, BlinkClock } from './render_policy.js';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -338,9 +339,14 @@ function animate(deltaTime) {
         expressionPlayback.peakMouthWeight = Math.max(expressionPlayback.peakMouthWeight, ...Object.values(mouth.weights));
         expressionPlayback.peakMouthMorphWeight = Math.max(expressionPlayback.peakMouthMorphWeight, mouth.morphWeight);
     }
-    if (elapsedTime - lastPlaybackNotification > (clockedPerformance ? 0.25 : 1) &&
+    const expressionReadoutVisible=!document.getElementById('utility-panels').hidden &&
+        (!document.getElementById('expression-panel').hidden ||
+        (!document.getElementById('replay-panel').hidden && document.getElementById('expression-trials').open));
+    const inspectionVisible=
         !document.getElementById('utility-panels').hidden && !document.getElementById('replay-panel').hidden &&
-        document.getElementById('replay-inspector')?.closest('details')?.open) {
+        document.getElementById('replay-inspector')?.closest('details')?.open;
+    if (elapsedTime - lastPlaybackNotification > (expressionReadoutVisible ? 0.1 : clockedPerformance ? 0.25 : 1) &&
+        (expressionReadoutVisible || inspectionVisible)) {
         lastPlaybackNotification = elapsedTime;
         notifyPlaybackState();
     }
@@ -372,8 +378,13 @@ export function disposeRenderer() { stopPerformance(); renderLoop.stop(); contro
 
 export function getPlaybackState() {
     const pcmClock=pcmPerformance?.sample();
+    const scheduler=pcmClock?{...pcmClock,streaming:true,phase:pcmClock.finished?'completed':pcmClock.paused?'paused':pcmClock.buffering?'buffering':pcmClock.playedFrames>0?'playing':'starting'}:performanceScheduler.snapshot();
+    const display=sampleExpressionDisplay(currentVrm?.expressionManager,{
+        emotions:pcmClock?.emotions??clockedPerformance?.emotions??[],
+        time:scheduler.playedSeconds,cueTime:pcmClock?.playedSeconds??scheduler.segmentTime,phase:scheduler.phase,
+        active:Boolean(clockedPerformance||pcmPerformance)});
     return { ...assetState, ready: animationsLoaded, clips: [...(animationLibrary?.files.keys() ?? [])], loadedClips: Object.keys(animations),
-        scheduler:pcmClock?{...pcmClock,streaming:true,phase:pcmClock.paused?'paused':pcmClock.buffering?'buffering':pcmClock.playedFrames>0?'playing':'starting'}:performanceScheduler.snapshot(),
+        scheduler,
         rendering: {...renderSettings, fpsLimit:renderLoop.fps, pixelRatio:renderer.getPixelRatio(),
             width:renderer.domElement.width,height:renderer.domElement.height,frames:renderLoop.frames,callbacks:renderLoop.callbacks,
             paused:!renderLoop.running,resizeCount,geometries:renderer.info.memory.geometries,textures:renderer.info.memory.textures,
@@ -382,6 +393,7 @@ export function getPlaybackState() {
         bodyWeights: Object.fromEntries(Object.entries(animations).filter(([, action]) => action.isRunning()).map(
             ([name, action]) => [name, Number(action.getEffectiveWeight().toFixed(3))])),
         expressions: { ...expressionPlayback, active: Boolean(clockedPerformance||pcmPerformance),
+            display,emotionWeights:display.weights,
             boundMouthChannels: MOUTH_EXPRESSIONS.filter(name => currentVrm && resolveExpressionBinding(currentVrm.expressionManager, name)),
             missingMouthChannels: MOUTH_EXPRESSIONS.filter(name => currentVrm && !resolveExpressionBinding(currentVrm.expressionManager, name)),
             ...mouthPlaybackState() } };

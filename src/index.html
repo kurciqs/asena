@@ -76,6 +76,7 @@
                 </div>
                 <details class="debug-section" id="expression-trials">
                     <summary>Expression blending</summary>
+                    <div class="expression-readout" data-expression-readout aria-label="Current facial expression"></div>
                     <p class="field-hint">Tune expressions in a compact panel while moving around the scene.</p>
                     <button id="expressions-toggle" type="button" aria-controls="expression-panel" aria-expanded="false">Tune in scene</button>
                 </details>
@@ -107,6 +108,7 @@
             </div>
         </section>
         <section id="expression-panel" hidden role="tabpanel" aria-labelledby="expressions-tab">
+            <div class="expression-readout" data-expression-readout aria-label="Current facial expression"></div>
             <p class="field-hint">Adjust during speech. Drag the title to move this panel; drag the scene to orbit and scroll to zoom.</p>
             <div class="expression-controls">
                 <label for="expression-preset">Starting point</label><select id="expression-preset"><option value="soft">Soft</option><option value="balanced">Balanced</option><option value="expressive">Expressive</option><option value="custom">Custom</option></select>

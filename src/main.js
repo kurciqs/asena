@@ -16,6 +16,7 @@ import { createJsonViewer } from './json_viewer.js';
 import {MemoryWork, MEMORY_INSTRUCTION, mergeMemories} from './memory_work.js';
 import {TurnMetrics} from './turn_metrics.js';
 import {setupExpressionControls} from './expression_controls.js';
+import {createExpressionReadouts} from './expression_readout.js';
 import {expressionPreferences} from './emotion_envelope.js';
 import {setupSpeechTrials} from './speech_trial_controls.js';
 
@@ -58,6 +59,9 @@ const companionLabel = document.getElementById('companion-label');
 const replayStatus = document.getElementById('replay-status');
 const replayInspector = document.getElementById('replay-inspector');
 const replayJsonViewer = createJsonViewer(replayInspector);
+const expressionReadouts=createExpressionReadouts(document);
+window.addEventListener('asena-tools-change',()=>expressionReadouts.update(ANI.getPlaybackState().expressions?.display));
+document.getElementById('expression-trials').addEventListener('toggle',()=>expressionReadouts.update(ANI.getPlaybackState().expressions?.display));
 let replayInspection = {};
 let turnMetrics = null;
 let inspectionTimer = null;
@@ -723,6 +727,7 @@ companionForm.addEventListener('submit', (event) => {
 });
 renderMessages();
 ANI.onPlaybackStateChange(state => {
+    expressionReadouts.update(state.expressions?.display);
     textInput.disabled = sendButton.disabled = !startupReady || state.loading;
     if (state.loading) turnController.stop();
     document.getElementById('avatar-status').textContent = state.loading ? 'Loading avatar…' :

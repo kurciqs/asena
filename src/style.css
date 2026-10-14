@@ -115,6 +115,10 @@ summary { cursor: pointer; font-size: 12px; font-weight: 600; }
 .expression-controls select { font-size: 12px; padding-top: 6px; padding-bottom: 6px; }
 .expression-controls input[type="range"] { width: 100%; padding: 0; accent-color: var(--accent); }
 .expression-footnote { margin-top: 14px; font-size: 11px; }
+.expression-readout { margin: 0 0 12px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.38); }
+.expression-readout strong { display: block; font-size: 14px; }
+.expression-readout .field-hint { font-size: 11px; font-variant-numeric: tabular-nums; }
+.expression-clock { margin-top: 4px; }
 #selections, #replay-panel { padding: 0 18px 18px; overflow: auto; min-height: 0; overscroll-behavior: contain; }
 .settings-group { padding: 16px 0; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px; }
 .settings-group h3 { margin: 0 0 3px; font-size: 13px; font-weight: 650; }
