@@ -363,7 +363,7 @@ class Handler(BaseHTTPRequestHandler):
         path = self.path.split('?', 1)[0]
         allowed = (path in ('/', '/stream-test.html', '/lip-sync-lab/lab.css',
                            '/lip-sync-lab/mouth-adapters.js', '/load_mixamo_animation.js',
-                           '/mixamo_vrm_rig_map.js', '/json_viewer.js', '/json_viewer.css', '/pcm_stream_playback.js', '/rhubarb_mouth.js',
+                           '/mixamo_vrm_rig_map.js', '/json_viewer.js', '/json_viewer.css', '/pcm_stream_playback.js', '/rhubarb_mouth.js', '/speech_startup_timing.js',
                            '/vrm_models/asena_sfw.vrm', '/animations/idle.fbx')
                    or path in ('/stream-lab/client.js', '/stream-lab/playback.js',
                                '/stream-lab/viewer.js', '/stream-lab/style.css','/stream-lab/startup-timing.js'))

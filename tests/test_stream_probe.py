@@ -57,6 +57,28 @@ class StreamProbeTests(unittest.TestCase):
             handler.path='/probe/run';handler.headers['Content-Length']=str(len(body));handler.rfile=io.BytesIO(body);handler.wfile=io.BytesIO();handler.do_POST()
             self.assertEqual(statuses[-1],410)
 
+    def test_lab_serves_the_complete_local_module_graph(self):
+        # Moving a shared module must not leave an allowed wrapper importing a 404.
+        import io
+        import re
+        from urllib.parse import urljoin
+        handler=object.__new__(probe.Handler)
+        handler.server=type('Server',(),{'server_port':3002,'recordings':[]})()
+        handler.headers={'Host':'localhost:3002'}
+        statuses=[]
+        handler.send_response=statuses.append;handler.send_header=lambda *_:None;handler.end_headers=lambda:None
+        pending=['/stream-lab/client.js'];seen=set()
+        while pending:
+            path=pending.pop()
+            if path in seen:continue
+            seen.add(path);handler.path=path;handler.wfile=io.BytesIO();handler.do_GET()
+            self.assertEqual(statuses[-1],200,f'Missing browser module: {path}')
+            source=handler.wfile.getvalue().decode()
+            for target in re.findall(r'''(?:from\s*|import\s*)['"]([^'"]+)['"]''',source):
+                if target.startswith(('.', '/')):pending.append(urljoin(path,target))
+        self.assertIn('/speech_startup_timing.js',seen)
+        self.assertIn('/pcm_stream_playback.js',seen)
+
     def source(self, seconds=4, rate=100):
         frames=seconds*rate
         return {'frames': frames, 'rate': rate, 'pcm': b'\0\0'*frames,

@@ -1,6 +1,6 @@
 # Speech slowdown diagnosis — 14 October 2026
 
-The reported slowdown is real in the speech provider, not just the browser's timer. Host memory pressure is the strongest supported cause. Recovery has **not** been validated in a new live trial; this is a diagnosis, not a claim that the incident is fixed.
+The reported slowdown is real in the speech provider, not just the browser's timer. The first investigation confirmed host memory pressure, but the user reports slow playback after restarting. A subsequent check found **battery power with Low Power Mode enabled**. Memory pressure alone is therefore an incomplete diagnosis. Recovery has **not** been validated in a controlled live trial; this is a diagnosis, not a claim that the incident is fixed.
 
 ## Observations
 
@@ -43,3 +43,20 @@ The HTTP streaming adapter had a hard-coded **15 s no-data read timeout**, short
 The transport now uses `NETWORK_TIMEOUT` consistently (default 3 s connection / 30 s read). Reports expose both limits. A socket timeout has a specific message identifying the connection/read limits and distinguishing it from a buffer underrun. Producer cleanup uses the same read budget; socket shutdown still interrupts Stop immediately. The three-minute overall deadline, Rhubarb's separate 15 s region deadline, memory limits and 1 / 2 / 2 settings remain unchanged. This makes slow generation less likely to be discarded; it does not improve generation throughput or guarantee gap-free playback under memory pressure.
 
 Regression checks cover a real stalled local HTTP socket delivering a specific terminal timeout, immediate cancellation of a blocked socket, and playback resuming after a simulated 20 s buffer gap. They use fake providers and saved/mock data, with no new Kokoro generation. Live recovery still needs validation on a prepared machine.
+
+## Follow-up: slow after restart, comparison with the TTS lab
+
+The user confirmed they were on battery, with Low Power Mode enabled and 24% remaining. The current power settings have Low Power Mode disabled on AC. A restart does not change those settings. Power mode should have been checked before recommending a restart; its causal contribution still requires a matched comparison rather than another assumption.
+
+The latest existing provider log showed **4.824 s** for **102,600 samples / 4.275 s of audio** in the companion introduction. This is better than the earlier 14–20 s requests, but the request still took longer than its output duration. The old fast short lab opening and this companion introduction use different words and packet lengths, so their absolute startup times are not a controlled comparison. The user-confirmed S06 sentence-mode baseline remains 9.25 s until playback with zero gaps.
+
+Read-only checks after restart found no Docker CPU throttling or container memory-limit events in the current container lifetime. Host swap occupied about 2.42 GiB; a short idle sample had no new swap-outs. Those snapshots do not measure pressure during synthesis. No extra live generation was run during this follow-up.
+
+Code-path comparison:
+
+- Both interfaces use the same `SpeechStream`, native ARM64 Rhubarb recognizer, sentence splitter, PCM player and startup timing class. The main server has no Rhubarb override. Both servers were checked against the same `stable-122` profile and existing loopback Kokoro endpoint.
+- The companion **L01** parser output is byte-for-byte equal to lab **S06 / Tiny opening, longer follow-up**: 502 characters, 89 words, five requests. Default voice/speed/provider payloads match. Use these for the next comparison rather than the two different introduction scripts.
+- The companion does more rendering work: animated body, spring physics, expressions and full scene, while the lab fixes the body pose and renders a mouth close-up. Companion trial settings persist; the lab initializes from the default profile. Reset companion speech settings and use `af_heart`, 1.00× for a matched run. Rendering cost is a possible contributor, not yet measured as the cause.
+- A separate lab defect was found: its compatibility timing module imported `/speech_startup_timing.js`, but the diagnostic server's asset allowlist omitted that file. This would prevent a fresh lab page from loading. The route is now allowed, with a regression checking the entire transitive local JavaScript module graph. **13 probe tests passed**, and both servers' configuration endpoints and the timing-module HTTP response were checked. This fixes lab availability, not the speech slowdown.
+
+The lab is restored at `http://127.0.0.1:3002/stream-test.html?source=live`; no test starts on opening it. Next acceptance: while connected to power with Low Power Mode off, run S06 in the lab and L01 in the companion separately at 1 / 2 / 2. Hide the other avatar tab during each run. Compare provider time, per-region Rhubarb time and gaps, keeping the first cold run separate. If only the companion remains slower, isolate its rendering/gesture/debug overhead. Do not declare the pipeline fixed merely because low-power operation was discovered.
