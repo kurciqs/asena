@@ -39,10 +39,13 @@ export function validateFixture(value) {
     }
     const ids = new Set();
     for (const scenario of value.cases) {
-        if (!scenario.id || ids.has(scenario.id) || !['benchmark', 'recall', 'single'].includes(scenario.kind)) {
+        if (!scenario.id || ids.has(scenario.id) || !['benchmark', 'recall', 'single', 'sequence'].includes(scenario.kind)) {
             throw new Error('Invalid or duplicate replay case.');
         }
         ids.add(scenario.id);
+        if(scenario.turns!==undefined&&(!Array.isArray(scenario.turns)||!scenario.turns.length||scenario.turns.length>16||scenario.turns.some(index=>!Number.isInteger(index)||!value.turns[index])))throw new Error('Invalid replay sequence.');
+        if(scenario.turns!==undefined&&!['benchmark','sequence'].includes(scenario.kind))throw new Error('Invalid replay sequence kind.');
+        if(scenario.kind==='sequence'&&!scenario.turns)throw new Error('Missing replay sequence.');
         if (scenario.kind === 'single' && !value.turns[scenario.turn]) {
             throw new Error('Replay case refers to a missing turn.');
         }
@@ -92,7 +95,7 @@ export class ReplaySession {
         this.fixture = validateFixture(fixture);
         this.scenario = fixture.cases.find(item => item.id === caseId);
         if (!this.scenario) throw new Error(`Unknown replay case: ${caseId}`);
-        this.turns = this.scenario.kind === 'benchmark' ? fixture.turns :
+        this.turns = this.scenario.turns ? this.scenario.turns.map(index=>fixture.turns[index]) : this.scenario.kind === 'benchmark' ? fixture.turns :
             [this.scenario.kind === 'recall' ? fixture.recall : fixture.turns[this.scenario.turn]];
         this.cursor = 0;
         this.active = null;

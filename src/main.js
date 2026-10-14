@@ -430,7 +430,10 @@ async function prepareAndPlay(parsedReply, turn) {
         turnMetrics?.mark('gesturePreparation');
         let available=new Set(ANI.getPlaybackState().loadedClips??ANI.getPlaybackState().clips),active=true;
         turn.own(()=>{active=false;});
-        const refreshCues=()=>{try{cues=EMO.getPartialPerformance(words,parsedReply,available);}catch(error){speechWarning(`Emotion and gesture timing unavailable. ${error.message}`);}};
+        const refreshCues=()=>{try{cues=EMO.getPartialPerformance(words,parsedReply,available);}catch(error){
+            cues=EMO.getOpeningPerformance(words,parsedReply,available);
+            speechWarning(`Only opening performance cues are timed; later word anchors are unavailable. ${error.message}`);
+        }};
         // Optional clip loading overlaps generation; a late clip cannot delay or
         // restart speech. The renderer skips a gesture whose audible anchor passed.
         ANI.preparePerformance(parsedReply.actions.map(cue=>({value:cue.value})),turn.signal).then(()=>{
@@ -470,6 +473,8 @@ async function prepareAndPlay(parsedReply, turn) {
         }finally{active=false;if(!turn.signal.aborted)ANI.stopPerformance();}
         return;
     }
+    ANI.preparePerformance(parsedReply.actions.map(cue=>({value:cue.value})),turn.signal)
+        .catch(error=>{try{turn.assertCurrent();speechWarning(`Gesture unavailable; speech continues. ${error.message}`);}catch{}});
     const { audio, timestamps, audioId } = await generateTTS(parsedReply.text, turn);
     turn.assertCurrent();
     let visemes = [], emotions = [], actions = [];
@@ -486,12 +491,14 @@ async function prepareAndPlay(parsedReply, turn) {
     try {
         if (!timestamps?.length) throw new Error('No word timing was returned.');
         emotions = EMO.getEmotions(timestamps, parsedReply.emotions, parsedReply.text, audio.duration);
-        actions = EMO.getActions(timestamps, parsedReply.actions, parsedReply.text, new Set(ANI.getPlaybackState().clips));
+        actions = EMO.getActions(timestamps, parsedReply.actions, parsedReply.text, new Set(ANI.getPlaybackState().loadedClips??ANI.getPlaybackState().clips));
     } catch (error) {
-        if (turn.signal.aborted || replay) throw error;
-        speechWarning(`Emotion and gesture timing unavailable. Playing audio without those cues. ${error.message}`);
+        if (turn.signal.aborted || replay&&!replay.active.speech.captionNormalization) throw error;
+        const opening=EMO.getOpeningPerformance(timestamps,parsedReply,new Set(ANI.getPlaybackState().clips));
+        actions=opening.actions;emotions=opening.emotions.map(cue=>({...cue,end:audio.duration}));
+        speechWarning(`Only opening performance cues are timed; later word anchors are unavailable. ${error.message}`);
     }
-    actions = await ANI.preparePerformance(actions, turn.signal);
+    actions=actions.filter(cue=>new Set(ANI.getPlaybackState().loadedClips??ANI.getPlaybackState().clips).has(cue.value));
     turn.assertCurrent();
     inspectReplay({ phase: 'performance prepared', spokenText: parsedReply.text, visemes, emotions, actions });
     turn.phase('speaking');
@@ -597,7 +604,7 @@ function setupReplayUI() {
     document.getElementById('chat-empty').querySelector('p').textContent='Play the introduction, or choose a different scene in Debug.';
     const selector = document.getElementById('replay-case');
     for (const scenario of replay.fixture.cases) {
-        if(RUNTIME_MODE==='preview'&&!['benchmark','recall'].includes(scenario.kind))continue;
+        if(RUNTIME_MODE==='preview'&&(scenario.error||scenario.missingAudio||scenario.missingTimestamps))continue;
         const option = document.createElement('option');
         option.value = scenario.id;
         option.textContent = scenario.label;

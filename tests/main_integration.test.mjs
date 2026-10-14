@@ -190,3 +190,8 @@ test('an unresolved optional gesture load never blocks the speech request',async
     h.context.playSpeechStream=async()=>{requested=true;};
     await h.run();assert.equal(requested,true);
 });
+test('complete-recording speech also proceeds when an optional gesture cannot load',async()=>{
+    const manager=new VRMExpressionManager();manager.registerExpression(new VRMExpression('aa'));
+    const h=speechHarness(manager);h.context.ANI.preparePerformance=()=>new Promise(()=>{});
+    await h.run();assert.equal(h.starts(),1);
+});

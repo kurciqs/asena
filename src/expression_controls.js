@@ -12,7 +12,7 @@ export function setupExpressionControls(document,storage,apply){
         apply({...value});
     };
     const save=()=>{try{storage.setItem(EXPRESSION_STORAGE_KEY,JSON.stringify(value));}catch{}};
-    preset.value='custom';
+    preset.value=Object.entries(EXPRESSION_PRESETS).find(([,settings])=>Object.keys(EXPRESSION_LIMITS).every(key=>settings[key]===value[key]))?.[0]??'custom';
     preset.addEventListener('change',()=>{if(EXPRESSION_PRESETS[preset.value]){value={...EXPRESSION_PRESETS[preset.value]};save();render();}});
     for(const key of Object.keys(EXPRESSION_LIMITS))document.getElementById(`expression-${key}`).addEventListener('input',event=>{
         value=expressionPreferences({...value,[key]:Number(event.target.value)});preset.value='custom';save();render();

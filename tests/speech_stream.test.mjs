@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {playSpeechStream} from '../src/speech_stream.js';
-import {getPartialPerformance} from '../src/emotion_classifier.js';
+import {getPartialPerformance,getOpeningPerformance} from '../src/emotion_classifier.js';
 
 const context=()=>({currentTime:0,nodes:[],resume:async()=>{},close:async function(){this.closed=true;},
   createBuffer:(_,n)=>({getChannelData:()=>new Float32Array(n)}),createBufferSource(){const n={connect(){},disconnect(){},start(){},stop(){this.stopped=true;}};this.nodes.push(n);return n;}});
@@ -13,6 +13,13 @@ test('partial word anchors never fire a tag whose words have not arrived',()=>{
   cues=getPartialPerformance([{word:'Hello',start_time:0,end_time:1},{word:'there',start_time:1,end_time:2}],parsed,new Set(['wave','head_nod']));
   assert.deepEqual(cues.actions,[{value:'wave',start:0}]);assert.equal(cues.emotions[0].start,1);
   assert.throws(()=>getPartialPerformance([{word:'Different',start_time:0,end_time:1}],parsed),/do not match/);
+});
+test('normalized number captions retain only unambiguous opening cues',()=>{
+    const parsed={text:'Dr. Ellis booked 7:30.',actions:[{value:'wave',position:0},{value:'head_nod',position:10}],emotions:[{value:'happy',position:0}]};
+    const stamps=[{word:'Doctor',start_time:.02,end_time:.4}];
+    assert.throws(()=>getPartialPerformance(stamps,parsed,new Set(['wave','head_nod'])),/do not match/);
+    const cues=getOpeningPerformance(stamps,parsed,new Set(['wave','head_nod']));
+    assert.deepEqual(cues.actions,[{value:'wave',start:.02}]);assert.equal(cues.emotions[0].start,.02);
 });
 test('stream consumer uses 24 kHz PCM, forwards timings, completes and releases audio ownership',async()=>{
   const audio=context(),calls=[];let words=null,player=null,index=0;

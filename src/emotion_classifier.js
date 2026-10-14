@@ -77,6 +77,14 @@ export function getPartialPerformance(timestamps, parsed, available) {
     const emotions=timedCues(timestamps,parsed.emotions,parsed.text,undefined,true);
     return {actions,emotions:emotions.map((cue,index)=>({...cue,end:emotions[index+1]?.start??180}))};
 }
+// Normalized number/abbreviation captions cannot safely locate later character
+// offsets. An explicit opening cue has an unambiguous first-audio anchor.
+export function getOpeningPerformance(timestamps,parsed,available){
+    const first=timestamps?.find(stamp=>Number.isFinite(stamp.start_time)&&stamp.start_time>=0);
+    if(!first)return {actions:[],emotions:[]};
+    return {actions:parsed.actions.filter(cue=>cue.position===0&&(!available||available.has(cue.value))).map(cue=>({value:cue.value,start:first.start_time})),
+        emotions:parsed.emotions.filter(cue=>cue.position===0).map(cue=>({value:cue.value,start:first.start_time,end:180}))};
+}
 
 export function getActions(timestamps, actions, text, available) {
     return timedCues(timestamps, actions, text, available);

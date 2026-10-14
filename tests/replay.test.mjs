@@ -54,6 +54,19 @@ test('five benchmark replies use existing parsing and performance mapping withou
     } finally { globalThis.fetch = originalFetch; }
 });
 
+test('long demo uses two named saved passages while keeping the original five-turn benchmark intact',()=>{
+    const session=new ReplaySession(fixture,'long-demo');
+    assert.equal(session.turns.length,2);
+    for(let i=0;i<2;i++){
+        const parsed=decodeTaggedMessage(session.reply(history([]))),speech=session.speech();
+        assert.ok(speech.duration>25);assert.ok(parsed.text.length>300);
+        assert.equal(parsed.text,speech.spokenText);assert.ok(session.visemes().length>100);
+    }
+    assert.equal(session.finished,true);
+    const invalid=structuredClone(fixture);invalid.cases.find(c=>c.id==='long-demo').turns=[999];
+    assert.throws(()=>validateFixture(invalid),/sequence/);
+});
+
 test('service failure fixtures throw at the requested stage without falling back', () => {
     for (const stage of ['chat', 'tts', 'alignment']) {
         const session = new ReplaySession(fixture, `${stage}-error`);

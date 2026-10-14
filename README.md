@@ -35,6 +35,8 @@ ASENA_MODE=preview ASENA_SPEECH_SOURCE=recorded ASENA_PORT=3001 python3 server.p
 
 Open [the main benchmark](http://localhost:3001/?replay-case=benchmark). Play introduction, teasing, disagreement, emotes and memory scenes using saved PCM/cues through the current player. For an already authorized/prepared Kokoro, set `ASENA_PREVIEW_KOKORO=1` and its endpoint at launch; **Debug → Voice for the next scene → Live Kokoro + Rhubarb** enables generation when you press Play scene. Preview blocks model calls and private memories. See the [handoff](docs/llm-integration-handoff-2026-10-13.md) for exact launch examples and the later live-model gate.
 
+The main Debug tab also has **Expression blending** sliders/presets, **Streaming speech settings** (with a reset to the accepted 1 / 2 / 2 policy), and a visible **Speech timing** breakdown. Choose **Longer conversation trials** for L01's 28-second story with expression changes and L02's 26-second numbers passage. Saved mode reuses existing voice/cues; live mode generates only when you play a scene. [Changes and limitations](docs/main-chat-trials-2026-10-14.md).
+
 ## Setup and development
 
 - [Installation and configuration](INSTALLATION.md): replay, manually prepared live services, environment variables, verification.

@@ -6,6 +6,8 @@ Two independent behaviors explained the reported sequence. The main streaming re
 
 Optional gesture preparation now overlaps the speech request. Loaded clips update available cue bindings without owning audio startup. Gesture cues fire only after samples have played, and remain held during pause/buffering. A clip arriving more than 750 ms after its audio anchor is skipped instead of replaying a stale opening gesture. Slow/unavailable optional clips leave speech usable with idle. This does not remove CPU cost from retargeting or establish a new live latency measurement.
 
+The complete-recording rollback/replay path also warms optional clips alongside speech preparation and uses only ready actions, so an unresolved gesture no longer blocks that path either.
+
 Regressions cover an indefinitely pending gesture loader, pre-audio metadata, paused/starved playback, one-shot cues and late assets. **85 JavaScript tests passed at this step.** No model or new speech generation was run.
 
 ## Expression trials
@@ -21,3 +23,15 @@ Debug → **Streaming speech settings** now exposes sentence/fragment/short whol
 The backend rejects whole-text live requests longer than 180 characters before reserving work. This extends the diagnostic viewer's memory guard to the main interface; the previous long whole-request trial exceeded the prepared container limit. Long text should use the bounded sentence mode.
 
 **Speech timing** is visible outside the JSON tree. It advances while waiting and freezes the first-playback total, exposing browser setup, server setup, Kokoro connection/headers/generation/first packet, Rhubarb, reserve wait and browser delivery. The same report remains downloadable. Saved mode labels the bypass and shows playback setup rather than invented synthesis/alignment times. Pure inference and service boot remain unmeasured; overlapping later synthesis/alignment are not added to startup. Checks cover valid/default overrides, immutable baseline and forwarded generation speed. **88 JavaScript tests passed at this step.**
+
+## Longer named demo passages
+
+The main scene selector now includes **Longer conversation trials**: **L01 · Story and expression transitions** (28.41 seconds of existing voice) and **L02 · Numbers and abbreviations** (25.64 seconds). Each can also be selected individually. L01 adds a wave and several anchored emotion/gesture changes across a longer response. L02 stresses normalization and longer speech. The original five-turn introduction/memory benchmark remains five turns.
+
+These reuse the previously captured P05/P06 voice and accepted Rhubarb cues, copied into the replay fixtures so future comparison cleanup will not break the demo. No TTS or fresh alignment was needed. Saved mode uses those files; live Kokoro mode feeds the same longer text through the current generation settings and native analysis only when the user presses Play scene.
+
+Number/abbreviation captions can say “Doctor” for displayed “Dr.” or spell out digits. Those optional captions cannot safely anchor later character offsets. The fallback now retains only explicit **opening** cues at the first audio timestamp and warns about skipped later anchors; it does not guess timing or discard valid speech/Rhubarb lip sync. L01's captions match its text, so its later cue transitions remain timed. Full-WAV replay allows that explicit known-normalization fixture without weakening other failure fixtures.
+
+Human visual/listening acceptance remains open. Before the brief live LLM integration, move to a fresh chat using the existing handoff; afterward return to P2 motion/face/gaze polish, including task 20a's rig-level smile distortion.
+
+Final offline verification: **64 Python and 91 JavaScript tests passed**, and preview preflight has zero blocking issues. The two longer WAVs are byte-for-byte copies of existing recordings. No model load, new speech generation, or fresh Rhubarb analysis was needed for this work. Browser-controlled visual review was unavailable following the browser security restriction; please use the live sliders to choose the appearance, rather than treating automated cue/track tests as visual acceptance.
