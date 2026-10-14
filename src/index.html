@@ -16,13 +16,14 @@
 	<div id="bg"></div>
     <div id="tools-backdrop" hidden></div>
     <aside id="utility-panels" hidden aria-labelledby="tools-title">
-        <header class="tools-heading">
+        <header class="tools-heading" id="tools-drag-handle">
             <div><span class="eyebrow">YOUR COMPANION</span><h2 id="tools-title">Companion tools</h2></div>
             <button id="tools-close" type="button" class="icon-button" aria-label="Close tools">×</button>
         </header>
         <div id="tools-tabs" role="tablist" aria-label="Companion tools">
             <button id="settings-tab" type="button" role="tab" aria-selected="true" aria-controls="selections">Settings</button>
             <button id="debug-tab" type="button" role="tab" aria-selected="false" aria-controls="replay-panel" tabindex="-1" hidden>Debug &amp; replay</button>
+            <button id="expressions-tab" type="button" role="tab" aria-selected="false" aria-controls="expression-panel" tabindex="-1" hidden>Expressions</button>
         </div>
         <section id="selections" role="tabpanel" aria-labelledby="settings-tab">
             <div class="settings-group">
@@ -75,13 +76,8 @@
                 </div>
                 <details class="debug-section" id="expression-trials">
                     <summary>Expression blending</summary>
-                    <p class="field-hint">Try these while speech plays. Full-recording replay uses the next turn's settings. Further visual tuning is still planned.</p>
-                    <label for="expression-preset">Starting point</label><select id="expression-preset"><option value="soft">Soft</option><option value="balanced">Balanced</option><option value="expressive">Expressive</option><option value="custom">Custom</option></select>
-                    <label for="expression-strength">Intensity <output id="expression-strength-value"></output></label><input id="expression-strength" type="range" min="0" max="1" step=".05">
-                    <label for="expression-attack">Fade in <output id="expression-attack-value"></output></label><input id="expression-attack" type="range" min=".05" max="2" step=".05">
-                    <label for="expression-hold">Hold <output id="expression-hold-value"></output></label><input id="expression-hold" type="range" min=".5" max="12" step=".5">
-                    <label for="expression-release">Fade out <output id="expression-release-value"></output></label><input id="expression-release" type="range" min=".1" max="3" step=".1">
-                    <label for="expression-talkingSmile">Smile while talking <output id="expression-talkingSmile-value"></output></label><input id="expression-talkingSmile" type="range" min="0" max="1" step=".05">
+                    <p class="field-hint">Tune expressions in a compact panel while moving around the scene.</p>
+                    <button id="expressions-toggle" type="button" aria-controls="expression-panel" aria-expanded="false">Tune in scene</button>
                 </details>
                 <details class="debug-section" id="speech-trials">
                     <summary>Streaming speech settings</summary>
@@ -109,6 +105,18 @@
                     <button id="replay-clear" type="button" class="danger-button">Clear test memories</button>
                 </details>
             </div>
+        </section>
+        <section id="expression-panel" hidden role="tabpanel" aria-labelledby="expressions-tab">
+            <p class="field-hint">Adjust during speech. Drag the title to move this panel; drag the scene to orbit and scroll to zoom.</p>
+            <div class="expression-controls">
+                <label for="expression-preset">Starting point</label><select id="expression-preset"><option value="soft">Soft</option><option value="balanced">Balanced</option><option value="expressive">Expressive</option><option value="custom">Custom</option></select>
+                <label for="expression-strength">Intensity <output id="expression-strength-value"></output></label><input id="expression-strength" type="range" min="0" max="1" step=".05">
+                <label for="expression-attack">Fade in <output id="expression-attack-value"></output></label><input id="expression-attack" type="range" min=".05" max="2" step=".05">
+                <label for="expression-hold">Hold <output id="expression-hold-value"></output></label><input id="expression-hold" type="range" min=".5" max="12" step=".5">
+                <label for="expression-release">Fade out <output id="expression-release-value"></output></label><input id="expression-release" type="range" min=".1" max="3" step=".1">
+                <label for="expression-talkingSmile">Smile while talking <output id="expression-talkingSmile-value"></output></label><input id="expression-talkingSmile" type="range" min="0" max="1" step=".05">
+            </div>
+            <p class="field-hint expression-footnote">Open chat to start or stop a scene. Full-recording replay applies changes on the next turn.</p>
         </section>
     </aside>
 	<div id="main-container">

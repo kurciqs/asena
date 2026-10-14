@@ -101,6 +101,20 @@ summary { cursor: pointer; font-size: 12px; font-weight: 600; }
 #tools-tabs { display: flex; gap: 6px; padding: 0 18px 12px; border-bottom: 1px solid var(--line); flex-shrink: 0; }
 #tools-tabs button { border: 0; background: transparent; font-size: 12px; padding: 7px 12px; }
 #tools-tabs button[aria-selected="true"] { background: #e5e1f3; color: #443c70; font-weight: 650; }
+#utility-panels.expression-mode { width: 286px; max-width: calc(100vw - 24px); max-height: calc(100dvh - 24px); bottom: auto; }
+.expression-mode .tools-heading { padding: 12px 14px 7px; cursor: grab; user-select: none; touch-action: none; }
+.expression-mode .tools-heading:active { cursor: grabbing; }
+.expression-mode .tools-heading:focus-visible { outline: 2px solid #8278c5; outline-offset: -4px; border-radius: 14px; }
+.expression-mode .tools-heading .eyebrow { display: none; }
+.expression-mode .tools-heading h2 { font-size: 16px; }
+.expression-mode #tools-tabs { padding: 0 12px 9px; gap: 2px; }
+.expression-mode #tools-tabs button { padding: 6px 8px; font-size: 11px; }
+#expression-panel { padding: 12px 14px 14px; overflow: auto; min-height: 0; overscroll-behavior: contain; }
+.expression-controls label { display: flex; justify-content: space-between; gap: 10px; margin: 12px 0 3px; font-size: 12px; }
+.expression-controls output { color: var(--muted); font-variant-numeric: tabular-nums; }
+.expression-controls select { font-size: 12px; padding-top: 6px; padding-bottom: 6px; }
+.expression-controls input[type="range"] { width: 100%; padding: 0; accent-color: var(--accent); }
+.expression-footnote { margin-top: 14px; font-size: 11px; }
 #selections, #replay-panel { padding: 0 18px 18px; overflow: auto; min-height: 0; overscroll-behavior: contain; }
 .settings-group { padding: 16px 0; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px; }
 .settings-group h3 { margin: 0 0 3px; font-size: 13px; font-weight: 650; }
@@ -160,3 +174,7 @@ summary { cursor: pointer; font-size: 12px; font-weight: 600; }
     .companion-actions { flex-wrap: wrap; }
 }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+@media (max-width: 420px) {
+    #utility-panels.expression-mode { width: calc(100vw - 24px); max-height: 44dvh; }
+    body:has(#utility-panels.expression-mode:not([hidden])) #chat-restore { top: 12px; bottom: auto; }
+}

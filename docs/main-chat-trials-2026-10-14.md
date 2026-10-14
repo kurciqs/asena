@@ -16,6 +16,12 @@ The avatar's presets already have `isBinary:false`; the binary appearance came f
 
 Debug → **Expression blending** offers Soft / Balanced / Expressive starting points and sliders for intensity, fade-in time, hold, fade-out time and smile while talking. Settings persist locally. Streamed/saved-PCM previews respond during playback; full-WAV tracks pick settings at the next turn. Reports capture initial settings and up to 32 slider edits with their local times. Pause and buffering hold audio-clock expression progression. **87 JavaScript tests passed at this step**, including real-library pause/track checks and smooth bounded envelope checks. Human visual preference still determines the final settings.
 
+### Tuning while viewing the scene
+
+The controls now live in the tools panel's **Expressions** tab, also reachable through Debug → Expression blending → **Tune in scene**. This compact view has no modal backdrop or focus trap, including in narrow windows, so the uncovered canvas still accepts orbit and zoom input. Its title bar supports dragging and arrow-key movement, clamped to the viewport. On phone-sized screens it starts as a short bottom panel, leaving the upper scene visible.
+
+Entering this view temporarily hides chat; **Open chat** remains available for playback controls, and leaving restores the prior visibility. The existing slider bindings, persisted settings and audio-clock behavior are unchanged. **97 JavaScript tests passed**, including five panel tests for modality, chat restoration, movement bounds and keyboard handling. Browser visual review remains unavailable under the earlier browser security restriction. No speech generation or model startup was needed.
+
 ## Streaming controls and visible timings
 
 Debug → **Streaming speech settings** now exposes sentence/fragment/short whole-text requests, opening region, later regions, startup reserve and Kokoro speed. The accepted 1 / 2 / 2 sentence configuration is unchanged as the reset baseline; overrides persist separately in the browser and are captured at turn start. Generation controls are disabled for saved audio, and all streaming controls are disabled for old whole-WAV replay. Region packaging/reserve can still be compared on saved PCM without synthesis or Rhubarb work.

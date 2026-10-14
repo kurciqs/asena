@@ -2,16 +2,37 @@ export function createToolPanel() {
     const panel = document.getElementById('utility-panels');
     const backdrop = document.getElementById('tools-backdrop');
     const chat = document.getElementById('chat-panel');
+    const restore = document.getElementById('chat-restore');
+    const handle = document.getElementById('tools-drag-handle');
     const compact = matchMedia('(max-width: 999px)');
-    const tabs = {settings:document.getElementById('settings-tab'), debug:document.getElementById('debug-tab')};
-    const views = {settings:document.getElementById('selections'), debug:document.getElementById('replay-panel')};
-    const triggers = {settings:document.getElementById('settings-toggle'), debug:document.getElementById('debug-toggle')};
-    let selected = 'settings', returnFocus = null;
+    const tabs = {settings:document.getElementById('settings-tab'), debug:document.getElementById('debug-tab'), expressions:document.getElementById('expressions-tab')};
+    const views = {settings:document.getElementById('selections'), debug:document.getElementById('replay-panel'), expressions:document.getElementById('expression-panel')};
+    const triggers = {settings:document.getElementById('settings-toggle'), debug:document.getElementById('debug-toggle'), expressions:document.getElementById('expressions-toggle')};
+    let selected = 'settings', returnFocus = null, tuningChatWasHidden = null, position = null, dragging = null;
+    function place() {
+        if (panel.hidden || selected!=='expressions') return;
+        const rect=panel.getBoundingClientRect(),gap=12;
+        const next=position??{left:innerWidth-rect.width-gap,top:innerWidth<=420?innerHeight-rect.height-gap:20};
+        position={left:Math.max(gap,Math.min(next.left,innerWidth-rect.width-gap)),
+            top:Math.max(gap,Math.min(next.top,innerHeight-rect.height-gap))};
+        panel.style.left=`${position.left}px`;panel.style.top=`${position.top}px`;panel.style.right='auto';
+    }
     function sync() {
-        const modal = !panel.hidden && compact.matches;
+        const tuning = selected==='expressions';
+        const modal = !panel.hidden && compact.matches && !tuning;
+        panel.classList.toggle('expression-mode',tuning);
+        document.getElementById('tools-title').textContent=tuning?'Expressions':'Companion tools';
+        handle.tabIndex=tuning?0:-1;
+        handle.title=tuning?'Drag to move. Focus this title and use arrow keys to reposition.':'';
+        if (!panel.hidden && tuning && tuningChatWasHidden===null) {
+            tuningChatWasHidden=chat.hidden;chat.hidden=true;restore.hidden=false;
+        } else if ((panel.hidden || !tuning) && tuningChatWasHidden!==null) {
+            chat.hidden=tuningChatWasHidden;restore.hidden=!chat.hidden;tuningChatWasHidden=null;
+        }
+        if (!tuning) {panel.style.left='';panel.style.top='';panel.style.right='';dragging=null;}
         backdrop.hidden = !modal;
         chat.inert = modal;
-        document.getElementById('chat-restore').inert = modal;
+        restore.inert = modal;
         panel.setAttribute('role',modal ? 'dialog' : 'complementary');
         if (modal) panel.setAttribute('aria-modal','true'); else panel.removeAttribute('aria-modal');
         for (const name of Object.keys(tabs)) {
@@ -20,11 +41,13 @@ export function createToolPanel() {
             views[name].hidden = name!==selected;
             triggers[name].setAttribute('aria-expanded',String(!panel.hidden && name===selected));
         }
+        place();
         window.dispatchEvent(new Event('asena-tools-change'));
     }
     function close() {
-        panel.hidden = true; sync();
+        dragging=null;panel.hidden = true; sync();
         if (returnFocus?.isConnected && !returnFocus.closest('[hidden]')) returnFocus.focus();
+        else (chat.hidden?restore:triggers.debug).focus();
     }
     function open(name, trigger = triggers[name], focus = true) {
         if (tabs[name].hidden) return;
@@ -45,19 +68,41 @@ export function createToolPanel() {
         });
     }
     document.getElementById('tools-close').addEventListener('click',close);
+    triggers.expressions.addEventListener('click',()=>open('expressions'));
     backdrop.addEventListener('click',close);
     document.addEventListener('keydown',event=>{
         if (panel.hidden || document.getElementById('companion-dialog').open) return;
         if (event.key==='Escape') {event.preventDefault();close();}
-        if (event.key==='Tab' && compact.matches) {
+        if (event.key==='Tab' && compact.matches && selected!=='expressions') {
             const focusable = [...panel.querySelectorAll('button, select, input, summary, [tabindex="0"]')].filter(el=>!el.disabled && el.getClientRects().length);
             const first=focusable[0],last=focusable.at(-1);
             if (event.shiftKey && document.activeElement===first) {event.preventDefault();last?.focus();}
             else if (!event.shiftKey && document.activeElement===last) {event.preventDefault();first?.focus();}
         }
     });
+    handle.addEventListener('pointerdown',event=>{
+        if (selected!=='expressions' || event.button!==0 || event.target.closest('button')) return;
+        event.preventDefault();
+        const rect=panel.getBoundingClientRect();
+        dragging={pointer:event.pointerId,x:event.clientX,y:event.clientY,left:rect.left,top:rect.top};
+        handle.setPointerCapture(event.pointerId);
+    });
+    handle.addEventListener('pointermove',event=>{
+        if (!dragging || event.pointerId!==dragging.pointer) return;
+        position={left:dragging.left+event.clientX-dragging.x,top:dragging.top+event.clientY-dragging.y};place();
+    });
+    const stopDrag=()=>{dragging=null;};
+    handle.addEventListener('pointerup',stopDrag);handle.addEventListener('pointercancel',stopDrag);handle.addEventListener('lostpointercapture',stopDrag);
+    handle.addEventListener('keydown',event=>{
+        if (selected!=='expressions' || event.target!==handle || !['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)) return;
+        event.preventDefault();const step=event.shiftKey?30:10;
+        const rect=panel.getBoundingClientRect();
+        position={left:rect.left+(event.key==='ArrowLeft'?-step:event.key==='ArrowRight'?step:0),
+            top:rect.top+(event.key==='ArrowUp'?-step:event.key==='ArrowDown'?step:0)};place();
+    });
+    window.addEventListener('resize',place);
     compact.addEventListener('change',()=>{sync();if(!panel.hidden && compact.matches) tabs[selected].focus();});
-    return {open,close,toggle,enableDebug(){tabs.debug.hidden=false;triggers.debug.hidden=false;sync();}};
+    return {open,close,toggle,enableDebug(){tabs.debug.hidden=false;tabs.expressions.hidden=false;triggers.debug.hidden=false;sync();}};
 }
 
 export function wireChatLayout() {
@@ -66,7 +111,7 @@ export function wireChatLayout() {
     function bounds() {
         const tools=document.getElementById('utility-panels');
         const gap=innerWidth<=600?12:20;
-        const right=innerWidth>=1000 && !tools.hidden ? tools.getBoundingClientRect().left-gap : innerWidth-gap;
+        const right=innerWidth>=1000 && !tools.hidden && !tools.classList.contains('expression-mode') ? tools.getBoundingClientRect().left-gap : innerWidth-gap;
         return {gap,right,bottom:innerHeight-gap};
     }
     function clamp() {
