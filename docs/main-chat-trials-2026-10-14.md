@@ -22,6 +22,21 @@ The controls now live in the tools panel's **Expressions** tab, also reachable t
 
 Entering this view temporarily hides chat; **Open chat** remains available for playback controls, and leaving restores the prior visibility. The existing slider bindings, persisted settings and audio-clock behavior are unchanged. **97 JavaScript tests passed**, including five panel tests for modality, chat restoration, movement bounds and keyboard handling. Browser visual review remains unavailable under the earlier browser security restriction. No speech generation or model startup was needed.
 
+### E01 emotion stress sample
+
+Choose **E01 · Emotion stress test (28s)** in Debug, then **Saved voice · no generation**, press **Play scene**, and switch to **Expressions**. This is a deliberately exaggerated performance of L01's exact existing narration: its WAV, word timestamps and Rhubarb cues are unchanged. There are twelve emotion cues covering relaxed, sad, angry, happy and surprised. The `sighs` tag also requests the existing optional sigh gesture; the wave and nod from L01 are omitted.
+
+Approximate anchors below refer to the saved recording, not live regeneration. Actual weights depend on the current attack, hold and release settings:
+
+| Audio position | Stress case | Useful sliders |
+| --- | --- | --- |
+| 0–10 s | Relaxed → sad → angry → happy → surprised | Intensity, fade in, fade out |
+| 10.2–19.0 s | Long smile while speaking; enough time for shorter holds to fade toward neutral | Hold, fade out, smile while talking |
+| 19.0–20.9 s | Surprise → anger → smile with the first switches only 0.33 and 0.18 seconds apart | Fade in, fade out; long fades should smooth or suppress short peaks |
+| 20.9–28.4 s | Relaxation followed by two smile cues during speech | Smile while talking, repeated-cue blending |
+
+Replay with Soft, Balanced and Expressive first, then change one slider at a time. In the main preview, slider changes apply during saved PCM playback. In legacy full-WAV replay, restart the scene to apply them. Fixture checks confirm exact text/audio correspondence, all five emotions, short transitions, a long smile interval and repeated smile cues; visual preference still needs the user's review.
+
 ## Streaming controls and visible timings
 
 Debug → **Streaming speech settings** now exposes sentence/fragment/short whole-text requests, opening region, later regions, startup reserve and Kokoro speed. The accepted 1 / 2 / 2 sentence configuration is unchanged as the reset baseline; overrides persist separately in the browser and are captured at turn start. Generation controls are disabled for saved audio, and all streaming controls are disabled for old whole-WAV replay. Region packaging/reserve can still be compared on saved PCM without synthesis or Rhubarb work.

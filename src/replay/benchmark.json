@@ -4023,6 +4023,1492 @@
         "stored": true,
         "sourceRecording": "P06"
       }
+    },
+    {
+      "label": "E01 · Emotion stress test · 28 seconds",
+      "user": "Show me the emotion stress test so I can tune your expressions.",
+      "reply": "*relaxes* Hey. I was thinking about that little adventure you mentioned yesterday, *sighs* the one where nothing went according to plan *frowns* but you somehow *smiles* came home with a better story. *blushes* Really? *smiles* Tell me the part you left out, especially the moment when you realized you would have to improvise instead of following the perfectly sensible plan you had prepared. *blushes* Oh. *frowns* That *smiles* explains the grin. *relaxes* I had a feeling there was more to it. *smiles* Now give me a second to be impressed *giggles* before I start teasing you about your definition of careful.",
+      "speech": {
+        "audio": "/replay/long-story.wav",
+        "timestamps": [
+          {
+            "word": "Hey",
+            "start_time": 0.024125000000000008,
+            "end_time": 0.499125
+          },
+          {
+            "word": ".",
+            "start_time": 0.499125,
+            "end_time": 0.624125
+          },
+          {
+            "word": "I",
+            "start_time": 0.624125,
+            "end_time": 0.7991250000000001
+          },
+          {
+            "word": "was",
+            "start_time": 0.7991250000000001,
+            "end_time": 0.9741250000000001
+          },
+          {
+            "word": "thinking",
+            "start_time": 0.9741250000000001,
+            "end_time": 1.274125
+          },
+          {
+            "word": "about",
+            "start_time": 1.274125,
+            "end_time": 1.574125
+          },
+          {
+            "word": "that",
+            "start_time": 1.574125,
+            "end_time": 1.774125
+          },
+          {
+            "word": "little",
+            "start_time": 1.774125,
+            "end_time": 1.999125
+          },
+          {
+            "word": "adventure",
+            "start_time": 1.999125,
+            "end_time": 2.499125
+          },
+          {
+            "word": "you",
+            "start_time": 2.499125,
+            "end_time": 2.624125
+          },
+          {
+            "word": "mentioned",
+            "start_time": 2.624125,
+            "end_time": 3.0241249999999997
+          },
+          {
+            "word": "yesterday",
+            "start_time": 3.0241249999999997,
+            "end_time": 3.949125
+          },
+          {
+            "word": ",",
+            "start_time": 3.949125,
+            "end_time": 4.074125
+          },
+          {
+            "word": "the",
+            "start_time": 4.074125,
+            "end_time": 4.211625000000001
+          },
+          {
+            "word": "one",
+            "start_time": 4.211625000000001,
+            "end_time": 4.499125
+          },
+          {
+            "word": "where",
+            "start_time": 4.499125,
+            "end_time": 4.686625
+          },
+          {
+            "word": "nothing",
+            "start_time": 4.686625,
+            "end_time": 5.074125
+          },
+          {
+            "word": "went",
+            "start_time": 5.074125,
+            "end_time": 5.274125000000001
+          },
+          {
+            "word": "according",
+            "start_time": 5.274125000000001,
+            "end_time": 5.749125
+          },
+          {
+            "word": "to",
+            "start_time": 5.749125,
+            "end_time": 5.874125
+          },
+          {
+            "word": "plan",
+            "start_time": 5.874125,
+            "end_time": 6.649125000000001
+          },
+          {
+            "word": "but",
+            "start_time": 6.649125000000001,
+            "end_time": 6.824125
+          },
+          {
+            "word": "you",
+            "start_time": 6.824125,
+            "end_time": 6.999125
+          },
+          {
+            "word": "somehow",
+            "start_time": 6.999125,
+            "end_time": 7.474125
+          },
+          {
+            "word": "came",
+            "start_time": 7.474125,
+            "end_time": 7.749125
+          },
+          {
+            "word": "home",
+            "start_time": 7.749125,
+            "end_time": 8.149125
+          },
+          {
+            "word": "with",
+            "start_time": 8.149125,
+            "end_time": 8.286624999999999
+          },
+          {
+            "word": "a",
+            "start_time": 8.286624999999999,
+            "end_time": 8.349124999999999
+          },
+          {
+            "word": "better",
+            "start_time": 8.349124999999999,
+            "end_time": 8.674125
+          },
+          {
+            "word": "story",
+            "start_time": 8.674125,
+            "end_time": 9.474124999999999
+          },
+          {
+            "word": ".",
+            "start_time": 9.474124999999999,
+            "end_time": 9.524416666666667
+          },
+          {
+            "word": "Really",
+            "start_time": 9.543875,
+            "end_time": 10.068875
+          },
+          {
+            "word": "?",
+            "start_time": 10.068875,
+            "end_time": 10.206375000000001
+          },
+          {
+            "word": "Tell",
+            "start_time": 10.206375000000001,
+            "end_time": 10.431375000000001
+          },
+          {
+            "word": "me",
+            "start_time": 10.431375000000001,
+            "end_time": 10.556375000000001
+          },
+          {
+            "word": "the",
+            "start_time": 10.556375000000001,
+            "end_time": 10.643875000000001
+          },
+          {
+            "word": "part",
+            "start_time": 10.643875000000001,
+            "end_time": 10.943875
+          },
+          {
+            "word": "you",
+            "start_time": 10.943875,
+            "end_time": 11.093875
+          },
+          {
+            "word": "left",
+            "start_time": 11.093875,
+            "end_time": 11.343875
+          },
+          {
+            "word": "out",
+            "start_time": 11.343875,
+            "end_time": 11.868875000000001
+          },
+          {
+            "word": ",",
+            "start_time": 11.868875000000001,
+            "end_time": 11.981375
+          },
+          {
+            "word": "especially",
+            "start_time": 11.981375,
+            "end_time": 12.618875000000001
+          },
+          {
+            "word": "the",
+            "start_time": 12.618875000000001,
+            "end_time": 12.743875000000001
+          },
+          {
+            "word": "moment",
+            "start_time": 12.743875000000001,
+            "end_time": 13.156375
+          },
+          {
+            "word": "when",
+            "start_time": 13.156375,
+            "end_time": 13.293875
+          },
+          {
+            "word": "you",
+            "start_time": 13.293875,
+            "end_time": 13.418875
+          },
+          {
+            "word": "realized",
+            "start_time": 13.418875,
+            "end_time": 13.943875
+          },
+          {
+            "word": "you",
+            "start_time": 13.943875,
+            "end_time": 14.118875000000001
+          },
+          {
+            "word": "would",
+            "start_time": 14.118875000000001,
+            "end_time": 14.243875000000001
+          },
+          {
+            "word": "have",
+            "start_time": 14.243875000000001,
+            "end_time": 14.468875
+          },
+          {
+            "word": "to",
+            "start_time": 14.468875,
+            "end_time": 14.593875
+          },
+          {
+            "word": "improvise",
+            "start_time": 14.593875,
+            "end_time": 15.406375
+          },
+          {
+            "word": "instead",
+            "start_time": 15.406375,
+            "end_time": 15.756375
+          },
+          {
+            "word": "of",
+            "start_time": 15.756375,
+            "end_time": 15.843875
+          },
+          {
+            "word": "following",
+            "start_time": 15.843875,
+            "end_time": 16.281375
+          },
+          {
+            "word": "the",
+            "start_time": 16.281375,
+            "end_time": 16.406375
+          },
+          {
+            "word": "perfectly",
+            "start_time": 16.406375,
+            "end_time": 17.006375
+          },
+          {
+            "word": "sensible",
+            "start_time": 17.006375,
+            "end_time": 17.518875
+          },
+          {
+            "word": "plan",
+            "start_time": 17.518875,
+            "end_time": 17.893875
+          },
+          {
+            "word": "you",
+            "start_time": 17.893875,
+            "end_time": 18.006375
+          },
+          {
+            "word": "had",
+            "start_time": 18.006375,
+            "end_time": 18.118875000000003
+          },
+          {
+            "word": "prepared",
+            "start_time": 18.118875000000003,
+            "end_time": 18.893875
+          },
+          {
+            "word": ".",
+            "start_time": 18.893875,
+            "end_time": 19.013083333333334
+          },
+          {
+            "word": "Oh",
+            "start_time": 19.042083333333334,
+            "end_time": 19.292083333333334
+          },
+          {
+            "word": ".",
+            "start_time": 19.292083333333334,
+            "end_time": 19.367083333333333
+          },
+          {
+            "word": "That",
+            "start_time": 19.367083333333333,
+            "end_time": 19.554583333333333
+          },
+          {
+            "word": "explains",
+            "start_time": 19.554583333333333,
+            "end_time": 20.029583333333335
+          },
+          {
+            "word": "the",
+            "start_time": 20.029583333333335,
+            "end_time": 20.117083333333333
+          },
+          {
+            "word": "grin",
+            "start_time": 20.117083333333333,
+            "end_time": 20.717083333333335
+          },
+          {
+            "word": ".",
+            "start_time": 20.717083333333335,
+            "end_time": 20.88104166666667
+          },
+          {
+            "word": "I",
+            "start_time": 20.88104166666667,
+            "end_time": 21.00254166666667
+          },
+          {
+            "word": "had",
+            "start_time": 21.00254166666667,
+            "end_time": 21.14004166666667
+          },
+          {
+            "word": "a",
+            "start_time": 21.14004166666667,
+            "end_time": 21.215041666666668
+          },
+          {
+            "word": "feeling",
+            "start_time": 21.215041666666668,
+            "end_time": 21.62754166666667
+          },
+          {
+            "word": "there",
+            "start_time": 21.62754166666667,
+            "end_time": 21.74004166666667
+          },
+          {
+            "word": "was",
+            "start_time": 21.74004166666667,
+            "end_time": 21.902541666666668
+          },
+          {
+            "word": "more",
+            "start_time": 21.902541666666668,
+            "end_time": 22.12754166666667
+          },
+          {
+            "word": "to",
+            "start_time": 22.12754166666667,
+            "end_time": 22.31504166666667
+          },
+          {
+            "word": "it",
+            "start_time": 22.31504166666667,
+            "end_time": 22.727541666666667
+          },
+          {
+            "word": ".",
+            "start_time": 22.727541666666667,
+            "end_time": 22.87754166666667
+          },
+          {
+            "word": "Now",
+            "start_time": 22.938333333333333,
+            "end_time": 23.22583333333333
+          },
+          {
+            "word": "give",
+            "start_time": 23.22583333333333,
+            "end_time": 23.40083333333333
+          },
+          {
+            "word": "me",
+            "start_time": 23.40083333333333,
+            "end_time": 23.500833333333333
+          },
+          {
+            "word": "a",
+            "start_time": 23.500833333333333,
+            "end_time": 23.60083333333333
+          },
+          {
+            "word": "second",
+            "start_time": 23.60083333333333,
+            "end_time": 23.98833333333333
+          },
+          {
+            "word": "to",
+            "start_time": 23.98833333333333,
+            "end_time": 24.075833333333332
+          },
+          {
+            "word": "be",
+            "start_time": 24.075833333333332,
+            "end_time": 24.21333333333333
+          },
+          {
+            "word": "impressed",
+            "start_time": 24.21333333333333,
+            "end_time": 25.08833333333333
+          },
+          {
+            "word": "before",
+            "start_time": 25.08833333333333,
+            "end_time": 25.40083333333333
+          },
+          {
+            "word": "I",
+            "start_time": 25.40083333333333,
+            "end_time": 25.53833333333333
+          },
+          {
+            "word": "start",
+            "start_time": 25.53833333333333,
+            "end_time": 25.825833333333332
+          },
+          {
+            "word": "teasing",
+            "start_time": 25.825833333333332,
+            "end_time": 26.23833333333333
+          },
+          {
+            "word": "you",
+            "start_time": 26.23833333333333,
+            "end_time": 26.438333333333333
+          },
+          {
+            "word": "about",
+            "start_time": 26.438333333333333,
+            "end_time": 26.71333333333333
+          },
+          {
+            "word": "your",
+            "start_time": 26.71333333333333,
+            "end_time": 26.83833333333333
+          },
+          {
+            "word": "definition",
+            "start_time": 26.83833333333333,
+            "end_time": 27.438333333333333
+          },
+          {
+            "word": "of",
+            "start_time": 27.438333333333333,
+            "end_time": 27.563333333333333
+          },
+          {
+            "word": "careful",
+            "start_time": 27.563333333333333,
+            "end_time": 28.313333333333333
+          },
+          {
+            "word": ".",
+            "start_time": 28.313333333333333,
+            "end_time": 28.410916666666665
+          }
+        ],
+        "source": "kokoro",
+        "voice": "af_heart",
+        "speed": 1,
+        "spokenText": "Hey. I was thinking about that little adventure you mentioned yesterday, the one where nothing went according to plan but you somehow came home with a better story. Really? Tell me the part you left out, especially the moment when you realized you would have to improvise instead of following the perfectly sensible plan you had prepared. Oh. That explains the grin. I had a feeling there was more to it. Now give me a second to be impressed before I start teasing you about your definition of careful.",
+        "duration": 28.410916666666665,
+        "sampleRate": 24000,
+        "backendVersion": "0.9.0",
+        "captionNormalization": false
+      },
+      "visemes": [
+        {
+          "start": 0.0,
+          "end": 0.04,
+          "value": "X"
+        },
+        {
+          "start": 0.04,
+          "end": 0.26,
+          "value": "C"
+        },
+        {
+          "start": 0.26,
+          "end": 0.7,
+          "value": "B"
+        },
+        {
+          "start": 0.7,
+          "end": 0.76,
+          "value": "C"
+        },
+        {
+          "start": 0.76,
+          "end": 0.82,
+          "value": "B"
+        },
+        {
+          "start": 0.82,
+          "end": 0.89,
+          "value": "F"
+        },
+        {
+          "start": 0.89,
+          "end": 1.0,
+          "value": "B"
+        },
+        {
+          "start": 1.0,
+          "end": 1.27,
+          "value": "B"
+        },
+        {
+          "start": 1.27,
+          "end": 1.35,
+          "value": "A"
+        },
+        {
+          "start": 1.35,
+          "end": 1.5,
+          "value": "C"
+        },
+        {
+          "start": 1.5,
+          "end": 1.6400000000000001,
+          "value": "B"
+        },
+        {
+          "start": 1.6400000000000001,
+          "end": 1.71,
+          "value": "C"
+        },
+        {
+          "start": 1.71,
+          "end": 1.92,
+          "value": "B"
+        },
+        {
+          "start": 1.92,
+          "end": 1.99,
+          "value": "C"
+        },
+        {
+          "start": 1.99,
+          "end": 2.06,
+          "value": "H"
+        },
+        {
+          "start": 2.06,
+          "end": 2.13,
+          "value": "B"
+        },
+        {
+          "start": 2.13,
+          "end": 2.2,
+          "value": "G"
+        },
+        {
+          "start": 2.2,
+          "end": 2.34,
+          "value": "C"
+        },
+        {
+          "start": 2.34,
+          "end": 2.41,
+          "value": "B"
+        },
+        {
+          "start": 2.41,
+          "end": 2.55,
+          "value": "E"
+        },
+        {
+          "start": 2.55,
+          "end": 2.62,
+          "value": "F"
+        },
+        {
+          "start": 2.62,
+          "end": 2.7,
+          "value": "A"
+        },
+        {
+          "start": 2.7,
+          "end": 2.82,
+          "value": "C"
+        },
+        {
+          "start": 2.82,
+          "end": 3.0,
+          "value": "B"
+        },
+        {
+          "start": 3.0,
+          "end": 3.18,
+          "value": "C"
+        },
+        {
+          "start": 3.18,
+          "end": 3.39,
+          "value": "B"
+        },
+        {
+          "start": 3.39,
+          "end": 3.6,
+          "value": "C"
+        },
+        {
+          "start": 3.6,
+          "end": 3.67,
+          "value": "B"
+        },
+        {
+          "start": 3.67,
+          "end": 4.14,
+          "value": "X"
+        },
+        {
+          "start": 4.14,
+          "end": 4.2,
+          "value": "B"
+        },
+        {
+          "start": 4.2,
+          "end": 4.26,
+          "value": "C"
+        },
+        {
+          "start": 4.26,
+          "end": 4.33,
+          "value": "F"
+        },
+        {
+          "start": 4.33,
+          "end": 4.61,
+          "value": "C"
+        },
+        {
+          "start": 4.61,
+          "end": 4.68,
+          "value": "B"
+        },
+        {
+          "start": 4.68,
+          "end": 4.890000000000001,
+          "value": "C"
+        },
+        {
+          "start": 4.890000000000001,
+          "end": 5.0,
+          "value": "B"
+        },
+        {
+          "start": 5.0,
+          "end": 5.09,
+          "value": "B"
+        },
+        {
+          "start": 5.09,
+          "end": 5.16,
+          "value": "F"
+        },
+        {
+          "start": 5.16,
+          "end": 5.23,
+          "value": "C"
+        },
+        {
+          "start": 5.23,
+          "end": 5.3,
+          "value": "B"
+        },
+        {
+          "start": 5.3,
+          "end": 5.51,
+          "value": "E"
+        },
+        {
+          "start": 5.51,
+          "end": 5.79,
+          "value": "B"
+        },
+        {
+          "start": 5.79,
+          "end": 5.87,
+          "value": "A"
+        },
+        {
+          "start": 5.87,
+          "end": 6.02,
+          "value": "H"
+        },
+        {
+          "start": 6.02,
+          "end": 6.37,
+          "value": "C"
+        },
+        {
+          "start": 6.37,
+          "end": 6.75,
+          "value": "B"
+        },
+        {
+          "start": 6.75,
+          "end": 6.95,
+          "value": "F"
+        },
+        {
+          "start": 6.95,
+          "end": 7.0,
+          "value": "B"
+        },
+        {
+          "start": 7.0,
+          "end": 7.12,
+          "value": "B"
+        },
+        {
+          "start": 7.12,
+          "end": 7.19,
+          "value": "C"
+        },
+        {
+          "start": 7.19,
+          "end": 7.27,
+          "value": "A"
+        },
+        {
+          "start": 7.27,
+          "end": 7.6,
+          "value": "C"
+        },
+        {
+          "start": 7.6,
+          "end": 7.67,
+          "value": "B"
+        },
+        {
+          "start": 7.67,
+          "end": 7.75,
+          "value": "A"
+        },
+        {
+          "start": 7.75,
+          "end": 7.9399999999999995,
+          "value": "E"
+        },
+        {
+          "start": 7.9399999999999995,
+          "end": 8.01,
+          "value": "F"
+        },
+        {
+          "start": 8.01,
+          "end": 8.18,
+          "value": "A"
+        },
+        {
+          "start": 8.18,
+          "end": 8.24,
+          "value": "F"
+        },
+        {
+          "start": 8.24,
+          "end": 8.29,
+          "value": "B"
+        },
+        {
+          "start": 8.29,
+          "end": 8.370000000000001,
+          "value": "A"
+        },
+        {
+          "start": 8.370000000000001,
+          "end": 8.48,
+          "value": "C"
+        },
+        {
+          "start": 8.48,
+          "end": 8.620000000000001,
+          "value": "E"
+        },
+        {
+          "start": 8.620000000000001,
+          "end": 8.76,
+          "value": "B"
+        },
+        {
+          "start": 8.76,
+          "end": 8.9,
+          "value": "E"
+        },
+        {
+          "start": 8.9,
+          "end": 9.0,
+          "value": "B"
+        },
+        {
+          "start": 9.0,
+          "end": 9.16,
+          "value": "B"
+        },
+        {
+          "start": 9.16,
+          "end": 9.52,
+          "value": "X"
+        },
+        {
+          "start": 9.524416666666667,
+          "end": 9.574416666666668,
+          "value": "X"
+        },
+        {
+          "start": 9.574416666666668,
+          "end": 9.944416666666667,
+          "value": "B"
+        },
+        {
+          "start": 9.944416666666667,
+          "end": 10.144416666666666,
+          "value": "X"
+        },
+        {
+          "start": 10.144416666666666,
+          "end": 10.284416666666667,
+          "value": "B"
+        },
+        {
+          "start": 10.284416666666667,
+          "end": 10.354416666666667,
+          "value": "C"
+        },
+        {
+          "start": 10.354416666666667,
+          "end": 10.424416666666668,
+          "value": "H"
+        },
+        {
+          "start": 10.424416666666668,
+          "end": 10.504416666666668,
+          "value": "A"
+        },
+        {
+          "start": 10.504416666666668,
+          "end": 10.594416666666667,
+          "value": "B"
+        },
+        {
+          "start": 10.594416666666667,
+          "end": 10.674416666666668,
+          "value": "A"
+        },
+        {
+          "start": 10.674416666666668,
+          "end": 10.784416666666667,
+          "value": "D"
+        },
+        {
+          "start": 10.784416666666667,
+          "end": 10.854416666666667,
+          "value": "B"
+        },
+        {
+          "start": 10.854416666666667,
+          "end": 11.104416666666667,
+          "value": "F"
+        },
+        {
+          "start": 11.104416666666667,
+          "end": 11.174416666666668,
+          "value": "E"
+        },
+        {
+          "start": 11.174416666666668,
+          "end": 11.484416666666668,
+          "value": "C"
+        },
+        {
+          "start": 11.484416666666668,
+          "end": 11.524416666666667,
+          "value": "B"
+        },
+        {
+          "start": 11.524416666666667,
+          "end": 11.624416666666667,
+          "value": "B"
+        },
+        {
+          "start": 11.624416666666667,
+          "end": 12.034416666666667,
+          "value": "X"
+        },
+        {
+          "start": 12.034416666666667,
+          "end": 12.134416666666667,
+          "value": "B"
+        },
+        {
+          "start": 12.134416666666667,
+          "end": 12.214416666666667,
+          "value": "A"
+        },
+        {
+          "start": 12.214416666666667,
+          "end": 12.314416666666666,
+          "value": "C"
+        },
+        {
+          "start": 12.314416666666666,
+          "end": 12.734416666666668,
+          "value": "B"
+        },
+        {
+          "start": 12.734416666666668,
+          "end": 12.824416666666668,
+          "value": "A"
+        },
+        {
+          "start": 12.824416666666668,
+          "end": 12.874416666666667,
+          "value": "E"
+        },
+        {
+          "start": 12.874416666666667,
+          "end": 12.914416666666668,
+          "value": "F"
+        },
+        {
+          "start": 12.914416666666668,
+          "end": 12.994416666666668,
+          "value": "A"
+        },
+        {
+          "start": 12.994416666666668,
+          "end": 13.064416666666666,
+          "value": "C"
+        },
+        {
+          "start": 13.064416666666666,
+          "end": 13.274416666666667,
+          "value": "B"
+        },
+        {
+          "start": 13.274416666666667,
+          "end": 13.484416666666668,
+          "value": "F"
+        },
+        {
+          "start": 13.484416666666668,
+          "end": 13.524416666666667,
+          "value": "B"
+        },
+        {
+          "start": 13.524416666666667,
+          "end": 13.574416666666668,
+          "value": "B"
+        },
+        {
+          "start": 13.574416666666668,
+          "end": 13.644416666666666,
+          "value": "C"
+        },
+        {
+          "start": 13.644416666666666,
+          "end": 13.714416666666667,
+          "value": "H"
+        },
+        {
+          "start": 13.714416666666667,
+          "end": 13.784416666666667,
+          "value": "C"
+        },
+        {
+          "start": 13.784416666666667,
+          "end": 13.924416666666668,
+          "value": "B"
+        },
+        {
+          "start": 13.924416666666668,
+          "end": 14.184416666666667,
+          "value": "F"
+        },
+        {
+          "start": 14.184416666666667,
+          "end": 14.234416666666668,
+          "value": "E"
+        },
+        {
+          "start": 14.234416666666668,
+          "end": 14.414416666666668,
+          "value": "C"
+        },
+        {
+          "start": 14.414416666666668,
+          "end": 14.554416666666667,
+          "value": "F"
+        },
+        {
+          "start": 14.554416666666667,
+          "end": 14.694416666666667,
+          "value": "B"
+        },
+        {
+          "start": 14.694416666666667,
+          "end": 14.774416666666667,
+          "value": "A"
+        },
+        {
+          "start": 14.774416666666667,
+          "end": 14.834416666666668,
+          "value": "B"
+        },
+        {
+          "start": 14.834416666666668,
+          "end": 14.894416666666668,
+          "value": "G"
+        },
+        {
+          "start": 14.894416666666668,
+          "end": 15.034416666666667,
+          "value": "C"
+        },
+        {
+          "start": 15.034416666666667,
+          "end": 15.474416666666666,
+          "value": "B"
+        },
+        {
+          "start": 15.474416666666666,
+          "end": 15.524416666666667,
+          "value": "F"
+        },
+        {
+          "start": 15.524416666666667,
+          "end": 15.614416666666667,
+          "value": "B"
+        },
+        {
+          "start": 15.614416666666667,
+          "end": 15.684416666666667,
+          "value": "C"
+        },
+        {
+          "start": 15.684416666666667,
+          "end": 15.824416666666668,
+          "value": "B"
+        },
+        {
+          "start": 15.824416666666668,
+          "end": 15.964416666666667,
+          "value": "G"
+        },
+        {
+          "start": 15.964416666666667,
+          "end": 16.03441666666667,
+          "value": "D"
+        },
+        {
+          "start": 16.03441666666667,
+          "end": 16.174416666666666,
+          "value": "E"
+        },
+        {
+          "start": 16.174416666666666,
+          "end": 16.314416666666666,
+          "value": "B"
+        },
+        {
+          "start": 16.314416666666666,
+          "end": 16.394416666666668,
+          "value": "A"
+        },
+        {
+          "start": 16.394416666666668,
+          "end": 16.684416666666667,
+          "value": "E"
+        },
+        {
+          "start": 16.684416666666667,
+          "end": 16.754416666666668,
+          "value": "G"
+        },
+        {
+          "start": 16.754416666666668,
+          "end": 17.104416666666665,
+          "value": "B"
+        },
+        {
+          "start": 17.104416666666665,
+          "end": 17.244416666666666,
+          "value": "C"
+        },
+        {
+          "start": 17.244416666666666,
+          "end": 17.314416666666666,
+          "value": "B"
+        },
+        {
+          "start": 17.314416666666666,
+          "end": 17.404416666666666,
+          "value": "A"
+        },
+        {
+          "start": 17.404416666666666,
+          "end": 17.44441666666667,
+          "value": "B"
+        },
+        {
+          "start": 17.44441666666667,
+          "end": 17.524416666666667,
+          "value": "A"
+        },
+        {
+          "start": 17.524416666666667,
+          "end": 17.674416666666666,
+          "value": "H"
+        },
+        {
+          "start": 17.674416666666666,
+          "end": 17.814416666666666,
+          "value": "C"
+        },
+        {
+          "start": 17.814416666666666,
+          "end": 18.024416666666667,
+          "value": "F"
+        },
+        {
+          "start": 18.024416666666667,
+          "end": 18.114416666666667,
+          "value": "B"
+        },
+        {
+          "start": 18.114416666666667,
+          "end": 18.134416666666667,
+          "value": "A"
+        },
+        {
+          "start": 18.134416666666667,
+          "end": 18.204416666666667,
+          "value": "B"
+        },
+        {
+          "start": 18.204416666666667,
+          "end": 18.264416666666666,
+          "value": "A"
+        },
+        {
+          "start": 18.264416666666666,
+          "end": 18.514416666666666,
+          "value": "C"
+        },
+        {
+          "start": 18.514416666666666,
+          "end": 18.654416666666666,
+          "value": "B"
+        },
+        {
+          "start": 18.654416666666666,
+          "end": 19.004416666666668,
+          "value": "X"
+        },
+        {
+          "start": 19.013083333333334,
+          "end": 19.063083333333335,
+          "value": "X"
+        },
+        {
+          "start": 19.063083333333335,
+          "end": 19.253083333333333,
+          "value": "E"
+        },
+        {
+          "start": 19.253083333333333,
+          "end": 19.323083333333333,
+          "value": "F"
+        },
+        {
+          "start": 19.323083333333333,
+          "end": 19.673083333333334,
+          "value": "B"
+        },
+        {
+          "start": 19.673083333333334,
+          "end": 19.753083333333333,
+          "value": "A"
+        },
+        {
+          "start": 19.753083333333333,
+          "end": 19.823083333333333,
+          "value": "H"
+        },
+        {
+          "start": 19.823083333333333,
+          "end": 19.893083333333333,
+          "value": "C"
+        },
+        {
+          "start": 19.893083333333333,
+          "end": 20.523083333333336,
+          "value": "B"
+        },
+        {
+          "start": 20.523083333333336,
+          "end": 20.873083333333334,
+          "value": "X"
+        },
+        {
+          "start": 20.88104166666667,
+          "end": 20.93104166666667,
+          "value": "X"
+        },
+        {
+          "start": 20.93104166666667,
+          "end": 21.00104166666667,
+          "value": "C"
+        },
+        {
+          "start": 21.00104166666667,
+          "end": 21.211041666666667,
+          "value": "B"
+        },
+        {
+          "start": 21.211041666666667,
+          "end": 21.351041666666667,
+          "value": "G"
+        },
+        {
+          "start": 21.351041666666667,
+          "end": 21.91104166666667,
+          "value": "B"
+        },
+        {
+          "start": 21.91104166666667,
+          "end": 21.991041666666668,
+          "value": "A"
+        },
+        {
+          "start": 21.991041666666668,
+          "end": 22.061041666666668,
+          "value": "E"
+        },
+        {
+          "start": 22.061041666666668,
+          "end": 22.331041666666668,
+          "value": "F"
+        },
+        {
+          "start": 22.331041666666668,
+          "end": 22.54104166666667,
+          "value": "B"
+        },
+        {
+          "start": 22.54104166666667,
+          "end": 22.88104166666667,
+          "value": "X"
+        },
+        {
+          "start": 22.88104166666667,
+          "end": 22.89104166666667,
+          "value": "X"
+        },
+        {
+          "start": 22.8925,
+          "end": 22.9425,
+          "value": "X"
+        },
+        {
+          "start": 22.9425,
+          "end": 23.1025,
+          "value": "C"
+        },
+        {
+          "start": 23.1025,
+          "end": 23.382499999999997,
+          "value": "B"
+        },
+        {
+          "start": 23.382499999999997,
+          "end": 23.4625,
+          "value": "A"
+        },
+        {
+          "start": 23.4625,
+          "end": 23.6725,
+          "value": "B"
+        },
+        {
+          "start": 23.6725,
+          "end": 23.952499999999997,
+          "value": "C"
+        },
+        {
+          "start": 23.952499999999997,
+          "end": 24.022499999999997,
+          "value": "B"
+        },
+        {
+          "start": 24.022499999999997,
+          "end": 24.1025,
+          "value": "A"
+        },
+        {
+          "start": 24.1025,
+          "end": 24.2825,
+          "value": "B"
+        },
+        {
+          "start": 24.2825,
+          "end": 24.452499999999997,
+          "value": "A"
+        },
+        {
+          "start": 24.452499999999997,
+          "end": 24.522499999999997,
+          "value": "B"
+        },
+        {
+          "start": 24.522499999999997,
+          "end": 24.652499999999996,
+          "value": "C"
+        },
+        {
+          "start": 24.652499999999996,
+          "end": 24.862499999999997,
+          "value": "B"
+        },
+        {
+          "start": 24.862499999999997,
+          "end": 24.8925,
+          "value": "X"
+        },
+        {
+          "start": 24.8925,
+          "end": 25.072499999999998,
+          "value": "X"
+        },
+        {
+          "start": 25.072499999999998,
+          "end": 25.1925,
+          "value": "A"
+        },
+        {
+          "start": 25.1925,
+          "end": 25.2625,
+          "value": "B"
+        },
+        {
+          "start": 25.2625,
+          "end": 25.322499999999998,
+          "value": "G"
+        },
+        {
+          "start": 25.322499999999998,
+          "end": 25.3925,
+          "value": "E"
+        },
+        {
+          "start": 25.3925,
+          "end": 25.6025,
+          "value": "B"
+        },
+        {
+          "start": 25.6025,
+          "end": 25.7425,
+          "value": "D"
+        },
+        {
+          "start": 25.7425,
+          "end": 26.162499999999998,
+          "value": "B"
+        },
+        {
+          "start": 26.162499999999998,
+          "end": 26.4425,
+          "value": "F"
+        },
+        {
+          "start": 26.4425,
+          "end": 26.522499999999997,
+          "value": "A"
+        },
+        {
+          "start": 26.522499999999997,
+          "end": 26.632499999999997,
+          "value": "C"
+        },
+        {
+          "start": 26.632499999999997,
+          "end": 26.842499999999998,
+          "value": "F"
+        },
+        {
+          "start": 26.842499999999998,
+          "end": 26.8925,
+          "value": "C"
+        },
+        {
+          "start": 26.8925,
+          "end": 27.002499999999998,
+          "value": "C"
+        },
+        {
+          "start": 27.002499999999998,
+          "end": 27.072499999999998,
+          "value": "G"
+        },
+        {
+          "start": 27.072499999999998,
+          "end": 27.3525,
+          "value": "B"
+        },
+        {
+          "start": 27.3525,
+          "end": 27.772499999999997,
+          "value": "C"
+        },
+        {
+          "start": 27.772499999999997,
+          "end": 27.842499999999998,
+          "value": "B"
+        },
+        {
+          "start": 27.842499999999998,
+          "end": 27.912499999999998,
+          "value": "G"
+        },
+        {
+          "start": 27.912499999999998,
+          "end": 28.0525,
+          "value": "B"
+        },
+        {
+          "start": 28.0525,
+          "end": 28.4025,
+          "value": "X"
+        }
+      ],
+      "alignment": {
+        "source": "rhubarb",
+        "version": "1.14.0",
+        "stored": true,
+        "sourceRecording": "P05"
+      }
     }
   ],
   "recall": {
@@ -4337,6 +5823,12 @@
         3,
         4
       ]
+    },
+    {
+      "id": "emotion-stress",
+      "label": "E01 · Emotion stress test (28s)",
+      "kind": "single",
+      "turn": 7
     },
     {
       "id": "long-demo",

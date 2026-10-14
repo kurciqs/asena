@@ -67,6 +67,23 @@ test('long demo uses two named saved passages while keeping the original five-tu
     assert.throws(()=>validateFixture(invalid),/sequence/);
 });
 
+test('emotion stress scene aligns all five expressions and rapid/held/repeated cues to unchanged saved speech',()=>{
+    const session=new ReplaySession(fixture,'emotion-stress');
+    const parsed=decodeTaggedMessage(session.reply(history([]))),speech=session.speech();
+    const original=fixture.turns[fixture.cases.find(c=>c.id==='long-story').turn];
+    assert.deepEqual(parsed.warnings,[]);
+    assert.equal(parsed.text,speech.spokenText);
+    assert.deepEqual(speech,original.speech);
+    assert.deepEqual(session.visemes(),original.visemes);
+    const cues=getEmotions(speech.timestamps,parsed.emotions,parsed.text,speech.duration);
+    assert.deepEqual([...new Set(cues.map(cue=>cue.value))].sort(),['angry','happy','relaxed','sad','surprised']);
+    assert.ok(cues.some(cue=>cue.end-cue.start<.35),'rapid changes stress fade overlap');
+    assert.ok(cues.some(cue=>cue.value==='happy'&&cue.end-cue.start>8),'long smile tests hold/release and talking smile');
+    assert.ok(cues.some((cue,i)=>cue.value==='happy'&&cues[i+1]?.value==='happy'),'repeated smile tests retriggering');
+    assert.ok(cues.every(cue=>cue.start>=0&&cue.end<=speech.duration));
+    assert.equal(session.finished,true);
+});
+
 test('service failure fixtures throw at the requested stage without falling back', () => {
     for (const stage of ['chat', 'tts', 'alignment']) {
         const session = new ReplaySession(fixture, `${stage}-error`);
