@@ -7,6 +7,7 @@ import {CHANNELS,boundedWeights} from './rhubarb_mouth.js';
 import { LatestLoad, withAbort, withDeadline } from './asset_loading.js';
 import { LazyAnimations } from './lazy_animations.js';
 import {dueGestures} from './gesture_clock.js';
+import {emotionWeightsAt,expressionPreferences} from './emotion_envelope.js';
 import { RENDER_PROFILES, RENDER_STORAGE_KEY, renderPreferences, pixelRatio, RenderLoop, BlinkClock } from './render_policy.js';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -53,11 +54,13 @@ let lastPlaybackNotification = 0;
 let gestureGeneration = 0;
 let clockedPerformance = null;
 let pcmPerformance = null;
+let expressionSettings=expressionPreferences();
+export function setExpressionPreferences(value){expressionSettings=expressionPreferences(value);}
 let previewRemaining = null;
 const performanceScheduler = new AudioPerformanceScheduler({
     onSegment:data=>{
         clockedPerformance=new ClockedAvatarPerformance({mixer:currentMixer,manager:currentVrm.expressionManager,
-            animations,bodyPlayback,data});
+            animations,bodyPlayback,data:{...data,expressionSettings}});
         expressionPlayback=clockedPerformance.inspection;
     },
     onTime:(time,wallDelta)=>{if(clockedPerformance)currentAnimation=clockedPerformance.sample(time,wallDelta)??currentAnimation;},
@@ -312,10 +315,10 @@ function animate(deltaTime) {
     if(pcmPerformance&&currentVrm){
         const s=pcmState;pcmWeights=boundedWeights(s.weights);
         CHANNELS.slice(0,5).forEach((name,index)=>{if(currentVrm.expressionManager.getExpression(name))currentVrm.expressionManager.setValue(name,pcmWeights[index]);});
-        for(const name of expressionOptions){
-            const cue=(s.emotions??[]).findLast(c=>c.value===name&&c.start<=s.playedSeconds&&s.playedSeconds<c.end);
-            if(currentVrm.expressionManager.getExpression(name))currentVrm.expressionManager.setValue(name,cue?(name==='happy'?.3:.5):0);
-        }
+        const emotions=emotionWeightsAt(s.emotions,s.playedSeconds,{settings:expressionSettings,
+            duration:s.durationSeconds??Infinity,speaking:s.playedFrames>0&&!s.finished});
+        for(const name of expressionOptions)if(currentVrm.expressionManager.getExpression(name))currentVrm.expressionManager.setValue(name,emotions[name]);
+        expressionPlayback.emotionWeights=emotions;expressionPlayback.settings={...expressionSettings};
         const due=dueGestures(s.actions,s,pcmPerformance.seen,new Set(Object.keys(animations)));
         const cue=due.at(-1);
         if(cue&&animations[cue.value]){transitionBody(animations[cue.value]);previewRemaining=Math.max(0,animations[cue.value].getClip().duration-ANIMATION_CROSSFADE);}

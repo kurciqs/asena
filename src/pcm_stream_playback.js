@@ -111,7 +111,8 @@ export class PCMPlayer {
     if(!buffering)this.waitingSince=null;
     return {playedFrames:this.played,playedSeconds:this.played/this.rate,bufferSeconds:held,
       firstPlaybackSeconds:this.firstPlaybackSeconds,gapCount:this.gaps.length,gapSeconds:this.gaps.reduce((n,g)=>n+g.seconds,0),
-      buffering,paused:this.paused,waitingSeconds:buffering?(this.now()-this.waitingSince)/1000:0,finished};
+      buffering,paused:this.paused,waitingSeconds:buffering?(this.now()-this.waitingSince)/1000:0,finished,
+      durationSeconds:this.eos?this.ready/this.rate:null};
   }
   async pause(){if(!this.stopped&&!this.paused){await this.context.suspend();this.paused=true;}}
   async resume(){if(!this.stopped&&this.paused){await this.context.resume();this.paused=false;}}

@@ -1,6 +1,6 @@
-// Structural track repair; the approximate viseme mapping and smile strength remain tunable later.
+import {EMOTION_NAMES,emotionWeightsAt} from './emotion_envelope.js';
 export const MOUTH_CHANNELS = { A: 'aa', B: null, C: 'oh', D: 'ee', E: 'ee', F: 'ou', G: 'aa', H: 'aa', X: null };
-const EMOTIONS = ['happy', 'sad', 'angry', 'surprised', 'relaxed'];
+const EMOTIONS = EMOTION_NAMES;
 
 export const MOUTH_EXPRESSIONS = [...new Set(Object.values(MOUTH_CHANNELS).filter(Boolean))];
 class MissingMouthBindingsError extends Error {}
@@ -41,7 +41,7 @@ function range(cue, duration) {
     return { ...cue, start: Math.min(cue.start, duration), end: Math.min(cue.end, duration) };
 }
 
-export function buildExpressionTracks({ duration, visemes = [], emotions = [] }, resolveBinding) {
+export function buildExpressionTracks({ duration, visemes = [], emotions = [], expressionSettings }, resolveBinding) {
     if (!Number.isFinite(duration) || duration <= 0) throw new Error('Playable audio metadata is required');
     if (!Array.isArray(visemes) || !Array.isArray(emotions)) throw new Error('Expression cues must be arrays');
     const groups = new Map();
@@ -61,12 +61,11 @@ export function buildExpressionTracks({ duration, visemes = [], emotions = [] },
             points: [cue.start, (cue.start + cue.end) / 2, cue.end], values: [0, 1, 0]
         });
     }
-    for (const raw of emotions) {
-        const cue = range(raw, duration);
-        if (!EMOTIONS.includes(cue.value) || cue.end === cue.start) continue;
-        const intensity = cue.value === 'happy' ? 0.3 : 0.5;
-        group(cue.value)?.push({ points: [Math.max(0, cue.start - 0.05), cue.start, cue.end, Math.min(duration, cue.end + 0.05)],
-            values: [0, intensity, intensity, 0] });
+    const validEmotions=emotions.map(raw=>range(raw,duration));
+    if(validEmotions.length){
+        const points=[0,...Array.from({length:Math.floor(duration*20)},(_,i)=>(i+1)/20).filter(t=>t<duration),duration];
+        const samples=points.map(t=>emotionWeightsAt(validEmotions,t,{settings:expressionSettings,duration,speaking:visemes.length>0}));
+        for(const name of EMOTIONS)group(name)?.push({points,values:samples.map(sample=>sample[name])});
     }
     function sample(curve, time) {
         const {points,values} = curve;

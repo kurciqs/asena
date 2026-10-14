@@ -15,9 +15,12 @@ import { createToolPanel, wireChatLayout } from './ui_panels.js';
 import { createJsonViewer } from './json_viewer.js';
 import {MemoryWork, MEMORY_INSTRUCTION, mergeMemories} from './memory_work.js';
 import {TurnMetrics} from './turn_metrics.js';
+import {setupExpressionControls} from './expression_controls.js';
+import {expressionPreferences} from './emotion_envelope.js';
 
 let replay = null;
 let previewSpeechSource = null;
+let expressionConfig=expressionPreferences();
 let startupReady = false;
 let profileEditedDuringStartup = false;
 let profileStorage = {getItem:()=>null, setItem:()=>{throw new Error('Configuration still loading');}};
@@ -642,6 +645,11 @@ function setupReplayUI() {
 }
 function setupDebugUI() {
     toolPanel.enableDebug();
+    setupExpressionControls(document,localStorage,settings=>{
+        expressionConfig=settings;ANI.setExpressionPreferences(settings);
+        turnMetrics?.recordExpressionChange(settings);
+        inspectReplay({expressionSettings:settings});
+    });
     document.getElementById('replay-collapse').addEventListener('click',()=>replayJsonViewer.collapseAll());
     document.getElementById('turn-report-download').addEventListener('click',()=>{
         if(!turnMetrics)return;
@@ -664,7 +672,7 @@ function setupDebugUI() {
 function beginTurnMetrics(turn,retry=false){
     turn.speech={voice:KOKORO_VOICE,profile:structuredClone(runtimeConfig?.speechProfile??null),source:previewSpeechSource??runtimeConfig?.speechSource};
     turnMetrics=new TurnMetrics(turn.id,{mode:RUNTIME_MODE,speechSource:turn.speech.source,
-        speechProfile:turn.speech.profile,voice:turn.speech.voice,chatModel:runtimeConfig?.chatModel,retry});
+        speechProfile:turn.speech.profile,voice:turn.speech.voice,chatModel:runtimeConfig?.chatModel,retry,expressionSettings:expressionConfig});
 }
 window.addEventListener('pagehide',()=>turnController.stop());
 renderCompanionProfile();

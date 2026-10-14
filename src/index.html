@@ -73,6 +73,16 @@
                     <button id="replay-save" type="button">Save test memories</button>
                 </div>
                 </div>
+                <details class="debug-section" id="expression-trials">
+                    <summary>Expression blending</summary>
+                    <p class="field-hint">Try these while speech plays. Full-recording replay uses the next turn's settings. Further visual tuning is still planned.</p>
+                    <label for="expression-preset">Starting point</label><select id="expression-preset"><option value="soft">Soft</option><option value="balanced">Balanced</option><option value="expressive">Expressive</option><option value="custom">Custom</option></select>
+                    <label for="expression-strength">Intensity <output id="expression-strength-value"></output></label><input id="expression-strength" type="range" min="0" max="1" step=".05">
+                    <label for="expression-attack">Fade in <output id="expression-attack-value"></output></label><input id="expression-attack" type="range" min=".05" max="2" step=".05">
+                    <label for="expression-hold">Hold <output id="expression-hold-value"></output></label><input id="expression-hold" type="range" min=".5" max="12" step=".5">
+                    <label for="expression-release">Fade out <output id="expression-release-value"></output></label><input id="expression-release" type="range" min=".1" max="3" step=".1">
+                    <label for="expression-talkingSmile">Smile while talking <output id="expression-talkingSmile-value"></output></label><input id="expression-talkingSmile" type="range" min="0" max="1" step=".05">
+                </details>
                 <details id="turn-inspection">
                     <summary>Inspect this turn</summary>
                     <div class="json-tools"><button id="replay-collapse" type="button">Collapse all JSON</button></div>

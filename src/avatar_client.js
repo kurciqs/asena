@@ -22,6 +22,7 @@ export class AvatarClient {
         this.loading = (async () => {
             try {
                 this.module = await withDeadline(this.load(),20000,'Avatar renderer',late=>late.disposeRenderer?.());
+                if(this.expressionSettings)this.module.setExpressionPreferences?.(this.expressionSettings);
                 this.module.onPlaybackStateChange(() => this.publish());
                 await this.module.loadThreeVRM();
             } catch (error) {
@@ -41,5 +42,6 @@ export class AvatarClient {
     finishPerformance() {this.module?.finishPerformance();}
     beginPcmPerformance(sample,player) {if(!this.module)throw new Error('Avatar unavailable');return this.module.beginPcmPerformance(sample,player);}
     setRenderPreferences(value) { this.module?.setRenderPreferences(value); }
+    setExpressionPreferences(value) {this.expressionSettings=value;this.module?.setExpressionPreferences?.(value);}
 }
 export const avatar = new AvatarClient();

@@ -44,13 +44,14 @@ test('audio time freezes mouth, emotion and gesture together across pause and st
     const audio=new FakeAudio();
     const done=h.scheduler.play([segment(audio,{visemes:[{value:'A',start:0,end:2}],emotions:[{value:'happy',start:0,end:2}],actions:[{value:'wave',start:0}]})]);
     await flush();audio.advance(1);h.scheduler.sample(.1);
-    assert.equal(avatar.mesh.morphTargetInfluences[0],1);assert.ok(Math.abs(avatar.manager.getValue('happy')-.3)<1e-6);
+    const happy=avatar.manager.getValue('happy');
+    assert.equal(avatar.mesh.morphTargetInfluences[0],1);assert.ok(happy>0&&happy<.3);
     const pose=avatar.bone.position.x,gesture=avatar.animations.wave.time,idle=avatar.animations.idle.time;
     h.scheduler.pause();h.advance(120000);h.scheduler.sample(.1);
     assert.equal(avatar.bone.position.x,pose);assert.equal(avatar.animations.wave.time,gesture);
     assert.equal(avatar.mesh.morphTargetInfluences[0],1);assert.ok(avatar.animations.idle.time>idle);
     h.scheduler.resume();await flush();audio.dispatchEvent(new Event('waiting'));h.scheduler.sample(.1);
-    assert.equal(avatar.bone.position.x,pose);assert.ok(Math.abs(avatar.manager.getValue('happy')-.3)<1e-6);
+    assert.equal(avatar.bone.position.x,pose);assert.ok(Math.abs(avatar.manager.getValue('happy')-happy)<1e-6);
     audio.advance(1.25);h.scheduler.sample();assert.notEqual(avatar.bone.position.x,pose);
     audio.end();await done;assert.equal(avatar.mesh.morphTargetInfluences[0],0);assert.equal(avatar.manager.getValue('happy'),0);
     assert.equal(audio.listeners.size,0);assert.equal(h.watch(),null);

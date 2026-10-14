@@ -53,7 +53,7 @@ export class ClockedBodyPlayback {
 export class ClockedAvatarPerformance {
     constructor({mixer,manager,animations,bodyPlayback,data}) {
         Object.assign(this,{mixer,manager,animations,bodyPlayback});
-        const {tracks,warning}=prepareVrmExpressionTracks({duration:data.audio.duration,visemes:data.visemes,emotions:data.emotions},manager);
+        const {tracks,warning}=prepareVrmExpressionTracks({duration:data.audio.duration,visemes:data.visemes,emotions:data.emotions,expressionSettings:data.expressionSettings},manager);
         this.inspection={trackCount:tracks.length,peakMouthWeight:0,peakMouthMorphWeight:0,warning};
         if(warning)data.onWarning?.(warning);
         const clip=new THREE.AnimationClip('SpeechExpressions',data.audio.duration,tracks.map(track=>

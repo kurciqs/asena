@@ -118,6 +118,11 @@ summary { cursor: pointer; font-size: 12px; font-weight: 600; }
 .replay-buttons { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 16px; }
 #replay-panel button { font-size: 12px; }
 #turn-inspection { padding-top: 12px; border-top: 1px solid var(--line); }
+.debug-section { margin:12px 0; padding:12px 0; border-top:1px solid var(--line); }
+.debug-section > p { margin:9px 0; }
+.debug-section label { display:flex; justify-content:space-between; gap:10px; margin:10px 0 5px; }
+.debug-section output { color:var(--muted); font-variant-numeric:tabular-nums; }
+.debug-section input[type="range"] { width:100%; padding:0; accent-color:var(--accent); }
 .json-tools { margin: 10px 0; }
 .reset-section { border-top: 1px solid var(--line); margin-top: 18px; padding-top: 13px; }
 .reset-section > p { margin: 9px 0; }
