@@ -22,7 +22,7 @@
         </header>
         <div id="tools-tabs" role="tablist" aria-label="Companion tools">
             <button id="settings-tab" type="button" role="tab" aria-selected="true" aria-controls="selections">Settings</button>
-            <button id="debug-tab" type="button" role="tab" aria-selected="false" aria-controls="replay-panel" tabindex="-1" hidden>Debug &amp; replay</button>
+            <button id="debug-tab" type="button" role="tab" aria-selected="false" aria-controls="replay-panel" tabindex="-1" hidden>Debug</button>
             <button id="expressions-tab" type="button" role="tab" aria-selected="false" aria-controls="expression-panel" tabindex="-1" hidden>Expressions</button>
         </div>
         <section id="selections" role="tabpanel" aria-labelledby="settings-tab">
@@ -63,17 +63,19 @@
             <div class="replay-heading"><span id="debug-mode" class="mode-badge">Offline replay</span><span id="debug-source" class="field-hint">AI services are off</span></div>
             <div id="replay-body">
                 <p id="replay-description" class="field-hint">Saved dialogue and audio. Test memories stay separate.</p>
-                <p id="speech-policy-note" class="field-hint"></p>
-                <p class="field-hint"><a href="/lip-sync-samples.html">Compare lip-sync methods</a></p>
-                <div id="replay-controls">
-                <div id="preview-speech-controls" hidden><label for="preview-speech-source">Voice for the next scene</label><select id="preview-speech-source"></select></div>
-                <label for="replay-case">Replay scene</label><select id="replay-case"></select>
-                <p id="replay-status" class="field-status" role="status" aria-live="polite"></p>
-                <div class="replay-buttons">
-                    <button id="replay-restart" type="button">Restart scene</button>
-                    <button id="replay-save" type="button">Save test memories</button>
-                </div>
-                </div>
+                <a id="speech-lab-link" class="speech-lab-link" href="http://127.0.0.1:3002/stream-test.html?source=live" target="_blank" rel="noopener">Live speech lab <span aria-hidden="true">↗</span></a>
+                <p class="field-hint lab-link-note">Try passages, buffering and mouth timing. Opens in a new tab; press Start there to generate speech.</p>
+                <details id="debug-scenes" class="debug-section" open>
+                    <summary>Scenes &amp; voice</summary>
+                    <div id="replay-controls">
+                        <div id="preview-speech-controls" hidden><label for="preview-speech-source">Voice for the next scene</label><select id="preview-speech-source"></select></div>
+                        <label for="replay-case">Replay scene</label><select id="replay-case"></select>
+                        <p id="replay-status" class="field-status" role="status" aria-live="polite"></p>
+                        <div class="replay-buttons">
+                            <button id="replay-restart" type="button">Restart scene</button>
+                        </div>
+                    </div>
+                </details>
                 <details class="debug-section" id="expression-trials">
                     <summary>Expression blending</summary>
                     <div class="expression-readout" data-expression-readout aria-label="Current facial expression"></div>
@@ -81,7 +83,8 @@
                     <button id="expressions-toggle" type="button" aria-controls="expression-panel" aria-expanded="false">Tune in scene</button>
                 </details>
                 <details class="debug-section" id="speech-trials">
-                    <summary>Streaming speech settings</summary>
+                    <summary>Speech controls</summary>
+                    <p id="speech-policy-note" class="field-hint"></p>
                     <p id="speech-trial-note" class="field-hint"></p>
                     <label for="speech-strategy">Text requests</label><select id="speech-strategy"><option value="sentences">Complete sentences / long clauses</option><option value="phrases">Short fragments · comparison</option><option value="whole">One request · short text only</option></select>
                     <label for="speech-opening">First mouth-analysis region</label><select id="speech-opening"><option value="0.5">0.5 seconds</option><option value="1">1 second</option><option value="2">2 seconds</option></select>
@@ -90,20 +93,21 @@
                     <label for="speech-speed">Kokoro speed <output id="speech-speed-value"></output></label><input id="speech-speed" type="range" min=".5" max="2" step=".05">
                     <button id="speech-reset" type="button">Reset to accepted 1 / 2 / 2</button>
                 </details>
-                <details class="debug-section" id="speech-timing" open><summary>Speech timing</summary>
-                    <p id="speech-startup-total" class="field-hint">Timing appears when speech starts.</p>
+                <details class="debug-section" id="speech-timing"><summary>Speech timing<span id="speech-startup-total" class="field-hint">Waiting for a turn</span></summary>
                     <p id="speech-timing-note" class="field-hint"></p><dl id="speech-startup-rows" class="context-breakdown"></dl>
                 </details>
-                <details id="turn-inspection">
-                    <summary>Inspect this turn</summary>
-                    <div class="json-tools"><button id="replay-collapse" type="button">Collapse all JSON</button></div>
+                <section class="debug-report" aria-label="Turn report">
                     <p id="turn-timing-summary" class="field-hint">Timing appears after a reply.</p>
                     <button id="turn-report-download" type="button" disabled>Download turn report</button>
+                </section>
+                <details id="turn-inspection" class="debug-section">
+                    <summary>Inspect turn JSON</summary>
+                    <div class="json-tools"><button id="replay-collapse" type="button">Collapse all JSON</button></div>
                     <div id="replay-inspector" aria-label="Turn data"></div>
                 </details>
-                <details id="replay-reset" class="reset-section"><summary>Reset test memories</summary>
-                    <p class="field-hint">Clears the saved replay facts in this browser. Your live memory file is separate.</p>
-                    <button id="replay-clear" type="button" class="danger-button">Clear test memories</button>
+                <details id="replay-reset" class="reset-section"><summary>Test memories</summary>
+                    <p class="field-hint">Save or clear the test facts in this browser. Your live memory file is separate.</p>
+                    <div class="replay-buttons"><button id="replay-save" type="button">Save test memories</button><button id="replay-clear" type="button" class="danger-button">Clear test memories</button></div>
                 </details>
             </div>
         </section>

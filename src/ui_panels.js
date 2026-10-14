@@ -74,7 +74,7 @@ export function createToolPanel() {
         if (panel.hidden || document.getElementById('companion-dialog').open) return;
         if (event.key==='Escape') {event.preventDefault();close();}
         if (event.key==='Tab' && compact.matches && selected!=='expressions') {
-            const focusable = [...panel.querySelectorAll('button, select, input, summary, [tabindex="0"]')].filter(el=>!el.disabled && el.getClientRects().length);
+            const focusable = [...panel.querySelectorAll('button, a[href], select, input, summary, [tabindex="0"]')].filter(el=>!el.disabled && el.getClientRects().length);
             const first=focusable[0],last=focusable.at(-1);
             if (event.shiftKey && document.activeElement===first) {event.preventDefault();last?.focus();}
             else if (!event.shiftKey && document.activeElement===last) {event.preventDefault();first?.focus();}

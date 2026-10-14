@@ -58,6 +58,8 @@ const companionStatus = document.getElementById('companion-status');
 const companionLabel = document.getElementById('companion-label');
 const replayStatus = document.getElementById('replay-status');
 const replayInspector = document.getElementById('replay-inspector');
+const speechLabURL=new URL('/stream-test.html?source=live',location.href);speechLabURL.port='3002';
+document.getElementById('speech-lab-link').href=speechLabURL.href;
 const replayJsonViewer = createJsonViewer(replayInspector);
 const expressionReadouts=createExpressionReadouts(document);
 window.addEventListener('asena-tools-change',()=>expressionReadouts.update(ANI.getPlaybackState().expressions?.display));
@@ -616,7 +618,7 @@ function setupReplayUI() {
     }
     selector.value = replay.scenario.id;
     document.getElementById('replay-description').textContent = replay.fixture.recording
-        ? 'Saved dialogue, voice and mouth timings. Test profile and memories stay separate.'
+        ? 'Saved scenes. Test profile and memories stay separate.'
         : 'Scripted dialogue with silent audio and synthetic mouth timings. Your test profile and memories stay separate.';
     selector.addEventListener('change', () => {
         const url = new URL(location.href);
@@ -653,7 +655,7 @@ function setupReplayUI() {
         document.getElementById('debug-mode').textContent='Scripted preview';
         document.getElementById('debug-source').textContent=runtimeConfig.speechSource==='kokoro'?'Live Kokoro · no LLM':'Saved voice · AI services off';
         document.getElementById('chat-mode').textContent='Preview';
-        document.getElementById('replay-description').textContent='Scripted conversation in the main chat. Speech uses the shared PCM player and selected 1 / 2 / 2 profile. Test memories stay separate.';
+        document.getElementById('replay-description').textContent='Scripted scenes with saved or live speech. Test memories stay separate.';
         document.getElementById('chat-empty').querySelector('h2').textContent='Meet her in the main chat.';
         document.getElementById('chat-empty').querySelector('p').textContent='Play the introduction, teasing, disagreement and emotes. Replies are scripted until LLM integration.';
         document.getElementById('voice-note').textContent=runtimeConfig.speechSource==='kokoro'?'Used for the next scripted spoken reply.':'Saved scenes use their recorded voice.';
@@ -684,7 +686,7 @@ function setupDebugUI() {
         document.getElementById('debug-mode').textContent='Live conversation';
         document.getElementById('debug-source').textContent='Prepared services only';
         document.getElementById('replay-description').textContent='Current turn, speech timing, queue state and performance cues.';
-        document.getElementById('replay-controls').hidden=true;
+        document.getElementById('replay-controls').hidden=true;document.getElementById('debug-scenes').hidden=true;
         document.getElementById('replay-reset').hidden=true;
     }
 }

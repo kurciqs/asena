@@ -78,6 +78,16 @@ class StreamProbeTests(unittest.TestCase):
                 if target.startswith(('.', '/')):pending.append(urljoin(path,target))
         self.assertIn('/speech_startup_timing.js',seen)
         self.assertIn('/pcm_stream_playback.js',seen)
+        self.assertIn('/rhubarb_mouth.js',seen)
+        self.assertFalse(any('/lip-sync-lab/' in path for path in seen))
+        for path,expected in [('/stream-test.html',200),('/stream-lab/style.css',200),
+                              ('/lip-sync-lab/lab.css',404),('/lip-sync-lab/mouth-adapters.js',404)]:
+            handler.path=path;handler.wfile=io.BytesIO();handler.do_GET()
+            self.assertEqual(statuses[-1],expected)
+            if path=='/stream-test.html':
+                page=handler.wfile.getvalue().decode()
+                self.assertNotIn('lip-sync-lab',page)
+                self.assertIn('Back to companion',page)
 
     def source(self, seconds=4, rate=100):
         frames=seconds*rate

@@ -1,12 +1,14 @@
 # Rhubarb optimization and Kokoro streaming strategies — 12 October 2026
 
+> Historical report. The comparison studio and its alternate-method preparation files were removed on 14 October 2026 after Rhubarb was selected. Measurements below are retained as evidence. Use the main page’s **Debug → Live speech lab** for current saved/live trials. [Cleanup details](lab-cleanup-2026-10-14.md).
+
 ## Decision and result
 
 Keep **Kokoro + Rhubarb/PocketSphinx**. The strongest improvement is a native Apple Silicon Release build of the **same Rhubarb 1.14.0 source and recognition resources**. On the seven saved Kokoro recordings it took **0.78–1.62 seconds**, compared with **2.86–5.94 seconds** for the installed Intel executable in this run: approximately **3–4× faster**. No recognition or animation algorithm changes are enabled in the installed native build.
 
 The main path now prefers that checksum-verified native build, supplies the spoken transcript, caps Rhubarb at two requested workers, skips redundant conversion of complete compatible WAVs, caches repeated input privately, and shares one deadline across conversion/alignment. A real Flask route check produced the original introduction cues and released its temporary audio. Its first request took **1.94 s** including fingerprint/setup overhead; an identical cached request took **0.001 s**. These are alignment-only observations, not total reply latency.
 
-The [studio](http://localhost:3001/lip-sync-samples.html) now shows preparation times beside the selected method and includes six additional actual Rhubarb strategies. **All original alternatives remain**: 15 methods × three unchanged recordings = **45 visual comparisons**. Comparison cleanup is explicitly deferred under TODO **11b**.
+The former studio now shows preparation times beside the selected method and includes six additional actual Rhubarb strategies. **All original alternatives remain**: 15 methods × three unchanged recordings = **45 visual comparisons**. Comparison cleanup is explicitly deferred under TODO **11b**.
 
 No Kokoro, Docker, LLM or new speech generation was started. All computation used existing synthetic clips. Every benchmark/model worker was finite and exited. The installed native tool starts only when a live alignment request invokes it; opening the site does not load its recognizer.
 

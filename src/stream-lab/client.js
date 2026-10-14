@@ -4,6 +4,7 @@ import {createJsonViewer} from '../json_viewer.js';
 import {SavedPlayback} from './saved-playback.js';
 import {StartupTiming} from './startup-timing.js';
 const $=id=>document.getElementById(id),zero=[0,0,0,0,0,0];
+const companionURL=new URL('/',location.href);companionURL.port='3001';$('companion-link').href=companionURL.href;
 const inspection=createJsonViewer($('inspection'));
 inspection.update({status:'No test run yet.'});
 let lastInspection=0,trialNumber=0;

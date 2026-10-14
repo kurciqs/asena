@@ -131,18 +131,26 @@ summary { cursor: pointer; font-size: 12px; font-weight: 600; }
 #replay-panel { padding-top: 16px; }
 .replay-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
 #replay-description { margin-bottom: 14px; }
+.speech-lab-link { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.46); color: var(--accent); font-size: 13px; font-weight: 600; text-decoration: none; }
+.speech-lab-link:hover { background: #eeedf8; border-color: #a5a0c7; }
+.speech-lab-link:focus-visible { outline: 3px solid #8278c5; outline-offset: 3px; }
+.lab-link-note { margin: 6px 0 14px; font-size: 11px; }
 #replay-case { margin: 6px 0 10px; font-size: 12px; }
 #replay-status { padding: 8px 10px; background: var(--soft); border-radius: 8px; margin-bottom: 10px; }
 .replay-buttons { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 16px; }
 #replay-panel button { font-size: 12px; }
-#turn-inspection { padding-top: 12px; border-top: 1px solid var(--line); }
-.debug-section { margin:12px 0; padding:12px 0; border-top:1px solid var(--line); }
+.debug-section { margin: 0; padding: 13px 0; border-top: 1px solid var(--line); }
+.debug-section > summary { font-size: 13px; }
+.debug-section[open] > summary { margin-bottom: 12px; }
+#speech-startup-total { display: block; margin: 3px 0 0 12px; font-weight: 400; font-size: 11px; }
+.debug-report { padding: 12px 0; border-top: 1px solid var(--line); }
+.debug-report p { margin-bottom: 8px; }
 .debug-section > p { margin:9px 0; }
 .debug-section label { display:flex; justify-content:space-between; gap:10px; margin:10px 0 5px; }
 .debug-section output { color:var(--muted); font-variant-numeric:tabular-nums; }
 .debug-section input[type="range"] { width:100%; padding:0; accent-color:var(--accent); }
 .json-tools { margin: 10px 0; }
-.reset-section { border-top: 1px solid var(--line); margin-top: 18px; padding-top: 13px; }
+.reset-section { border-top: 1px solid var(--line); margin-top: 0; padding: 13px 0; }
 .reset-section > p { margin: 9px 0; }
 .danger-button { color: #8a424c; }
 #tools-backdrop { position: fixed; inset: 0; z-index: 19; background: rgba(38,32,66,.25); }

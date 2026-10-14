@@ -361,8 +361,7 @@ class Handler(BaseHTTPRequestHandler):
                                     'speechProfile':SPEECH_PROFILE, 'trialTexts':TRIAL_TEXTS, 'trialCases':TRIAL_CASES,
                                     'running': bool(self.server.active or self.server.live.active)})
         path = self.path.split('?', 1)[0]
-        allowed = (path in ('/', '/stream-test.html', '/lip-sync-lab/lab.css',
-                           '/lip-sync-lab/mouth-adapters.js', '/load_mixamo_animation.js',
+        allowed = (path in ('/', '/stream-test.html', '/load_mixamo_animation.js',
                            '/mixamo_vrm_rig_map.js', '/json_viewer.js', '/json_viewer.css', '/pcm_stream_playback.js', '/rhubarb_mouth.js', '/speech_startup_timing.js',
                            '/vrm_models/asena_sfw.vrm', '/animations/idle.fbx')
                    or path in ('/stream-lab/client.js', '/stream-lab/playback.js',

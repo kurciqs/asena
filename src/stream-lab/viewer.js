@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {VRMLoaderPlugin,VRMUtils} from '@pixiv/three-vrm';
 import {loadMixamoAnimation} from '../load_mixamo_animation.js';
-import {CHANNELS,boundedWeights} from '../lip-sync-lab/mouth-adapters.js';
+import {CHANNELS,boundedWeights} from '../rhubarb_mouth.js';
 
 export async function createViewer(stage) {
   const renderer=new THREE.WebGLRenderer({alpha:true,antialias:true});
