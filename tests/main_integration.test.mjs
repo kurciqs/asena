@@ -181,3 +181,12 @@ test('late cleanup from a stopped speech turn cannot stop its replacement',async
     pending[0]();await old;assert.equal(stops,0);
     pending[1]();await replacement;assert.equal(stops,1);
 });
+test('an unresolved optional gesture load never blocks the speech request',async()=>{
+    const manager=new VRMExpressionManager(),h=speechHarness(manager);
+    h.context.runtimeConfig.speechStreaming=true;h.context.KOKORO_VOICE='af_heart';
+    h.context.ANI.preparePerformance=()=>new Promise(()=>{});
+    h.context.ANI.stopPerformance=()=>{};
+    let requested=false;
+    h.context.playSpeechStream=async()=>{requested=true;};
+    await h.run();assert.equal(requested,true);
+});

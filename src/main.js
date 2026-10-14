@@ -422,9 +422,18 @@ async function prepareAndPlay(parsedReply, turn) {
     if((!replay||RUNTIME_MODE==='preview')&&runtimeConfig?.speechStreaming&&LIP_SYNC==='rhubarb'){
         let player=null,words=[],cues={actions:[],emotions:[]},speaking=false;
         turnMetrics?.mark('gesturePreparation');
-        await ANI.preparePerformance(parsedReply.actions.map(cue=>({value:cue.value})),turn.signal);
-        turnMetrics?.mark('gesturesReady');
-        const available=new Set(ANI.getPlaybackState().loadedClips??ANI.getPlaybackState().clips);
+        let available=new Set(ANI.getPlaybackState().loadedClips??ANI.getPlaybackState().clips),active=true;
+        turn.own(()=>{active=false;});
+        const refreshCues=()=>{try{cues=EMO.getPartialPerformance(words,parsedReply,available);}catch(error){speechWarning(`Emotion and gesture timing unavailable. ${error.message}`);}};
+        // Optional clip loading overlaps generation; a late clip cannot delay or
+        // restart speech. The renderer skips a gesture whose audible anchor passed.
+        ANI.preparePerformance(parsedReply.actions.map(cue=>({value:cue.value})),turn.signal).then(()=>{
+            if(!active||turn.signal.aborted)return;
+            turn.assertCurrent();
+            if(turnMetrics?.id===turn.id)turnMetrics.mark('gesturesReady');
+            available=new Set(ANI.getPlaybackState().loadedClips??ANI.getPlaybackState().clips);
+            refreshCues();
+        }).catch(error=>{if(active&&!turn.signal.aborted)speechWarning(`Gesture unavailable; speech continues. ${error.message}`);});
         try{
             turnMetrics?.mark('speechRequested');
             await playSpeechStream({text:parsedReply.text,voice:turn.speech?.voice??KOKORO_VOICE,signal:turn.signal,speechProfile:turn.speech?.profile??runtimeConfig.speechProfile,
@@ -432,7 +441,7 @@ async function prepareAndPlay(parsedReply, turn) {
                 onPlayer:value=>{player=value;ANI.beginPcmPerformance(()=>({...player.sample(),weights:player.weights(),...cues}),player);},
                 onWarning:speechWarning,onReport:report=>{if(turnMetrics?.id===turn.id){turnMetrics.observeSpeech(report);inspectReplay({speechReport:turnMetrics.speech});}},
                 onEvent:event=>{turn.assertCurrent();inspectReplay({speechPhase:event.type==='provider-stage'?event.phase:event.type});},
-                onWords:stamps=>{words.push(...stamps);try{cues=EMO.getPartialPerformance(words,parsedReply,available);}catch(error){speechWarning(`Emotion and gesture timing unavailable. ${error.message}`);}},
+                onWords:stamps=>{words.push(...stamps);refreshCues();},
                 onClock:clock=>{
                     turn.assertCurrent();
                     turnMetrics?.observeClock(clock);
@@ -450,7 +459,7 @@ async function prepareAndPlay(parsedReply, turn) {
                 inspectReplay({fallback:'text only'});
             }
             throw error;
-        }finally{if(!turn.signal.aborted)ANI.stopPerformance();}
+        }finally{active=false;if(!turn.signal.aborted)ANI.stopPerformance();}
         return;
     }
     const { audio, timestamps, audioId } = await generateTTS(parsedReply.text, turn);

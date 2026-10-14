@@ -6,6 +6,7 @@ import { ClockedAvatarPerformance } from './clocked_avatar_performance.js';
 import {CHANNELS,boundedWeights} from './rhubarb_mouth.js';
 import { LatestLoad, withAbort, withDeadline } from './asset_loading.js';
 import { LazyAnimations } from './lazy_animations.js';
+import {dueGestures} from './gesture_clock.js';
 import { RENDER_PROFILES, RENDER_STORAGE_KEY, renderPreferences, pixelRatio, RenderLoop, BlinkClock } from './render_policy.js';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -315,8 +316,7 @@ function animate(deltaTime) {
             const cue=(s.emotions??[]).findLast(c=>c.value===name&&c.start<=s.playedSeconds&&s.playedSeconds<c.end);
             if(currentVrm.expressionManager.getExpression(name))currentVrm.expressionManager.setValue(name,cue?(name==='happy'?.3:.5):0);
         }
-        const due=s.paused||s.buffering?[]:(s.actions??[]).filter(c=>c.start<=s.playedSeconds&&!pcmPerformance.seen.has(`${c.value}:${c.start}`));
-        due.forEach(c=>pcmPerformance.seen.add(`${c.value}:${c.start}`));
+        const due=dueGestures(s.actions,s,pcmPerformance.seen,new Set(Object.keys(animations)));
         const cue=due.at(-1);
         if(cue&&animations[cue.value]){transitionBody(animations[cue.value]);previewRemaining=Math.max(0,animations[cue.value].getClip().duration-ANIMATION_CROSSFADE);}
     }
